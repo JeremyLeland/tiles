@@ -1,0 +1,5 @@
+3/14:
+
+Start experimenting with tiles again, using kenney's collections for inspiration
+
+NEXT: Create python script to combine separate tiles into one image, with a json guide for name, direction, and sx,sy,sw,sh
