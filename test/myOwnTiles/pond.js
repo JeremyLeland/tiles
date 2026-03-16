@@ -1,45 +1,73 @@
 import { GameCanvas } from '../../src/common/GameCanvas.js';
 
+const Dirs = {
+  north: 0,
+  east: 1,
+  south: 2,
+  west: 3,
+};
+
+// scaleX, skewY, skewX, scaleY, translateX, translateY
+const IsometricTransforms = {
+  north:  [  1,  0.5, -1,  0.5, 0, 0 ],
+  east:   [ -1,  0.5, -1, -0.5, 0, 0 ],
+  south:  [ -1, -0.5,  1, -0.5, 0, 0 ],
+  west:   [  1, -0.5,  1,  0.5, 0, 0 ],
+  left:   [  1,  0.5,  0,  1, -0.5, 0.75 ],
+  right:  [  1, -0.5,  0,  1,  0.5, 0.75 ],
+};
+
+const YAxes = {
+  north:  [  1,  1 ],
+  east:   [  1, -1 ],
+  south:  [ -1, -1 ],
+  west:   [ -1,  1 ],
+};
+
+function frontLeft( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
+}
+
+function frontRight( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
+}
+
+function back( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( -0.5, -0.5, 1, 0.2 );
+}
+
+const Sides = [ frontLeft, frontRight, back, back ];
+
 const gameCanvas = new GameCanvas();
 gameCanvas.bounds = [ -2, -2, 2, 2 ];
 gameCanvas.backgroundColor = '#123';
 
 gameCanvas.draw = ( ctx ) => {
+  drawGrid( ctx, gameCanvas.bounds );
 
-  const bounds = gameCanvas.bounds;
-  ctx.fillStyle = 'gray';
-  for ( let row = bounds[ 1 ]; row <= bounds[ 3 ]; row++ ) {
-    ctx.fillRect( bounds[ 0 ], row, bounds[ 2 ] - bounds[ 0 ], 0.01 );
-  }
-  for ( let col = bounds[ 0 ]; col <= bounds[ 2 ]; col++ ) {
-    ctx.fillRect( col, bounds[ 1 ], 0.01, bounds[ 3 ] - bounds[ 1 ] );
-  }
+  const Direction = 'north';
 
   // Top
   ctx.save(); {
-    // scaleX, skewY, skewX, scaleY, translateX, translateY
-    const IsometricTransforms = {
-      north: [  1,  0.5, -1,  0.5, 0, 0 ],
-      east:  [ -1,  0.5, -1, -0.5, 0, 0 ],
-      south: [ -1, -0.5,  1, -0.5, 0, 0 ],
-      west:  [  1, -0.5,  1,  0.5, 0, 0 ],
-    };
-
-    const DownTransforms = {
-      north: [ 1, 0, 0, 1,  0.2,  0.2 ],
-      east:  [ 1, 0, 0, 1,  0.2, -0.2 ],
-      south: [ 1, 0, 0, 1, -0.2, -0.2 ],
-      west:  [ 1, 0, 0, 1, -0.2,  0.2 ],
-    };
-
-    const Direction = 'north';
 
     ctx.transform( ...IsometricTransforms[ Direction ] );
-    const transformDown = DownTransforms[ Direction ];
+    const yAxis = YAxes[ Direction ];
 
     // Water
     ctx.save(); {
-      ctx.transform( ...transformDown );
+      moveZ( ctx, Direction, 0.2 );
 
       ctx.beginPath();
       ctx.moveTo( 0.5, -0.3 );
@@ -58,7 +86,7 @@ gameCanvas.draw = ( ctx ) => {
       ctx.moveTo( 0.5, -0.3 );
       ctx.quadraticCurveTo( -0.2, -0.2, -0.3, 0.5 );
 
-      ctx.transform( ...transformDown );
+      moveZ( ctx, Direction, 0.2 );
 
       ctx.lineTo( -0.3, 0.5 );
       ctx.quadraticCurveTo( -0.2, -0.2, 0.5, -0.3 );
@@ -87,35 +115,38 @@ gameCanvas.draw = ( ctx ) => {
   }
   ctx.restore();
 
-  // // Left
-  // ctx.save(); {
-  //   // scaleX, skewY, skewX, scaleY, translateX, translateY
-  //   ctx.transform( 1, 0.5, 0, 1, -0.5, 0.75 );
+  // Left
+  ctx.save(); {
+    ctx.transform( ...IsometricTransforms.left );
 
-  //   ctx.fillStyle = 'tan';
-  //   ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+    Sides[ Dirs[ Direction ] ]( ctx );
+  }
+  ctx.restore();
 
-  //   ctx.fillStyle = 'green';
-  //   ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
+  // Right
+  ctx.save(); {
+    ctx.transform( ...IsometricTransforms.right );
 
-  //   ctx.fill();
-  // }
-  // ctx.restore();
-
-  // // Right
-  // ctx.save(); {
-  //   // scaleX, skewY, skewX, scaleY, translateX, translateY
-  //   ctx.transform( 1, -0.5, 0, 1, 0.5, 0.75 );
-
-  //   ctx.fillStyle = 'tan';
-  //   ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-  //   ctx.fillStyle = 'green';
-  //   ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
-
-  //   // drawDirt( ctx );
-  // }
-  // ctx.restore();
+    Sides[ ( Dirs[ Direction ] + 1 ) % 4 ]( ctx );
+  }
+  ctx.restore();
 }
 
 gameCanvas.redraw();
+
+function drawGrid( ctx, bounds, thickness = 0.01 ) {
+  const ORIGIN = '#777', OTHER = '#5555';
+  for ( let row = bounds[ 1 ]; row <= bounds[ 3 ]; row ++ ) {
+    ctx.fillStyle = row == 0 ? ORIGIN : OTHER;
+    ctx.fillRect( bounds[ 0 ], row, bounds[ 2 ] - bounds[ 0 ], thickness );
+  }
+  for ( let col = bounds[ 0 ]; col <= bounds[ 2 ]; col ++ ) {
+    ctx.fillStyle = col == 0 ? ORIGIN : OTHER;
+    ctx.fillRect( col, bounds[ 1 ], thickness, bounds[ 3 ] - bounds[ 1 ] );
+  }
+}
+
+function moveZ( ctx, dir, dist ) {
+  const yAxis = YAxes[ dir ];
+  ctx.translate( dist * yAxis[ 0 ], dist * yAxis[ 1 ] );
+}
