@@ -1,6 +1,10 @@
 import { GameCanvas } from '../src/common/GameCanvas.js';
 
-const tilePath = new Path2D( 'M -1,0 L 0,-0.5 L 1,0 L 0,0.5 Z' );
+const tilePath = new Path2D( `
+  M -1,0 L 0,-0.5 L 1,0 L 0,0.5 Z
+  M -1,0 L -1,1 L 0,1.5 L 0,0.5 Z
+  M  1,0 L  1,1 L 0,1.5 L 0,0.5 Z
+` );
 
 const colors = [ 'green', 'blue', 'brown' ];
 
@@ -17,8 +21,8 @@ function drawTile( ctx, color, col, row ) {
   const w = 1;
   const h = w / 2;
 
-  const x = w * ( col + row );
-  const y = h * ( row - col );
+  const x = w * ( col - row );
+  const y = h * ( row + col );
 
   ctx.save();
   ctx.translate( x, y );
