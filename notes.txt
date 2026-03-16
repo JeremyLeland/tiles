@@ -16,6 +16,12 @@ Setting the transforms is kind of a neat trick to let me use rects, but it's mak
     - Yes you can!
     - Though it seems like the math is just adding the amount you want to go down to both x and y
 
+Can I define the top of the tiles in 2D (of sorts) and use transforms to get the 4 different views?
+  - Could similarly define all 4 sides and pick the two that are visible (and appropriately transform them)
+  - Need different "go down" transforms for these
+  - Can't change transform in middle of path (maybe it's for the best)
+
+
 3/15:
 
 Since the desert tiles all have 4 directions, can rotate around map to show 4 different angles
