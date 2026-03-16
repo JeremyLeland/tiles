@@ -1,3 +1,7 @@
+3/15:
+
+Since the desert tiles all have 4 directions, can rotate around map to show 4 different angles
+
 3/14:
 
 Start experimenting with tiles again, using kenney's collections for inspiration
