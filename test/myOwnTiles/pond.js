@@ -24,6 +24,11 @@ const YAxes = {
   west:   [ -1,  1 ],
 };
 
+function moveZ( ctx, dir, dist ) {
+  const yAxis = YAxes[ dir ];
+  ctx.translate( dist * yAxis[ 0 ], dist * yAxis[ 1 ] );
+}
+
 function frontLeft( ctx ) {
   ctx.fillStyle = 'tan';
   ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
@@ -50,24 +55,15 @@ function back( ctx ) {
 
 const Sides = [ frontLeft, frontRight, back, back ];
 
-const gameCanvas = new GameCanvas();
-gameCanvas.bounds = [ -2, -2, 2, 2 ];
-gameCanvas.backgroundColor = '#123';
-
-gameCanvas.draw = ( ctx ) => {
-  drawGrid( ctx, gameCanvas.bounds );
-
-  const Direction = 'north';
-
+function drawTile( ctx, direction ) {
   // Top
   ctx.save(); {
 
-    ctx.transform( ...IsometricTransforms[ Direction ] );
-    const yAxis = YAxes[ Direction ];
+    ctx.transform( ...IsometricTransforms[ direction ] );
 
     // Water
     ctx.save(); {
-      moveZ( ctx, Direction, 0.2 );
+      moveZ( ctx, direction, 0.2 );
 
       ctx.beginPath();
       ctx.moveTo( 0.5, -0.3 );
@@ -86,7 +82,7 @@ gameCanvas.draw = ( ctx ) => {
       ctx.moveTo( 0.5, -0.3 );
       ctx.quadraticCurveTo( -0.2, -0.2, -0.3, 0.5 );
 
-      moveZ( ctx, Direction, 0.2 );
+      moveZ( ctx, direction, 0.2 );
 
       ctx.lineTo( -0.3, 0.5 );
       ctx.quadraticCurveTo( -0.2, -0.2, 0.5, -0.3 );
@@ -119,7 +115,7 @@ gameCanvas.draw = ( ctx ) => {
   ctx.save(); {
     ctx.transform( ...IsometricTransforms.left );
 
-    Sides[ Dirs[ Direction ] ]( ctx );
+    Sides[ Dirs[ direction ] ]( ctx );
   }
   ctx.restore();
 
@@ -127,9 +123,33 @@ gameCanvas.draw = ( ctx ) => {
   ctx.save(); {
     ctx.transform( ...IsometricTransforms.right );
 
-    Sides[ ( Dirs[ Direction ] + 1 ) % 4 ]( ctx );
+    Sides[ ( Dirs[ direction ] + 1 ) % 4 ]( ctx );
   }
   ctx.restore();
+}
+
+const gameCanvas = new GameCanvas();
+gameCanvas.bounds = [ -2, -2, 2, 2 ];
+gameCanvas.backgroundColor = '#123';
+
+gameCanvas.draw = ( ctx ) => {
+  drawGrid( ctx, gameCanvas.bounds );
+
+  const cols = 2, rows = 2;
+  const tiles = [
+    'north', 'east',
+    'west', 'south',
+  ];
+
+  for ( let row = 0; row < rows; row ++ ) {
+    for ( let col = 0; col < cols; col ++ ) {
+      ctx.save(); {
+        ctx.translate( col - row, ( row + col ) / 2 );
+        drawTile( ctx, tiles[ col + row * cols ] );
+      }
+      ctx.restore();
+    }
+  }
 }
 
 gameCanvas.redraw();
@@ -144,9 +164,4 @@ function drawGrid( ctx, bounds, thickness = 0.01 ) {
     ctx.fillStyle = col == 0 ? ORIGIN : OTHER;
     ctx.fillRect( col, bounds[ 1 ], thickness, bounds[ 3 ] - bounds[ 1 ] );
   }
-}
-
-function moveZ( ctx, dir, dist ) {
-  const yAxis = YAxes[ dir ];
-  ctx.translate( dist * yAxis[ 0 ], dist * yAxis[ 1 ] );
 }
