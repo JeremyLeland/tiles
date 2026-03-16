@@ -23,9 +23,11 @@ gameCanvas.draw = ( ctx ) => {
     ctx.fillStyle = 'green';
     ctx.fillRect( -0.5, -0.5, 1, 1 );
 
-    ctx.fillStyle = 'gray';
-    ctx.fillRect( -0.5, -0.5, 0.25, 0.25 );
-    ctx.fillRect( -0.25, -0.25, 0.25, 0.25 );
+    ctx.fillStyle = 'darkgreen';
+    drawDetail( ctx, 8, 8, 0.02, 0.04 );
+
+    ctx.fillStyle = '#090';
+    drawDetail( ctx, 8, 8, 0.02, 0.04 );
   }
   ctx.restore();
 
@@ -34,12 +36,7 @@ gameCanvas.draw = ( ctx ) => {
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     ctx.transform( 1, 0.5, 0, 1, -0.5, 0.75 );
 
-    ctx.fillStyle = 'brown';
-    ctx.fillRect( -0.5, -0.5, 1, 1 );
-
-    ctx.fillStyle = 'gray';
-    ctx.fillRect( -0.5, -0.5, 0.25, 0.25 );
-    ctx.fillRect( -0.25, -0.25, 0.25, 0.25 );
+    drawDirt( ctx );
   }
   ctx.restore();
 
@@ -48,14 +45,31 @@ gameCanvas.draw = ( ctx ) => {
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     ctx.transform( 1, -0.5, 0, 1, 0.5, 0.75 );
 
-    ctx.fillStyle = 'brown';
-    ctx.fillRect( -0.5, -0.5, 1, 1 );
-
-    ctx.fillStyle = 'gray';
-    ctx.fillRect( -0.5, -0.5, 0.25, 0.25 );
-    ctx.fillRect( -0.25, -0.25, 0.25, 0.25 );
+    drawDirt( ctx );
   }
   ctx.restore();
 }
 
 gameCanvas.redraw();
+
+function drawDirt( ctx ) {
+  ctx.fillStyle = '#640';
+  ctx.fillRect( -0.5, -0.5, 1, 1 );
+
+  ctx.fillStyle = '#530';
+  drawDetail( ctx, 4, 4, 0.03, 0.06 );
+
+  ctx.fillStyle = 'gray';
+  drawDetail( ctx, 3, 3, 0.03, 0.06 );
+}
+
+function drawDetail( ctx, cols, rows, minSize, maxSize ) {
+  for ( let row = 0; row < rows; row ++ ) {
+    for ( let col = 0; col < cols; col ++ ) {
+      const size = minSize + Math.random() * ( maxSize - minSize );
+      const x = Math.random() * ( 1 / cols - size );
+      const y = Math.random() * ( 1 / rows - size );
+      ctx.fillRect( -0.5 + col / cols + x, -0.5 + row / rows + y, size, size );
+    }
+  }
+}
