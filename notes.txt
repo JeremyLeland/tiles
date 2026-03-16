@@ -1,3 +1,21 @@
+3/16:
+
+Creating my own tiles is a pain in the ass, but so is using other people's tiles
+
+The ones I create myself are the easiest to use
+
+The ones created by others look good, but require lots of massaging to try to get to display the way I need them to
+The end result hasn't looked that good, anyway
+
+Gonna try making my own version of the roadTiles
+
+Setting the transforms is kind of a neat trick to let me use rects, but it's making it harder to do height now
+  - Easier to just manually specify the diagonals?
+  - What's the trick to increasing/decreasing height?
+  - Can I change transform mid path?
+    - Yes you can!
+    - Though it seems like the math is just adding the amount you want to go down to both x and y
+
 3/15:
 
 Since the desert tiles all have 4 directions, can rotate around map to show 4 different angles
