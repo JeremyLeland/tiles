@@ -39,6 +39,27 @@ gameCanvas.draw = ( ctx ) => {
     return [ pos[ 0 ], pos[ 1 ] ];
   }
 
+  // Test shape
+  function drawShape( steps, fill ) {
+    ctx.beginPath();
+    steps.forEach( step => {
+      if ( Array.isArray( step[ 0 ] ) ) {
+        const ctl = getPos( step[ 0 ] );
+        const pos = getPos( step[ 1 ] );
+
+        ctx.quadraticCurveTo( ctl[ 0 ], ctl[ 1 ], pos[ 0 ], pos[ 1 ] );
+      }
+      else {
+        const pos = getPos( step );
+        ctx.lineTo( pos[ 0 ], pos[ 1 ] );
+      }
+    } );
+    ctx.closePath();
+
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+
   // Grid
   // ctx.beginPath();
   ctx.lineWidth = 0.001;
@@ -63,18 +84,49 @@ gameCanvas.draw = ( ctx ) => {
   /// TODO: Make these functions that take in array of points?
   // Then the points can be transformed with map() and passed in?
 
-  // Test shape
-  ctx.beginPath();
-  ctx.moveTo( ...getPos( [ 0, 0, 0 ] ) );
-  ctx.lineTo( ...getPos( [ 1, 0, 0 ] ) );
-  ctx.lineTo( ...getPos( [ 1, 0.2, 0 ] ) );
-  ctx.quadraticCurveTo( ...getPos( [ 0.2, 0.2, 0 ] ), ...getPos( [ 0.2, 1, 0 ] ) );
-  // ctx.lineTo( ...getPos( [ 0.2, 1, 0 ] ) );
-  ctx.lineTo( ...getPos( [ 0, 1, 0 ] ) );
-  ctx.closePath();
+  // Or list of points, with the control points being arrays of more points?
 
-  ctx.fillStyle = 'white';
-  ctx.fill();
+  const top = [
+    [ -0.5, 0.5, -0.5 ],
+    [  0.5, 0.5, -0.5 ],
+    [  0.5, 0.5, -0.3 ],
+    [ [ -0.2, 0.5, -0.2 ], [ -0.3, 0.5,  0.5 ] ],
+    [ -0.5, 0.5,  0.5 ],
+  ];
+
+  const dropLeft = [
+    [ -0.5, 0.5, 0.5 ],
+    [ -0.3, 0.5, 0.5 ],
+    [ -0.3, 0.3, 0.5 ],
+    [ -0.5, 0.3, 0.5 ],
+  ];
+
+  const dropRight = [
+    [ 0.5, 0.5, -0.5 ],
+    [ 0.5, 0.5, -0.3 ],
+    [ 0.5, 0.3, -0.3 ],
+    [ 0.5, 0.3, -0.5 ],
+  ];
+
+  const dropCenter = [
+    [  0.5, 0.5, -0.3 ],
+    [ [ -0.2, 0.5, -0.2 ], [ -0.3, 0.5,  0.5 ] ],
+    [ -0.3, 0.3, 0.5 ],
+    [ [ -0.2, 0.3, -0.2 ], [ 0.5, 0.3,  -0.3 ] ],
+  ];
+
+  const water = [
+    [ -0.5, 0.3, -0.5 ],
+    [  0.5, 0.3, -0.5 ],
+    [  0.5, 0.3,  0.5 ],
+    [ -0.5, 0.3,  0.5 ],
+  ];
+
+  drawShape( water, 'cyan' );
+  drawShape( dropCenter, '#060' );
+  drawShape( dropLeft, '#060' );
+  drawShape( dropRight, '#060' );
+  drawShape( top, 'green' );
 }
 
 gameCanvas.redraw();
