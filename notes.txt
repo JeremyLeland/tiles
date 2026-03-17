@@ -1,3 +1,40 @@
+3/17:
+
+Experiment with 3D points drawn with 2D methods
+  - Use matrices to do this in new 3D branch
+
+3/16:
+
+Creating my own tiles is a pain in the ass, but so is using other people's tiles
+
+The ones I create myself are the easiest to use
+
+The ones created by others look good, but require lots of massaging to try to get to display the way I need them to
+The end result hasn't looked that good, anyway
+
+Gonna try making my own version of the roadTiles
+
+Setting the transforms is kind of a neat trick to let me use rects, but it's making it harder to do height now
+  - Easier to just manually specify the diagonals?
+  - What's the trick to increasing/decreasing height?
+  - Can I change transform mid path?
+    - Yes you can!
+    - Though it seems like the math is just adding the amount you want to go down to both x and y
+
+Can I define the top of the tiles in 2D (of sorts) and use transforms to get the 4 different views?
+  - Could similarly define all 4 sides and pick the two that are visible (and appropriately transform them)
+  - Need different "go down" transforms for these
+  - Can't change transform in middle of path (maybe it's for the best)
+
+Future optimization: only drawing visible left/right side surfaces
+
+Would it be easier to just store all these things as 3D points and convert them to 2D with a projection matrix?
+  - Just do the 3D math?
+  - Rather than trying to keep track of directions and have different functions for the sides and whatnot
+  - Just define everything in 3D space and then project it
+  - Make this a different branch
+
+
 3/15:
 
 Since the desert tiles all have 4 directions, can rotate around map to show 4 different angles
