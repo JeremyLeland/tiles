@@ -27,6 +27,8 @@ gameCanvas.draw = ( ctx ) => {
   // drawGrid( ctx, gameCanvas.bounds );
 
   const modelMatrix = mat4.create();
+  mat4.rotateY( modelMatrix, modelMatrix, -Math.PI );
+
   const viewMatrix = mat4.lookAt( [], [ 5, 5, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, 4, -4, 0, 100 );  // TODO: Flip?
 
@@ -108,6 +110,20 @@ gameCanvas.draw = ( ctx ) => {
     [ 0.5, 0.3, -0.5 ],
   ];
 
+  const dropBackLeft = [
+    [ -0.5, 0.5, -0.5 ],
+    [ 0.5, 0.5, -0.5 ],
+    [ 0.5, 0.3, -0.5 ],
+    [ -0.5, 0.3, -0.5 ],
+  ];
+
+  const dropBackRight = [
+    [ -0.5, 0.5, -0.5 ],
+    [ -0.5, 0.3, -0.5 ],
+    [ -0.5, 0.3,  0.5 ],
+    [ -0.5, 0.5,  0.5 ],
+  ];
+
   const dropCenter = [
     [  0.5, 0.5, -0.3 ],
     [ [ -0.2, 0.5, -0.2 ], [ -0.3, 0.5,  0.5 ] ],
@@ -126,6 +142,8 @@ gameCanvas.draw = ( ctx ) => {
   drawShape( dropCenter, '#060' );
   drawShape( dropLeft, '#060' );
   drawShape( dropRight, '#060' );
+  drawShape( dropBackLeft, '#060' );
+  drawShape( dropBackRight, '#060' );
   drawShape( top, 'green' );
 }
 
