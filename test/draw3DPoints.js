@@ -11,10 +11,12 @@ import { mat4, vec3 } from '../lib/gl-matrix.js';
 //   right:  [  1, -0.5,  0,  1,  0.5, 0.75 ],
 // };
 
-const points = [
-  [ 0, 0, 0 ],
-  [ 1, 0, 0 ],
-  [ 0, 1, 0 ],
+const ops = [
+  { func: 'beginPath' },
+  { func: 'moveTo', point: [ 0, 0, 0 ] },
+  { func: 'lineTo', point: [ 1, 0, 0 ] },
+  { func: 'lineTo', point: [ 0, 1, 0 ] },
+  { func: 'closePath' },
 ];
 
 const gameCanvas = new GameCanvas();
@@ -22,24 +24,57 @@ gameCanvas.bounds = [ -1, -1, 1, 1 ];
 gameCanvas.backgroundColor = '#123';
 
 gameCanvas.draw = ( ctx ) => {
-  drawGrid( ctx, gameCanvas.bounds );
+  // drawGrid( ctx, gameCanvas.bounds );
 
   const modelMatrix = mat4.create();
-  const viewMatrix = mat4.lookAt( [], [ 0, 0, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+  const viewMatrix = mat4.lookAt( [], [ 5, 5, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, 4, -4, 0, 100 );  // TODO: Flip?
 
   const mvp = mat4.mul( [], viewMatrix, modelMatrix );
   mat4.mul( mvp, projMatrix, mvp );
 
-  ctx.fillStyle = 'white';
-  points.forEach( point => {
-    const pos = vec3.transformMat4( [], point, mvp );
-    console.log( `${ point } -> ${ pos }` );
+  let tempPoint = [];
+  function getPos( point ) {
+    const pos = vec3.transformMat4( tempPoint, point, mvp );
+    return [ pos[ 0 ], pos[ 1 ] ];
+  }
 
-    // NOTE: The positions are as a percentage of the projection area (-1,-1 to 1,1)
-    // NOTE: The sizes are relative to bounds
-    ctx.fillRect( pos[ 0 ] - 0.005, pos[ 1 ] - 0.005, 0.01, 0.01 );
-  } );
+  // Grid
+  // ctx.beginPath();
+  ctx.lineWidth = 0.001;
+
+  ctx.beginPath();
+  ctx.moveTo( ...getPos( [ -5,  0,  0 ] ) );
+  ctx.lineTo( ...getPos( [  5,  0,  0 ] ) );
+  ctx.strokeStyle = 'red';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo( ...getPos( [  0, -5,  0 ] ) );
+  ctx.lineTo( ...getPos( [  0,  5,  0 ] ) );
+  ctx.strokeStyle = 'green';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo( ...getPos( [  0,  0, -5 ] ) );
+  ctx.lineTo( ...getPos( [  0,  0,  5 ] ) );
+  ctx.strokeStyle = 'blue';
+  ctx.stroke();
+
+
+  /// TODO: Make these functions that take in array of points?
+  // Then the points can be transformed with map() and passed in?
+
+  // Test shape
+  ctx.beginPath();
+  ctx.moveTo( ...getPos( [ 0, 0, 0 ] ) );
+  ctx.lineTo( ...getPos( [ 1, 0, 0 ] ) );
+  ctx.lineTo( ...getPos( [ 1, 0.2, 0 ] ) );
+  ctx.quadraticCurveTo( ...getPos( [ 0.2, 0.2, 0 ] ), ...getPos( [ 0.2, 1, 0 ] ) );
+  // ctx.lineTo( ...getPos( [ 0.2, 1, 0 ] ) );
+  ctx.lineTo( ...getPos( [ 0, 1, 0 ] ) );
+  ctx.closePath();
+
+  ctx.fillStyle = 'white';
+  ctx.fill();
 }
 
 gameCanvas.redraw();
