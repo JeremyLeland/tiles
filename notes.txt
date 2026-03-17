@@ -21,6 +21,8 @@ Can I define the top of the tiles in 2D (of sorts) and use transforms to get the
   - Need different "go down" transforms for these
   - Can't change transform in middle of path (maybe it's for the best)
 
+Future optimization: only drawing visible left/right side surfaces
+
 
 3/15:
 

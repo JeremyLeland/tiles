@@ -29,38 +29,28 @@ function moveZ( ctx, dir, dist ) {
   ctx.translate( dist * yAxis[ 0 ], dist * yAxis[ 1 ] );
 }
 
-function frontLeft( ctx ) {
-  ctx.fillStyle = 'tan';
-  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+function Grass() {
+  function top( ctx, direction ) {
+    ctx.fillStyle = 'green';
+    ctx.fillRect( -0.5, -0.5, 1, 1 );
+  }
 
-  ctx.fillStyle = 'green';
-  ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
+  function side( ctx ) {
+    ctx.fillStyle = 'tan';
+    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect( -0.5, -0.5, 1, 0.2 );
+  }
+
+  return {
+    Top: top,
+    Sides: [ side, side, side, side ],
+  }
 }
 
-function frontRight( ctx ) {
-  ctx.fillStyle = 'tan';
-  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-  ctx.fillStyle = 'green';
-  ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
-}
-
-function back( ctx ) {
-  ctx.fillStyle = 'tan';
-  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-  ctx.fillStyle = 'green';
-  ctx.fillRect( -0.5, -0.5, 1, 0.2 );
-}
-
-const Sides = [ frontLeft, frontRight, back, back ];
-
-function drawTile( ctx, direction ) {
-  // Top
-  ctx.save(); {
-
-    ctx.transform( ...IsometricTransforms[ direction ] );
-
+function Pond() {
+  function top( ctx, direction ) {
     // Water
     ctx.save(); {
       moveZ( ctx, direction, 0.2 );
@@ -104,6 +94,50 @@ function drawTile( ctx, direction ) {
 
     ctx.fillStyle = 'green';
     ctx.fill();
+  }
+
+  function frontLeft( ctx ) {
+    ctx.fillStyle = 'tan';
+    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
+  }
+
+  function frontRight( ctx ) {
+    ctx.fillStyle = 'tan';
+    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
+  }
+
+  function back( ctx ) {
+    ctx.fillStyle = 'tan';
+    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect( -0.5, -0.5, 1, 0.2 );
+  }
+
+  return {
+    Top: top,
+    Sides: [ frontLeft, frontRight, back, back ],
+  }
+}
+
+const TileInfo = {
+  Grass: Grass(),
+  Pond: Pond(),
+}
+
+function drawTile( ctx, tileInfo, direction ) {
+  // Top
+  ctx.save(); {
+
+    ctx.transform( ...IsometricTransforms[ direction ] );
+
+    tileInfo.Top( ctx, direction );
 
 
     // clear path so next ones don't screw it up
@@ -115,7 +149,7 @@ function drawTile( ctx, direction ) {
   ctx.save(); {
     ctx.transform( ...IsometricTransforms.left );
 
-    Sides[ Dirs[ direction ] ]( ctx );
+    tileInfo.Sides[ Dirs[ direction ] ]( ctx );
   }
   ctx.restore();
 
@@ -123,31 +157,49 @@ function drawTile( ctx, direction ) {
   ctx.save(); {
     ctx.transform( ...IsometricTransforms.right );
 
-    Sides[ ( Dirs[ direction ] + 1 ) % 4 ]( ctx );
+    tileInfo.Sides[ ( Dirs[ direction ] + 1 ) % 4 ]( ctx );
   }
   ctx.restore();
 }
 
+const Tiles = {
+  Grass: { name: 'Grass', dir: 'north' },
+  Pond_north: { name: 'Pond', dir: 'north'  },
+  Pond_east:  { name: 'Pond', dir: 'east'   },
+  Pond_south: { name: 'Pond', dir: 'south'  },
+  Pond_west:  { name: 'Pond', dir: 'west'   },
+};
+
 const gameCanvas = new GameCanvas();
-gameCanvas.bounds = [ -2, -2, 2, 2 ];
+gameCanvas.bounds = [ -4, -2, 4, 6 ];
 gameCanvas.backgroundColor = '#123';
 
 gameCanvas.draw = ( ctx ) => {
   drawGrid( ctx, gameCanvas.bounds );
 
-  const cols = 2, rows = 2;
+  const cols = 4, rows = 2, levels = 2;
   const tiles = [
-    'north', 'east',
-    'west', 'south',
+    Tiles.Grass, Tiles.Pond_north, Tiles.Pond_east, Tiles.Grass,
+    Tiles.Grass, Tiles.Pond_west, Tiles.Pond_south, Tiles.Grass,
+
+    Tiles.Grass, null, null, null,
+    null, null, null, null,
   ];
 
-  for ( let row = 0; row < rows; row ++ ) {
-    for ( let col = 0; col < cols; col ++ ) {
-      ctx.save(); {
-        ctx.translate( col - row, ( row + col ) / 2 );
-        drawTile( ctx, tiles[ col + row * cols ] );
+  for ( let level = 0; level < levels; level ++ ) {
+    for ( let row = 0; row < rows; row ++ ) {
+      for ( let col = 0; col < cols; col ++ ) {
+        ctx.save(); {
+          ctx.translate( col - row, ( row + col - level * 2 ) / 2 );
+
+          const tile = tiles[ col + row * cols + level * rows * cols ];
+
+          if ( tile ) {
+            drawTile( ctx, TileInfo[ tile.name ], tile.dir );
+          }
+        }
+        ctx.restore();
       }
-      ctx.restore();
     }
   }
 }
