@@ -49,7 +49,31 @@ function Grass() {
   }
 }
 
-function Pond() {
+function frontLeft( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
+}
+
+function frontRight( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
+}
+
+function back( ctx ) {
+  ctx.fillStyle = 'tan';
+  ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+
+  ctx.fillStyle = 'green';
+  ctx.fillRect( -0.5, -0.5, 1, 0.2 );
+}
+
+function PondCurve() {
   function top( ctx, direction ) {
     // Water
     ctx.save(); {
@@ -96,39 +120,55 @@ function Pond() {
     ctx.fill();
   }
 
-  function frontLeft( ctx ) {
-    ctx.fillStyle = 'tan';
-    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-    ctx.fillStyle = 'green';
-    ctx.fillRect( -0.5, -0.5, 0.2, 0.2 );
-  }
-
-  function frontRight( ctx ) {
-    ctx.fillStyle = 'tan';
-    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-    ctx.fillStyle = 'green';
-    ctx.fillRect( 0.3, -0.5, 0.2, 0.2 );
-  }
-
-  function back( ctx ) {
-    ctx.fillStyle = 'tan';
-    ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
-
-    ctx.fillStyle = 'green';
-    ctx.fillRect( -0.5, -0.5, 1, 0.2 );
-  }
-
   return {
     Top: top,
     Sides: [ frontLeft, frontRight, back, back ],
   }
 }
 
+function PondEdge() {
+  function top( ctx, direction ) {
+    // Water
+    ctx.save(); {
+      moveZ( ctx, direction, 0.2 );
+
+      ctx.fillStyle = 'cyan';
+      ctx.fillRect( -0.5, -0.3, 1, 1 - 0.2 );
+    }
+    ctx.restore();
+
+    // Downward
+    ctx.save(); {
+      ctx.beginPath();
+      ctx.moveTo( -0.5, -0.3 );
+      ctx.lineTo(  0.5, -0.3 );
+
+      moveZ( ctx, direction, 0.2 );
+
+      ctx.lineTo( 0.5, -0.3 );
+      ctx.lineTo( -0.5, -0.3 );
+      ctx.closePath();
+
+      ctx.fillStyle = '#060';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Top
+    ctx.fillStyle = 'green';
+    ctx.fillRect( -0.5, -0.5, 1, 0.2 );
+  }
+
+  return {
+    Top: top,
+    Sides: [ back, frontRight, back, frontLeft ],
+  }
+}
+
 const TileInfo = {
   Grass: Grass(),
-  Pond: Pond(),
+  PondCurve: PondCurve(),
+  PondEdge: PondEdge(),
 }
 
 function drawTile( ctx, tileInfo, direction ) {
@@ -138,10 +178,6 @@ function drawTile( ctx, tileInfo, direction ) {
     ctx.transform( ...IsometricTransforms[ direction ] );
 
     tileInfo.Top( ctx, direction );
-
-
-    // clear path so next ones don't screw it up
-    ctx.beginPath();
   }
   ctx.restore();
 
@@ -164,10 +200,14 @@ function drawTile( ctx, tileInfo, direction ) {
 
 const Tiles = {
   Grass: { name: 'Grass', dir: 'north' },
-  Pond_north: { name: 'Pond', dir: 'north'  },
-  Pond_east:  { name: 'Pond', dir: 'east'   },
-  Pond_south: { name: 'Pond', dir: 'south'  },
-  Pond_west:  { name: 'Pond', dir: 'west'   },
+  PondCurve_north: { name: 'PondCurve', dir: 'north'  },
+  PondCurve_east:  { name: 'PondCurve', dir: 'east'   },
+  PondCurve_south: { name: 'PondCurve', dir: 'south'  },
+  PondCurve_west:  { name: 'PondCurve', dir: 'west'   },
+  PondEdge_north: { name: 'PondEdge', dir: 'north'  },
+  PondEdge_east:  { name: 'PondEdge', dir: 'east'   },
+  PondEdge_south: { name: 'PondEdge', dir: 'south'  },
+  PondEdge_west:  { name: 'PondEdge', dir: 'west'   },
 };
 
 const gameCanvas = new GameCanvas();
@@ -177,12 +217,14 @@ gameCanvas.backgroundColor = '#123';
 gameCanvas.draw = ( ctx ) => {
   drawGrid( ctx, gameCanvas.bounds );
 
-  const cols = 4, rows = 2, levels = 2;
+  const cols = 4, rows = 3, levels = 2;
   const tiles = [
-    Tiles.Grass, Tiles.Pond_north, Tiles.Pond_east, Tiles.Grass,
-    Tiles.Grass, Tiles.Pond_west, Tiles.Pond_south, Tiles.Grass,
+    Tiles.Grass, Tiles.PondCurve_north, Tiles.PondEdge_north, Tiles.PondCurve_east,
+    Tiles.Grass, Tiles.PondEdge_west, Tiles.Grass, Tiles.PondEdge_east,
+    Tiles.Grass, Tiles.PondCurve_west, Tiles.PondEdge_south, Tiles.PondCurve_south,
 
     Tiles.Grass, null, null, null,
+    null, null, null, null,
     null, null, null, null,
   ];
 
