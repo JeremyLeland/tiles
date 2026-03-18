@@ -3,6 +3,13 @@
 Experiment with 3D points drawn with 2D methods
   - Use matrices to do this in new 3D branch
 
+So I got this to work with a simple pond example, 
+  - but I'm going to want backface culling and z-ordering soon, probably
+  - The curves are theoretically nice, 
+    - but it's probably better to just generate a curve with lots of smaller triangles
+  - If I'm going to all this effort, I may as well just use WebGL proper
+    - Maybe it's time to take another look at that
+
 3/16:
 
 Creating my own tiles is a pain in the ass, but so is using other people's tiles
