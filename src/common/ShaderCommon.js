@@ -134,7 +134,7 @@ export const BasicLighting = {
 
       vec3 ambientLight = vec3(0.3, 0.3, 0.3);
       vec3 directionalLightColor = vec3(1, 1, 1);
-      vec3 directionalVector = normalize( vec3( 1, 1, 1 ) );
+      vec3 directionalVector = normalize( vec3( 1, 0.5, 1 ) );
 
       vec3 normal = normalize( v_norm );
 
@@ -187,9 +187,9 @@ export const Lighting = {
 
       if ( NdotL > 0.0 ) {
         vec3 H = normalize( L + V );
-        
+
         float NdotH = dot( N, H );
-        
+
         float diffuse = max( 0.0, NdotL );
         float specular = 0.0; //( NdotL > 0.0 ) ? pow( max( 0.0, NdotH ), material.shininess ) : 0.0;
 
@@ -248,13 +248,13 @@ export function getShader( gl, shaderInfo ) {
     } );
 
     const attribLocations = {};
-    attributes.forEach( attribName => 
-      attribLocations[ attribName ] = gl.getAttribLocation( shaderProgram, attribName ) 
+    attributes.forEach( attribName =>
+      attribLocations[ attribName ] = gl.getAttribLocation( shaderProgram, attribName )
     );
-    
+
     const uniformLocations = {};
-    uniforms.forEach( uniformName => 
-      uniformLocations[ uniformName ] = gl.getUniformLocation( shaderProgram, uniformName ) 
+    uniforms.forEach( uniformName =>
+      uniformLocations[ uniformName ] = gl.getUniformLocation( shaderProgram, uniformName )
     );
 
     return {
@@ -289,7 +289,7 @@ function loadShader( gl, type, source ) {
       }
 
       alert( 'An error occurred compiling the shaders:\n' + errorMsg + '\n' + outLines.join( '\n' ) );
-    }    
+    }
 
     gl.deleteShader( shader );
     return null;

@@ -1,19 +1,173 @@
 import { GLGameCanvas } from '../src/common/GLGameCanvas.js';
+import * as Angle from '../src/common/Angle.js';
 import * as ShaderCommon from '../src/common/ShaderCommon.js';
 import { mat4, vec3 } from '../lib/gl-matrix.js';
 
 const glGameCanvas = new GLGameCanvas();
 
-const geometry = {
-  positions: [
+const GrassHeight = 0.3;
+const GrassEdge = 0.2;
+
+function getGrassCurveGeometry() {
+  const geometry = {
+    positions: [
+      // Left side
+      0, 1, 0,
+      0, 1, 1,
+      0, 1 - GrassHeight, 1,
+      0, 1 - GrassHeight, 0,
+
+      // Back side
+      0, 1, 0,
+      1, 1, 0,
+      1, 1 - GrassHeight, 0,
+      0, 1 - GrassHeight, 0,
+
+      // Right side
+      1, 1, GrassEdge,
+      1, 1, 0,
+      1, 1 - GrassHeight, 0,
+      1, 1 - GrassHeight, GrassEdge,
+
+      // Front side
+      0, 1, 1,
+      GrassEdge, 1, 1,
+      GrassEdge, 1 - GrassHeight, 1,
+      0, 1 - GrassHeight, 1,
+    ],
+    normals: [
+      // Left side
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+
+      // Back side
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+
+      // Right side
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+
+      // Front side
+      0, 0, 1,
+      0, 0, 1,
+      0, 0, 1,
+      0, 0, 1,
+    ],
+    indices: [
+      // Left side
+      0, 2, 1,
+      0, 3, 2,
+
+      // Back side
+      4, 6, 5,
+      4, 7, 6,
+
+      // Right side
+      8, 10, 9,
+      8, 11, 10,
+
+      // Front side
+      12, 14, 13,
+      12, 15, 14,
+    ],
+  };
+
+  const topCurvePositions = [];
+  const bottomCurvePositions = [];
+  const curveNormals = [];
+
+  const startAngle = -Math.PI / 2;
+  const endAngle = -Math.PI;
+  const radius = 1 - GrassEdge;
+
+  const CurveSections = 10;
+  for ( let i = 0; i <= CurveSections; i ++ ) {
+    const angle = startAngle + ( i / CurveSections ) * Angle.deltaAngle( startAngle, endAngle );
+    const cos = Math.cos( angle );
+    const sin = Math.sin( angle );
+
+    topCurvePositions.push(
+      1 + cos * radius,
+      1,
+      1 + sin * radius,
+    );
+
+    bottomCurvePositions.push(
+      1 + cos * radius,
+      1 - GrassHeight,
+      1 + sin * radius,
+    );
+
+    curveNormals.push(
+      -cos,
+      0,
+      -sin,
+    );
+  }
+
+
+  // Top
+  const topStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
     0, 1, 0,
     1, 1, 0,
-    1, 1, 0.3,
-    0.3, 1, 1,
+    ...topCurvePositions,
     0, 1, 1,
+  );
+
+  for ( let i = 0; i < 3 + CurveSections + 1; i ++ ) {
+    geometry.normals.push( 0, 1, 0 );
+  }
+
+  for ( let i = topStartIndex; i < topStartIndex + 2 + CurveSections; i ++ ) {
+    geometry.indices.push( topStartIndex, i + 2, i + 1 );
+  }
+
+  // Middle curve side
+  const curveStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    ...topCurvePositions,
+    ...bottomCurvePositions,
+  );
+
+  geometry.normals.push(
+    ...curveNormals,
+    ...curveNormals,
+  );
+
+  for ( let ndx = curveStartIndex; ndx < curveStartIndex + CurveSections; ndx ++ ) {
+    geometry.indices.push(
+      ndx + 1, ndx, ndx + CurveSections + 1,
+      ndx + 1, ndx + CurveSections + 1, ndx + CurveSections + 2,
+    );
+  }
+
+  // Center at 0,0,0
+  for ( let i = 0; i < geometry.positions.length; i ++ ) {
+    geometry.positions[ i ] -= 0.5;
+  }
+
+  console.log( geometry );
+  return geometry;
+}
+
+const grassGeo = getGrassCurveGeometry();
+
+const waterGeo = {
+  positions: [
+    -0.5, 0.5 - GrassHeight, -0.5,
+     0.5, 0.5 - GrassHeight, -0.5,
+     0.5, 0.5 - GrassHeight,  0.5,
+    -0.5, 0.5 - GrassHeight,  0.5,
   ],
   normals: [
-    0, 1, 0,
     0, 1, 0,
     0, 1, 0,
     0, 1, 0,
@@ -22,19 +176,19 @@ const geometry = {
   indices: [
     0, 2, 1,
     0, 3, 2,
-    0, 4, 3,
   ],
 };
 
 const shader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.BasicLighting );
-const vao = createVAO( glGameCanvas.gl, geometry, shader );
+const grassVAO = createVAO( glGameCanvas.gl, grassGeo, shader );
+const waterVAO = createVAO( glGameCanvas.gl, waterGeo, shader );
 
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  // mat4.rotateY( modelMatrix, modelMatrix, -Math.PI );
+  mat4.rotateY( modelMatrix, modelMatrix, Math.PI / 2 );
 
-  const viewMatrix = mat4.lookAt( [], [ 5, 5, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+  const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
   const mvp = mat4.mul( [], viewMatrix, modelMatrix );
@@ -46,11 +200,14 @@ glGameCanvas.draw = ( gl ) => {
   gl.useProgram( shader.program );
   gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
   gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
+
+  gl.bindVertexArray( grassVAO );
   gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
+  gl.drawElements( gl.TRIANGLES, grassGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
 
-  gl.bindVertexArray( vao );
-  gl.drawElements( gl.TRIANGLES, geometry.indices.length, gl.UNSIGNED_SHORT, 0 );
-
+  gl.bindVertexArray( waterVAO );
+  gl.uniform3fv( shader.uniformLocations.color, [ 0, 0, 1 ] );
+  gl.drawElements( gl.TRIANGLES, waterGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
 }
 
 
