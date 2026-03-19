@@ -1,3 +1,18 @@
+3/18:
+
+Made WebGL version today
+  - Was able to leverage code from Kingdoms to get something running pretty quickly
+  - Not that hard to build the mesh with curve
+    - Not much worse than creating the 2D coordinates for the SVG, anyway
+  - With 10 segments, looks basically as good as canvas curve
+  - Seamless (as opposed to missing edges when drawing with canvas)
+
+May as well keep pushing with this and turn this into another WebGL experiment
+  - Gives a chance to finish up the lighting shader work from before
+  - A chance to mess with shader textures some more, too
+
+Array of which mesh and which rotation go with each NW/NE/SW/SE combination?
+
 3/17:
 
 Experiment with 3D points drawn with 2D methods

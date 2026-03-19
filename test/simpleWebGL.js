@@ -183,21 +183,32 @@ const shader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.BasicLighti
 const grassVAO = createVAO( glGameCanvas.gl, grassGeo, shader );
 const waterVAO = createVAO( glGameCanvas.gl, waterGeo, shader );
 
+const yRot = ( angle ) => [ 0, Math.sin( angle / 2 ), 0, Math.cos( angle / 2 ) ];
+const ROT_0 = yRot( 0 );
+const ROT_90 = yRot( -Math.PI / 2 );
+const ROT_180 = yRot( Math.PI );
+const ROT_270 = yRot( Math.PI / 2 );
+
+const cols = 4, rows = 4;
+const tiles = [
+  ROT_0, ROT_90, ROT_0, ROT_90,
+  ROT_270, ROT_180, ROT_270, ROT_180,
+  ROT_0, ROT_90, ROT_0, ROT_90,
+  ROT_270, ROT_180, ROT_270, ROT_180,
+];
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
   const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  let angle = 0;
-  for ( let row = 0; row < 4; row ++ ) {
-    for ( let col = 0; col < 2; col ++ ) {
+  for ( let row = 0; row < rows; row ++ ) {
+    for ( let col = 0; col < cols; col ++ ) {
       mat4.fromRotationTranslation(
         modelMatrix,
-        [ 0, Math.sin( angle / 2 ), 0, Math.cos( angle / 2 ) ],
+        tiles[ col + row * cols ],
         [ col, 0, row ],
       );
-      angle -= Math.PI / 2;
 
       const mvp = mat4.mul( [], viewMatrix, modelMatrix );
       mat4.mul( mvp, projMatrix, mvp );
