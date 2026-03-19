@@ -154,11 +154,98 @@ function getGrassCurveGeometry() {
     geometry.positions[ i ] -= 0.5;
   }
 
-  console.log( geometry );
   return geometry;
 }
 
-const grassGeo = getGrassCurveGeometry();
+const grassEdgeGeometry = {
+  positions: [
+    // Left side
+    0, 1, 0,
+    0, 1, 1,
+    0, 1 - GrassHeight, 1,
+    0, 1 - GrassHeight, 0,
+
+    // Back side
+    0, 1, 0,
+    GrassEdge, 1, 0,
+    GrassEdge, 1 - GrassHeight, 0,
+    0, 1 - GrassHeight, 0,
+
+    // Right side
+    GrassEdge, 1, 1,
+    GrassEdge, 1, 0,
+    GrassEdge, 1 - GrassHeight, 0,
+    GrassEdge, 1 - GrassHeight, 1,
+
+    // Front side
+    0, 1, 1,
+    GrassEdge, 1, 1,
+    GrassEdge, 1 - GrassHeight, 1,
+    0, 1 - GrassHeight, 1,
+
+    // Top
+    0, 1, 0,
+    0, 1, 1,
+    GrassEdge, 1, 1,
+    GrassEdge, 1, 0,
+
+  ].map( e => e - 0.5 ),
+  normals: [
+    // Left side
+    -1, 0, 0,
+    -1, 0, 0,
+    -1, 0, 0,
+    -1, 0, 0,
+
+    // Back side
+    0, 0, -1,
+    0, 0, -1,
+    0, 0, -1,
+    0, 0, -1,
+
+    // Right side
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+
+    // Front side
+    0, 0, 1,
+    0, 0, 1,
+    0, 0, 1,
+    0, 0, 1,
+
+    // Top
+    0, 1, 0,
+    0, 1, 0,
+    0, 1, 0,
+    0, 1, 0,
+  ],
+  indices: [
+    // Left side
+    0, 2, 1,
+    0, 3, 2,
+
+    // Back side
+    4, 6, 5,
+    4, 7, 6,
+
+    // Right side
+    8, 10, 9,
+    8, 11, 10,
+
+    // Front side
+    12, 14, 13,
+    12, 15, 14,
+
+    // Top
+    16, 18, 17,
+    16, 19, 18,
+  ],
+};
+
+
+const grassGeo = grassEdgeGeometry; //getGrassCurveGeometry();
 
 const waterGeo = {
   positions: [
@@ -189,12 +276,10 @@ const ROT_90 = yRot( -Math.PI / 2 );
 const ROT_180 = yRot( Math.PI );
 const ROT_270 = yRot( Math.PI / 2 );
 
-const cols = 4, rows = 4;
+const cols = 2, rows = 2;
 const tiles = [
-  ROT_0, ROT_90, ROT_0, ROT_90,
-  ROT_270, ROT_180, ROT_270, ROT_180,
-  ROT_0, ROT_90, ROT_0, ROT_90,
-  ROT_270, ROT_180, ROT_270, ROT_180,
+  ROT_0, ROT_90,
+  ROT_270, ROT_180,
 ];
 
 glGameCanvas.draw = ( gl ) => {
