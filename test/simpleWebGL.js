@@ -186,28 +186,38 @@ const waterVAO = createVAO( glGameCanvas.gl, waterGeo, shader );
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  mat4.rotateY( modelMatrix, modelMatrix, Math.PI / 2 );
-
   const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  const mvp = mat4.mul( [], viewMatrix, modelMatrix );
-  mat4.mul( mvp, projMatrix, mvp );
+  let angle = 0;
+  for ( let row = 0; row < 4; row ++ ) {
+    for ( let col = 0; col < 2; col ++ ) {
+      mat4.fromRotationTranslation(
+        modelMatrix,
+        [ 0, Math.sin( angle / 2 ), 0, Math.cos( angle / 2 ) ],
+        [ col, 0, row ],
+      );
+      angle -= Math.PI / 2;
 
-  const normalMatrix = mat4.invert( [], modelMatrix );
-  mat4.transpose( normalMatrix, normalMatrix );
+      const mvp = mat4.mul( [], viewMatrix, modelMatrix );
+      mat4.mul( mvp, projMatrix, mvp );
 
-  gl.useProgram( shader.program );
-  gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
-  gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
+      const normalMatrix = mat4.invert( [], modelMatrix );
+      mat4.transpose( normalMatrix, normalMatrix );
 
-  gl.bindVertexArray( grassVAO );
-  gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
-  gl.drawElements( gl.TRIANGLES, grassGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
+      gl.useProgram( shader.program );
+      gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
+      gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
 
-  gl.bindVertexArray( waterVAO );
-  gl.uniform3fv( shader.uniformLocations.color, [ 0, 0, 1 ] );
-  gl.drawElements( gl.TRIANGLES, waterGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
+      gl.bindVertexArray( grassVAO );
+      gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
+      gl.drawElements( gl.TRIANGLES, grassGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
+
+      gl.bindVertexArray( waterVAO );
+      gl.uniform3fv( shader.uniformLocations.color, [ 0, 0, 1 ] );
+      gl.drawElements( gl.TRIANGLES, waterGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
+    }
+  }
 }
 
 
