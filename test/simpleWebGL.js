@@ -277,6 +277,212 @@ function getSmallCurveGeometry() {
   return geometry;
 }
 
+function getTwoSmallCurveGeometry() {
+  const geometry = {
+    positions: [
+      // Left side
+      0, 1, 0,
+      0, 1, GrassEdge,
+      0, 1 - GrassHeight, GrassEdge,
+      0, 1 - GrassHeight, 0,
+
+      // Back side
+      0, 1, 0,
+      GrassEdge, 1, 0,
+      GrassEdge, 1 - GrassHeight, 0,
+      0, 1 - GrassHeight, 0,
+
+      // Right side
+      1, 1, 1,
+      1, 1, 1 - GrassEdge,
+      1, 1 - GrassHeight, 1 - GrassEdge,
+      1, 1 - GrassHeight, 1,
+
+      // Front side
+      1 - GrassEdge, 1, 1,
+      1, 1, 1,
+      1, 1 - GrassHeight, 1,
+      1 - GrassEdge, 1 - GrassHeight, 1,
+
+    ],
+    normals: [
+      // Left side
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+
+      // Back side
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+
+      // Right side
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+
+      // Front side
+      0, 0, 1,
+      0, 0, 1,
+      0, 0, 1,
+      0, 0, 1,
+    ],
+    indices: [
+      // Left side
+      0, 2, 1,
+      0, 3, 2,
+
+      // Back side
+      4, 6, 5,
+      4, 7, 6,
+
+      // Right side
+      8, 10, 9,
+      8, 11, 10,
+
+      // Front side
+      12, 14, 13,
+      12, 15, 14,
+    ],
+  };
+
+  const topFirstCurvePositions = [];
+  const bottomFirstCurvePositions = [];
+  const firstCurveNormals = [];
+
+  const topSecondCurvePositions = [];
+  const bottomSecondCurvePositions = [];
+  const secondCurveNormals = [];
+
+  const startAngle = 0;
+  const endAngle = Math.PI / 2;
+  const radius = GrassEdge;
+
+  // TODO: Extract this to helper function that makes array of angles?
+
+  const CurveSections = 5;
+  for ( let i = 0; i <= CurveSections; i ++ ) {
+    const angle = startAngle + ( i / CurveSections ) * Angle.deltaAngle( startAngle, endAngle );
+    const cos = Math.cos( angle );
+    const sin = Math.sin( angle );
+
+    // Top left curve
+    topFirstCurvePositions.push(
+      cos * radius,
+      1,
+      sin * radius,
+    );
+
+    bottomFirstCurvePositions.push(
+      cos * radius,
+      1 - GrassHeight,
+      sin * radius,
+    );
+
+    firstCurveNormals.push(
+      cos,
+      0,
+      sin,
+    );
+
+    // Bottom right curve
+    topSecondCurvePositions.push(
+      1 - cos * radius,
+      1,
+      1 - sin * radius,
+    );
+
+    bottomSecondCurvePositions.push(
+      1 - cos * radius,
+      1 - GrassHeight,
+      1 - sin * radius,
+    );
+
+    secondCurveNormals.push(
+      -cos,
+      0,
+      -sin,
+    );
+  }
+
+
+  // Top
+  const firstTopStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    0, 1, 0,
+    ...topFirstCurvePositions,
+  );
+
+  for ( let i = 0; i < 1 + CurveSections + 1; i ++ ) {
+    geometry.normals.push( 0, 1, 0 );
+  }
+
+  for ( let i = firstTopStartIndex; i < firstTopStartIndex + CurveSections; i ++ ) {
+    geometry.indices.push( firstTopStartIndex, i + 2, i + 1 );
+  }
+
+  const secondTopStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    1, 1, 1,
+    ...topSecondCurvePositions,
+  );
+
+  for ( let i = 0; i < 1 + CurveSections + 1; i ++ ) {
+    geometry.normals.push( 0, 1, 0 );
+  }
+
+  for ( let i = secondTopStartIndex; i < secondTopStartIndex + CurveSections; i ++ ) {
+    geometry.indices.push( secondTopStartIndex, i + 2, i + 1 );
+  }
+
+  // Middle curve side
+  const firstCurveStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    ...topFirstCurvePositions,
+    ...bottomFirstCurvePositions,
+  );
+
+  geometry.normals.push(
+    ...firstCurveNormals,
+    ...firstCurveNormals,
+  );
+
+  for ( let ndx = firstCurveStartIndex; ndx < firstCurveStartIndex + CurveSections; ndx ++ ) {
+    geometry.indices.push(
+      ndx + 1, ndx, ndx + CurveSections + 1,
+      ndx + 1, ndx + CurveSections + 1, ndx + CurveSections + 2,
+    );
+  }
+
+  const secondCurveStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    ...topSecondCurvePositions,
+    ...bottomSecondCurvePositions,
+  );
+
+  geometry.normals.push(
+    ...secondCurveNormals,
+    ...secondCurveNormals,
+  );
+
+  for ( let ndx = secondCurveStartIndex; ndx < secondCurveStartIndex + CurveSections; ndx ++ ) {
+    geometry.indices.push(
+      ndx + 1, ndx, ndx + CurveSections + 1,
+      ndx + 1, ndx + CurveSections + 1, ndx + CurveSections + 2,
+    );
+  }
+
+  // Center at 0,0,0
+  for ( let i = 0; i < geometry.positions.length; i ++ ) {
+    geometry.positions[ i ] -= 0.5;
+  }
+
+  return geometry;
+}
+
 const edgeGeometry = {
   positions: [
     // Left side
@@ -366,8 +572,9 @@ const edgeGeometry = {
 
 const bigCurveGeometry = getBigCurveGeometry();
 const smallCurveGeometry = getSmallCurveGeometry();
+const twoSmallCurveGeometry = getTwoSmallCurveGeometry();
 
-const grassGeo = smallCurveGeometry;
+const grassGeo = twoSmallCurveGeometry;
 
 const waterGeo = {
   positions: [
@@ -437,8 +644,8 @@ glGameCanvas.draw = ( gl ) => {
   const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  for ( let row = 0; row < rows; row ++ ) {
-    for ( let col = 0; col < cols; col ++ ) {
+  for ( let row = 0; row < 2; row ++ ) {
+    for ( let col = 0; col < 2; col ++ ) {
       mat4.fromRotationTranslation(
         modelMatrix,
         tiles[ col + row * cols ],
