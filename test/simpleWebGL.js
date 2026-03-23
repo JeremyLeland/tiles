@@ -570,11 +570,96 @@ const edgeGeometry = {
   ],
 };
 
+const fullGeometry = {
+  positions: [
+    // Left side
+    0, 1, 0,
+    0, 1, 1,
+    0, 1 - GrassHeight, 1,
+    0, 1 - GrassHeight, 0,
+
+    // Back side
+    0, 1, 0,
+    1, 1, 0,
+    1, 1 - GrassHeight, 0,
+    0, 1 - GrassHeight, 0,
+
+    // Right side
+    1, 1, 1,
+    1, 1, 0,
+    1, 1 - GrassHeight, 0,
+    1, 1 - GrassHeight, 1,
+
+    // Front side
+    0, 1, 1,
+    1, 1, 1,
+    1, 1 - GrassHeight, 1,
+    0, 1 - GrassHeight, 1,
+
+    // Top
+    0, 1, 0,
+    0, 1, 1,
+    1, 1, 1,
+    1, 1, 0,
+
+  ].map( e => e - 0.5 ),
+  normals: [
+    // Left side
+    -1, 0, 0,
+    -1, 0, 0,
+    -1, 0, 0,
+    -1, 0, 0,
+
+    // Back side
+    0, 0, -1,
+    0, 0, -1,
+    0, 0, -1,
+    0, 0, -1,
+
+    // Right side
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+
+    // Front side
+    0, 0, 1,
+    0, 0, 1,
+    0, 0, 1,
+    0, 0, 1,
+
+    // Top
+    0, 1, 0,
+    0, 1, 0,
+    0, 1, 0,
+    0, 1, 0,
+  ],
+  indices: [
+    // Left side
+    0, 2, 1,
+    0, 3, 2,
+
+    // Back side
+    4, 6, 5,
+    4, 7, 6,
+
+    // Right side
+    8, 10, 9,
+    8, 11, 10,
+
+    // Front side
+    12, 14, 13,
+    12, 15, 14,
+
+    // Top
+    16, 18, 17,
+    16, 19, 18,
+  ],
+};
+
 const bigCurveGeometry = getBigCurveGeometry();
 const smallCurveGeometry = getSmallCurveGeometry();
 const twoSmallCurveGeometry = getTwoSmallCurveGeometry();
-
-const grassGeo = twoSmallCurveGeometry;
 
 const waterGeo = {
   positions: [
@@ -596,8 +681,14 @@ const waterGeo = {
 };
 
 const shader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.BasicLighting );
-const grassVAO = createVAO( glGameCanvas.gl, grassGeo, shader );
-const waterVAO = createVAO( glGameCanvas.gl, waterGeo, shader );
+const grassMeshes = {
+  smallCurve:     createMesh( glGameCanvas.gl, smallCurveGeometry, shader ),
+  edge:           createMesh( glGameCanvas.gl, edgeGeometry, shader ),
+  twoSmallCurve:  createMesh( glGameCanvas.gl, twoSmallCurveGeometry, shader ),
+  bigCurve:       createMesh( glGameCanvas.gl, bigCurveGeometry, shader ),
+  full:           createMesh( glGameCanvas.gl, fullGeometry, shader ),
+};
+const waterMesh = createMesh( glGameCanvas.gl, waterGeo, shader );
 
 const yRot = ( angle ) => [ 0, Math.sin( angle / 2 ), 0, Math.cos( angle / 2 ) ];
 const ROT_0 = yRot( 0 );
@@ -607,30 +698,53 @@ const ROT_270 = yRot( Math.PI / 2 );
 
 const Tiles = [
 
+  // NW 0, NE 0, SW 0, SE 0
+  null,
+
+  // NW 0, NE 0, SW 0, SE 1
+  { mesh: grassMeshes.smallCurve, quat: ROT_180 },
+
+  // NW 0, NE 0, SW 1, SE 0
+  { mesh: grassMeshes.smallCurve, quat: ROT_270 },
 
   // NW 0, NE 0, SW 1, SE 1
-  { geo: edgeGeometry, quat: ROT_270 },
+  { mesh: grassMeshes.edge, quat: ROT_270 },
+
+  // NW 0, NE 1, SW 0, SE 0
+  { mesh: grassMeshes.smallCurve, quat: ROT_90 },
 
   // NW 0, NE 1, SW 0, SE 1
-  { geo: edgeGeometry, quat: ROT_180 },
+  { mesh: grassMeshes.edge, quat: ROT_180 },
+
+  // NW 0, NE 1, SW 1, SE 0
+  { mesh: grassMeshes.twoSmallCurve, quat: ROT_90 },
 
   // NW 0, NE 1, SW 1, SE 1
-  { geo: bigCurveGeometry, quat: ROT_180 },
+  { mesh: grassMeshes.bigCurve, quat: ROT_180 },
+
+  // NW 1, NE 0, SW 0, SE 0
+  { mesh: grassMeshes.smallCurve, quat: ROT_0 },
+
+  // NW 1, NE 0, SW 0, SE 1
+  { mesh: grassMeshes.twoSmallCurve, quat: ROT_0 },
 
   // NW 1, NE 0, SW 1, SE 0
-  { geo: edgeGeometry, quat: ROT_0 },
+  { mesh: grassMeshes.edge, quat: ROT_0 },
 
   // NW 1, NE 0, SW 1, SE 1
-  { geo: bigCurveGeometry, quat: ROT_270 },
+  { mesh: grassMeshes.bigCurve, quat: ROT_270 },
 
   // NW 1, NE 1, SW 0, SE 0
-  { geo: edgeGeometry, quat: ROT_90 },
+  { mesh: grassMeshes.edge, quat: ROT_90 },
 
   // NW 1, NE 1, SW 0, SE 1
-  { geo: bigCurveGeometry, quat: ROT_90 },
+  { mesh: grassMeshes.bigCurve, quat: ROT_90 },
 
   // NW 1, NE 1, SW 1, SE 0
-  { geo: bigCurveGeometry, quat: ROT_0 },
+  { mesh: grassMeshes.bigCurve, quat: ROT_0 },
+
+  // NW 1, NE 1, SW 1, SE 1
+  { mesh: grassMeshes.full, quat: ROT_0 },
 ];
 
 const cols = 2, rows = 2;
@@ -644,11 +758,14 @@ glGameCanvas.draw = ( gl ) => {
   const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  for ( let row = 0; row < 2; row ++ ) {
-    for ( let col = 0; col < 2; col ++ ) {
+  for ( let row = 0; row < cols; row ++ ) {
+    for ( let col = 0; col < rows; col ++ ) {
+      const grassInfo = Tiles[ 4 ];
+
       mat4.fromRotationTranslation(
         modelMatrix,
-        tiles[ col + row * cols ],
+        grassInfo.quat,
+        // tiles[ col + row * cols ],
         [ col, 0, row ],
       );
 
@@ -662,19 +779,22 @@ glGameCanvas.draw = ( gl ) => {
       gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
       gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
 
-      gl.bindVertexArray( grassVAO );
-      gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
-      gl.drawElements( gl.TRIANGLES, grassGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
 
-      gl.bindVertexArray( waterVAO );
+      if ( grassInfo ) {
+        gl.bindVertexArray( grassInfo.mesh.vao );
+        gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
+        gl.drawElements( gl.TRIANGLES, grassInfo.mesh.geometry.indices.length, gl.UNSIGNED_SHORT, 0 );
+      }
+
+      gl.bindVertexArray( waterMesh.vao );
       gl.uniform3fv( shader.uniformLocations.color, [ 0, 0, 1 ] );
-      gl.drawElements( gl.TRIANGLES, waterGeo.indices.length, gl.UNSIGNED_SHORT, 0 );
+      gl.drawElements( gl.TRIANGLES, waterMesh.geometry.indices.length, gl.UNSIGNED_SHORT, 0 );
     }
   }
 }
 
 
-function createVAO( gl, geometry, shader ) {
+function createMesh( gl, geometry, shader ) {
   const vao = gl.createVertexArray();
   gl.bindVertexArray( vao );
 
@@ -690,7 +810,11 @@ function createVAO( gl, geometry, shader ) {
 
   gl.bindVertexArray( null );
 
-  return vao;
+  return {
+    vao: vao,
+    geometry: geometry,
+    shader: shader,
+  };
 }
 
 function createArrayBuffer( gl, array ) {
