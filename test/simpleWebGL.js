@@ -8,7 +8,7 @@ const glGameCanvas = new GLGameCanvas();
 const GrassHeight = 0.3;
 const GrassEdge = 0.2;
 
-function getGrassCurveGeometry() {
+function getBigCurveGeometry() {
   const geometry = {
     positions: [
       // Left side
@@ -105,6 +105,7 @@ function getGrassCurveGeometry() {
       1 + sin * radius,
     );
 
+    // Negative because we're seeing the inside of the curve
     curveNormals.push(
       -cos,
       0,
@@ -157,7 +158,126 @@ function getGrassCurveGeometry() {
   return geometry;
 }
 
-const grassEdgeGeometry = {
+function getSmallCurveGeometry() {
+  const geometry = {
+    positions: [
+      // Left side
+      0, 1, 0,
+      0, 1, GrassEdge,
+      0, 1 - GrassHeight, GrassEdge,
+      0, 1 - GrassHeight, 0,
+
+      // Back side
+      0, 1, 0,
+      GrassEdge, 1, 0,
+      GrassEdge, 1 - GrassHeight, 0,
+      0, 1 - GrassHeight, 0,
+    ],
+    normals: [
+      // Left side
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+
+      // Back side
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+      0, 0, -1,
+    ],
+    indices: [
+      // Left side
+      0, 2, 1,
+      0, 3, 2,
+
+      // Back side
+      4, 6, 5,
+      4, 7, 6,
+    ],
+  };
+
+  const topCurvePositions = [];
+  const bottomCurvePositions = [];
+  const curveNormals = [];
+
+  const startAngle = 0;
+  const endAngle = Math.PI / 2;
+  const radius = GrassEdge;
+
+  // TODO: Extract this to helper function that makes array of angles?
+
+  const CurveSections = 5;
+  for ( let i = 0; i <= CurveSections; i ++ ) {
+    const angle = startAngle + ( i / CurveSections ) * Angle.deltaAngle( startAngle, endAngle );
+    const cos = Math.cos( angle );
+    const sin = Math.sin( angle );
+
+    topCurvePositions.push(
+      cos * radius,
+      1,
+      sin * radius,
+    );
+
+    bottomCurvePositions.push(
+      cos * radius,
+      1 - GrassHeight,
+      sin * radius,
+    );
+
+    curveNormals.push(
+      cos,
+      0,
+      sin,
+    );
+  }
+
+
+  // Top
+  const topStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    0, 1, 0,
+    GrassEdge, 1, 0,
+    ...topCurvePositions,
+    0, 1, 1,
+  );
+
+  for ( let i = 0; i < 3 + CurveSections + 1; i ++ ) {
+    geometry.normals.push( 0, 1, 0 );
+  }
+
+  for ( let i = topStartIndex; i < topStartIndex + 2 + CurveSections; i ++ ) {
+    geometry.indices.push( topStartIndex, i + 2, i + 1 );
+  }
+
+  // Middle curve side
+  const curveStartIndex = geometry.positions.length / 3;
+  geometry.positions.push(
+    ...topCurvePositions,
+    ...bottomCurvePositions,
+  );
+
+  geometry.normals.push(
+    ...curveNormals,
+    ...curveNormals,
+  );
+
+  for ( let ndx = curveStartIndex; ndx < curveStartIndex + CurveSections; ndx ++ ) {
+    geometry.indices.push(
+      ndx + 1, ndx, ndx + CurveSections + 1,
+      ndx + 1, ndx + CurveSections + 1, ndx + CurveSections + 2,
+    );
+  }
+
+  // Center at 0,0,0
+  for ( let i = 0; i < geometry.positions.length; i ++ ) {
+    geometry.positions[ i ] -= 0.5;
+  }
+
+  return geometry;
+}
+
+const edgeGeometry = {
   positions: [
     // Left side
     0, 1, 0,
@@ -244,8 +364,10 @@ const grassEdgeGeometry = {
   ],
 };
 
+const bigCurveGeometry = getBigCurveGeometry();
+const smallCurveGeometry = getSmallCurveGeometry();
 
-const grassGeo = grassEdgeGeometry; //getGrassCurveGeometry();
+const grassGeo = smallCurveGeometry;
 
 const waterGeo = {
   positions: [
@@ -275,6 +397,34 @@ const ROT_0 = yRot( 0 );
 const ROT_90 = yRot( -Math.PI / 2 );
 const ROT_180 = yRot( Math.PI );
 const ROT_270 = yRot( Math.PI / 2 );
+
+const Tiles = [
+
+
+  // NW 0, NE 0, SW 1, SE 1
+  { geo: edgeGeometry, quat: ROT_270 },
+
+  // NW 0, NE 1, SW 0, SE 1
+  { geo: edgeGeometry, quat: ROT_180 },
+
+  // NW 0, NE 1, SW 1, SE 1
+  { geo: bigCurveGeometry, quat: ROT_180 },
+
+  // NW 1, NE 0, SW 1, SE 0
+  { geo: edgeGeometry, quat: ROT_0 },
+
+  // NW 1, NE 0, SW 1, SE 1
+  { geo: bigCurveGeometry, quat: ROT_270 },
+
+  // NW 1, NE 1, SW 0, SE 0
+  { geo: edgeGeometry, quat: ROT_90 },
+
+  // NW 1, NE 1, SW 0, SE 1
+  { geo: bigCurveGeometry, quat: ROT_90 },
+
+  // NW 1, NE 1, SW 1, SE 0
+  { geo: bigCurveGeometry, quat: ROT_0 },
+];
 
 const cols = 2, rows = 2;
 const tiles = [
