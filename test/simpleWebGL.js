@@ -5,8 +5,8 @@ import { mat4, vec3 } from '../lib/gl-matrix.js';
 
 const glGameCanvas = new GLGameCanvas();
 
-const GrassHeight = 0.3;
-const GrassEdge = 0.3;
+const GrassHeight = 0.2;
+const GrassEdge = 0.5;
 
 function getBigCurveGeometry() {
   const geometry = {
@@ -680,6 +680,7 @@ const waterGeo = {
   ],
 };
 
+
 const shader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.BasicLighting );
 const grassMeshes = {
   smallCurve:     createMesh( glGameCanvas.gl, smallCurveGeometry, shader ),
@@ -747,24 +748,58 @@ const Tiles = [
   { mesh: grassMeshes.full, quat: ROT_0 },
 ];
 
-const cols = 4, rows = 4;
+const cols = 5, rows = 6;
 const grassLayer = [
-  1, 0, 1, 0,
-  0, 1, 0, 1,
-  1, 0, 1, 0,
-  0, 1, 0, 1,
+  1, 1, 1, 1, 0,
+  1, 1, 0, 0, 0,
+  1, 0, 1, 1, 0,
+  1, 0, 1, 1, 0,
+  0, 0, 0, 1, 1,
+  1, 0, 1, 0, 1,
 ];
+
+
+const gridGeo = {
+  positions: [],
+}
+
+for ( let col = 0; col <= cols; col ++ ) {
+  gridGeo.positions.push( col, 0.5001, 0 );
+  gridGeo.positions.push( col, 0.5001, rows );
+}
+
+for ( let row = 0; row <= rows; row ++ ) {
+  gridGeo.positions.push( 0, 0.5001, row );
+  gridGeo.positions.push( cols, 0.5001, row );
+}
+
+const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidColor );
+const gridMesh = createLineMesh( glGameCanvas.gl, gridGeo, colorShader );
 
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+  const viewMatrix = mat4.lookAt( [], [ 10, 20, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+  mat4.translate( viewMatrix, viewMatrix, [ -2, 0, -2 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  for ( let row = 0; row <= cols; row ++ ) {
-    for ( let col = 0; col <= rows; col ++ ) {
+  const mvp = mat4.mul( [], viewMatrix, modelMatrix );
+  mat4.mul( mvp, projMatrix, mvp );
 
+  const normalMatrix = mat4.invert( [], modelMatrix );
+  mat4.transpose( normalMatrix, normalMatrix );
 
+  gl.useProgram( gridMesh.shader.program );
+  gl.uniformMatrix4fv( gridMesh.shader.uniformLocations.mvp, false, mvp );
+  gl.uniformMatrix4fv( gridMesh.shader.uniformLocations.normalMatrix, false, normalMatrix );
+
+  gl.uniform3fv( gridMesh.shader.uniformLocations.color, [ 1, 1, 1 ] );
+
+  gl.bindVertexArray( gridMesh.vao );
+  gl.drawArrays( gl.LINES, ROT_0, gridMesh.geometry.positions.length / 3 );
+
+  for ( let row = 0; row <= rows; row ++ ) {
+    for ( let col = 0; col <= cols; col ++ ) {
       const wc = col == 0 ? 0 : col - 1;
       const ec = col == ( cols ) ? ( cols - 1 ) : ( col );
       const nr = row == 0 ? 0 : row - 1;
@@ -791,18 +826,24 @@ glGameCanvas.draw = ( gl ) => {
       const normalMatrix = mat4.invert( [], modelMatrix );
       mat4.transpose( normalMatrix, normalMatrix );
 
-      gl.useProgram( shader.program );
-      gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
-      gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
-
       if ( grassInfo ) {
+        gl.useProgram( grassInfo.mesh.shader.program );
+        gl.uniformMatrix4fv( grassInfo.mesh.shader.uniformLocations.mvp, false, mvp );
+        gl.uniformMatrix4fv( grassInfo.mesh.shader.uniformLocations.normalMatrix, false, normalMatrix );
+
+        gl.uniform3fv( grassInfo.mesh.shader.uniformLocations.color, [ 0, 1, 0 ] );
+
         gl.bindVertexArray( grassInfo.mesh.vao );
-        gl.uniform3fv( shader.uniformLocations.color, [ 0, 1, 0 ] );
         gl.drawElements( gl.TRIANGLES, grassInfo.mesh.geometry.indices.length, gl.UNSIGNED_SHORT, 0 );
       }
 
+      gl.useProgram( waterMesh.shader.program );
+      gl.uniformMatrix4fv( waterMesh.shader.uniformLocations.mvp, false, mvp );
+      gl.uniformMatrix4fv( waterMesh.shader.uniformLocations.normalMatrix, false, normalMatrix );
+
+      gl.uniform3fv( waterMesh.shader.uniformLocations.color, [ 0, 0, 1 ] );
+
       gl.bindVertexArray( waterMesh.vao );
-      gl.uniform3fv( shader.uniformLocations.color, [ 0, 0, 1 ] );
       gl.drawElements( gl.TRIANGLES, waterMesh.geometry.indices.length, gl.UNSIGNED_SHORT, 0 );
     }
   }
@@ -822,6 +863,23 @@ function createMesh( gl, geometry, shader ) {
   gl.enableVertexAttribArray( shader.attribLocations.normal );
 
   gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, createIndexBuffer( gl, geometry.indices ) );
+
+  gl.bindVertexArray( null );
+
+  return {
+    vao: vao,
+    geometry: geometry,
+    shader: shader,
+  };
+}
+
+function createLineMesh( gl, geometry, shader ) {
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray( vao );
+
+  gl.bindBuffer( gl.ARRAY_BUFFER, createArrayBuffer( gl, geometry.positions ) );
+  gl.vertexAttribPointer( shader.attribLocations.position, 3, gl.FLOAT, false, 0, 0 );
+  gl.enableVertexAttribArray( shader.attribLocations.position );
 
   gl.bindVertexArray( null );
 

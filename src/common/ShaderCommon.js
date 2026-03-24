@@ -1,14 +1,12 @@
 export const SolidColor = {
   vertex: /*glsl*/`# version 300 es
     in vec4 position;
+    in vec3 normal;
 
-    uniform mat4 modelMatrix;
-    uniform mat4 viewMatrix;
-    uniform mat4 projectionMatrix;
-    uniform mat4 normalMatrix;
+    uniform mat4 mvp;
 
     void main() {
-      gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;
+      gl_Position = mvp * position;
     }
   `,
   fragment: /*glsl*/ `# version 300 es

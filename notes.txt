@@ -1,3 +1,14 @@
+3/23:
+
+Got it drawing all the NW/NE/SW/SE variations of grass and water
+
+Tried blending tiles from array. 
+  - This seemed like it made sense before, but is giving me weird results now
+  - Are my grass tiles too thin?
+
+What I really need is a grid to make it clear which blend tiles are contributing to which actual result
+  - Make something to draw lines...
+
 3/18:
 
 Made WebGL version today
