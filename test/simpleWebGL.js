@@ -5,6 +5,8 @@ import { mat4, vec3 } from '../lib/gl-matrix.js';
 
 const glGameCanvas = new GLGameCanvas();
 
+const Viewport = [ -4, -4, 4, 4 ];
+
 const GrassHeight = 0.2;
 const GrassEdge = 0.5;
 
@@ -782,7 +784,27 @@ const cameraPos = [ -2, 0, -2 ];
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
   const viewMatrix = mat4.translate( [], cameraViewMatrix, cameraPos );
-  const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
+
+
+  const minWidth = Viewport[ 2 ] - Viewport[ 0 ];
+  const minHeight = Viewport[ 3 ] - Viewport[ 1 ];
+
+  const xScale = gl.canvas.clientWidth / minWidth;
+  const yScale = gl.canvas.clientHeight / minHeight;
+
+  const scale = Math.min( xScale, yScale );
+  const offsetX = ( minWidth - gl.canvas.clientWidth / scale ) / 2;
+  const offsetY = ( minHeight - gl.canvas.clientHeight / scale ) / 2;
+
+  const projMatrix = mat4.ortho(
+    [],
+    Viewport[ 0 ] + offsetX,
+    Viewport[ 2 ] - offsetX,
+    Viewport[ 1 ] + offsetY,
+    Viewport[ 3 ] - offsetY,
+    0,
+    100
+  );
 
   const mvp = mat4.mul( [], viewMatrix, modelMatrix );
   mat4.mul( mvp, projMatrix, mvp );

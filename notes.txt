@@ -1,3 +1,7 @@
+3/24:
+
+DONE: Maintain viewport ratio as we resize window (showing extra on edges if needed)
+
 3/23:
 
 Got it drawing all the NW/NE/SW/SE variations of grass and water
@@ -6,8 +10,14 @@ Tried blending tiles from array.
   - This seemed like it made sense before, but is giving me weird results now
   - Are my grass tiles too thin?
 
-What I really need is a grid to make it clear which blend tiles are contributing to which actual result
+DONE: What I really need is a grid to make it clear which blend tiles are contributing to which actual result
   - Make something to draw lines...
+
+Translated via keys
+
+Turns out everything gets stretched weird when window resizes
+  - I need to adapt what I was doing with my minimum bounds for canvas view
+  - Resizing window should maintain aspect ratio and show more or less around edges
 
 3/18:
 
