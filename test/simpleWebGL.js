@@ -6,7 +6,7 @@ import { mat4, vec3 } from '../lib/gl-matrix.js';
 const glGameCanvas = new GLGameCanvas();
 
 const GrassHeight = 0.3;
-const GrassEdge = 0.2;
+const GrassEdge = 0.3;
 
 function getBigCurveGeometry() {
   const geometry = {
@@ -747,25 +747,41 @@ const Tiles = [
   { mesh: grassMeshes.full, quat: ROT_0 },
 ];
 
-const cols = 2, rows = 2;
-const tiles = [
-  ROT_0, ROT_90,
-  ROT_270, ROT_180,
+const cols = 4, rows = 4;
+const grassLayer = [
+  1, 0, 1, 0,
+  0, 1, 0, 1,
+  1, 0, 1, 0,
+  0, 1, 0, 1,
 ];
+
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
   const viewMatrix = mat4.lookAt( [], [ 5, 10, 5 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
-  for ( let row = 0; row < cols; row ++ ) {
-    for ( let col = 0; col < rows; col ++ ) {
-      const grassInfo = Tiles[ 4 ];
+  for ( let row = 0; row <= cols; row ++ ) {
+    for ( let col = 0; col <= rows; col ++ ) {
+
+
+      const wc = col == 0 ? 0 : col - 1;
+      const ec = col == ( cols ) ? ( cols - 1 ) : ( col );
+      const nr = row == 0 ? 0 : row - 1;
+      const sr = row == ( rows ) ? ( rows - 1 ) : ( row );
+
+      console.log( `wc = ${ wc }, ec = ${ ec }, nr = ${ nr }, sr = ${ sr }` );
+
+      const nw = grassLayer[ wc + nr * cols ];
+      const ne = grassLayer[ ec + nr * cols ];
+      const sw = grassLayer[ wc + sr * cols ];
+      const se = grassLayer[ ec + sr * cols ];
+
+      const grassInfo = Tiles[ ( nw << 3 ) + ( ne << 2 ) + ( sw << 1 ) + se ];
 
       mat4.fromRotationTranslation(
         modelMatrix,
-        grassInfo.quat,
-        // tiles[ col + row * cols ],
+        grassInfo?.quat ?? [ 0, 0, 0, 1 ],
         [ col, 0, row ],
       );
 
@@ -778,7 +794,6 @@ glGameCanvas.draw = ( gl ) => {
       gl.useProgram( shader.program );
       gl.uniformMatrix4fv( shader.uniformLocations.mvp, false, mvp );
       gl.uniformMatrix4fv( shader.uniformLocations.normalMatrix, false, normalMatrix );
-
 
       if ( grassInfo ) {
         gl.bindVertexArray( grassInfo.mesh.vao );
