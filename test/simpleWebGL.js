@@ -207,7 +207,7 @@ function getSmallCurveGeometry() {
 
   // TODO: Extract this to helper function that makes array of angles?
 
-  const CurveSections = 5;
+  const CurveSections = 10;
   for ( let i = 0; i <= CurveSections; i ++ ) {
     const angle = startAngle + ( i / CurveSections ) * Angle.deltaAngle( startAngle, endAngle );
     const cos = Math.cos( angle );
@@ -363,7 +363,7 @@ function getTwoSmallCurveGeometry() {
 
   // TODO: Extract this to helper function that makes array of angles?
 
-  const CurveSections = 5;
+  const CurveSections = 10;
   for ( let i = 0; i <= CurveSections; i ++ ) {
     const angle = startAngle + ( i / CurveSections ) * Angle.deltaAngle( startAngle, endAngle );
     const cos = Math.cos( angle );
@@ -776,11 +776,12 @@ for ( let row = 0; row <= rows; row ++ ) {
 const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidColor );
 const gridMesh = createLineMesh( glGameCanvas.gl, gridGeo, colorShader );
 
+const cameraViewMatrix = mat4.lookAt( [], [ 10, 20, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+const cameraPos = [ -2, 0, -2 ];
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  const viewMatrix = mat4.lookAt( [], [ 10, 20, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
-  mat4.translate( viewMatrix, viewMatrix, [ -2, 0, -2 ] );
+  const viewMatrix = mat4.translate( [], cameraViewMatrix, cameraPos );
   const projMatrix = mat4.ortho( [], -4, 4, -4, 4, 0, 100 );
 
   const mvp = mat4.mul( [], viewMatrix, modelMatrix );
@@ -804,8 +805,6 @@ glGameCanvas.draw = ( gl ) => {
       const ec = col == ( cols ) ? ( cols - 1 ) : ( col );
       const nr = row == 0 ? 0 : row - 1;
       const sr = row == ( rows ) ? ( rows - 1 ) : ( row );
-
-      console.log( `wc = ${ wc }, ec = ${ ec }, nr = ${ nr }, sr = ${ sr }` );
 
       const nw = grassLayer[ wc + nr * cols ];
       const ne = grassLayer[ ec + nr * cols ];
@@ -848,6 +847,29 @@ glGameCanvas.draw = ( gl ) => {
     }
   }
 }
+
+const TranslateSpeed = 0.05;
+const Translate = {
+  Up:     vec3.scale( [], [  1,  0,  1 ], TranslateSpeed ),
+  Down:   vec3.scale( [], [ -1,  0, -1 ], TranslateSpeed ),
+  Left:   vec3.scale( [], [  1,  0, -1 ], TranslateSpeed ),
+  Right:  vec3.scale( [], [ -1,  0,  1 ], TranslateSpeed ),
+};
+
+const TranslateKeys = {
+  'w': Translate.Up,
+  'a': Translate.Left,
+  's': Translate.Down,
+  'd': Translate.Right,
+};
+
+document.addEventListener( 'keydown', e => {
+  if ( TranslateKeys[ e.key ] ) {
+    vec3.add( cameraPos, cameraPos, TranslateKeys[ e.key ] );
+  }
+
+  glGameCanvas.redraw();
+} );
 
 
 function createMesh( gl, geometry, shader ) {
