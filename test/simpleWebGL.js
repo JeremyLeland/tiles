@@ -2,6 +2,7 @@ import { GLGameCanvas } from '../src/common/GLGameCanvas.js';
 import * as Angle from '../src/common/Angle.js';
 import * as ShaderCommon from '../src/common/ShaderCommon.js';
 import { mat4, vec3 } from '../lib/gl-matrix.js';
+import { OrbitCamera } from '../src/common/OrbitCamera.js';
 
 const glGameCanvas = new GLGameCanvas();
 
@@ -778,33 +779,37 @@ for ( let row = 0; row <= rows; row ++ ) {
 const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidColor );
 const gridMesh = createLineMesh( glGameCanvas.gl, gridGeo, colorShader );
 
-const cameraViewMatrix = mat4.lookAt( [], [ 10, 20, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
-const cameraPos = [ -2, 0, -2 ];
+// const cameraViewMatrix = mat4.lookAt( [], [ 10, 20, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
+// const cameraPos = [ -2, 0, -2 ];
+
+const camera = new OrbitCamera();
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  const viewMatrix = mat4.translate( [], cameraViewMatrix, cameraPos );
+  const viewMatrix = camera.getViewMatrix();  //mat4.translate( [], cameraViewMatrix, cameraPos );
 
 
-  const minWidth = Viewport[ 2 ] - Viewport[ 0 ];
-  const minHeight = Viewport[ 3 ] - Viewport[ 1 ];
+  // const minWidth = Viewport[ 2 ] - Viewport[ 0 ];
+  // const minHeight = Viewport[ 3 ] - Viewport[ 1 ];
 
-  const xScale = gl.canvas.clientWidth / minWidth;
-  const yScale = gl.canvas.clientHeight / minHeight;
+  // const xScale = gl.canvas.clientWidth / minWidth;
+  // const yScale = gl.canvas.clientHeight / minHeight;
 
-  const scale = Math.min( xScale, yScale );
-  const offsetX = ( minWidth - gl.canvas.clientWidth / scale ) / 2;
-  const offsetY = ( minHeight - gl.canvas.clientHeight / scale ) / 2;
+  // const scale = Math.min( xScale, yScale );
+  // const offsetX = ( minWidth - gl.canvas.clientWidth / scale ) / 2;
+  // const offsetY = ( minHeight - gl.canvas.clientHeight / scale ) / 2;
 
-  const projMatrix = mat4.ortho(
-    [],
-    Viewport[ 0 ] + offsetX,
-    Viewport[ 2 ] - offsetX,
-    Viewport[ 1 ] + offsetY,
-    Viewport[ 3 ] - offsetY,
-    0,
-    100
-  );
+  // const projMatrix = mat4.ortho(
+  //   [],
+  //   Viewport[ 0 ] + offsetX,
+  //   Viewport[ 2 ] - offsetX,
+  //   Viewport[ 1 ] + offsetY,
+  //   Viewport[ 3 ] - offsetY,
+  //   0,
+  //   100
+  // );
+
+  const projMatrix = mat4.perspective( [], Math.PI / 4, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 100 );
 
   const mvp = mat4.mul( [], viewMatrix, modelMatrix );
   mat4.mul( mvp, projMatrix, mvp );
@@ -872,10 +877,10 @@ glGameCanvas.draw = ( gl ) => {
 
 const TranslateSpeed = 0.05;
 const Translate = {
-  Up:     vec3.scale( [], [  1,  0,  1 ], TranslateSpeed ),
-  Down:   vec3.scale( [], [ -1,  0, -1 ], TranslateSpeed ),
-  Left:   vec3.scale( [], [  1,  0, -1 ], TranslateSpeed ),
-  Right:  vec3.scale( [], [ -1,  0,  1 ], TranslateSpeed ),
+  Up:     () => camera.pan( 0, -TranslateSpeed ),
+  Down:   () => camera.pan( 0,  TranslateSpeed ),
+  Left:   () => camera.pan( -TranslateSpeed, 0 ),
+  Right:  () => camera.pan(  TranslateSpeed, 0 ),
 };
 
 const TranslateKeys = {
@@ -886,9 +891,42 @@ const TranslateKeys = {
 };
 
 document.addEventListener( 'keydown', e => {
-  if ( TranslateKeys[ e.key ] ) {
-    vec3.add( cameraPos, cameraPos, TranslateKeys[ e.key ] );
+  TranslateKeys[ e.key ]?.();
+
+  glGameCanvas.redraw();
+} );
+
+const X_TURN_SENSITIVITY = 100;
+const Y_TURN_SENSITIVITY = -100;
+const X_MOVE_SENSITIVITY = -50;
+const Y_MOVE_SENSITIVITY = -50;
+
+glGameCanvas.canvas.addEventListener( 'pointermove', e => {
+  // Rotate around origin with left mouse button
+  if ( e.buttons == 1 ) {
+    const dPhi   = e.movementX / X_TURN_SENSITIVITY;
+    const dTheta = e.movementY / Y_TURN_SENSITIVITY;
+
+    camera.rotate( dPhi, dTheta );
+
+    glGameCanvas.redraw();
   }
+
+  // Pan with right mouse button
+  else if ( e.buttons == 2 ) {
+    const dx = e.movementX / X_MOVE_SENSITIVITY;
+    const dy = e.movementY / Y_MOVE_SENSITIVITY;
+
+    camera.pan( dx, dy );
+
+    glGameCanvas.redraw();
+  }
+} );
+
+const ZOOM_SENSIVITY = -200;
+
+glGameCanvas.canvas.addEventListener( 'wheel', e => {
+  camera.zoom( e.wheelDelta / ZOOM_SENSIVITY );
 
   glGameCanvas.redraw();
 } );

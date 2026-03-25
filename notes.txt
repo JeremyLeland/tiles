@@ -2,6 +2,10 @@
 
 DONE: Maintain viewport ratio as we resize window (showing extra on edges if needed)
 
+NOW: Add OrbitCamera in (to help verify angles we can't otherwise see)
+
+NEXT: Game of Life to create map?
+
 3/23:
 
 Got it drawing all the NW/NE/SW/SE variations of grass and water
