@@ -2,9 +2,17 @@
 
 DONE: Maintain viewport ratio as we resize window (showing extra on edges if needed)
 
-NOW: Add OrbitCamera in (to help verify angles we can't otherwise see)
+DONE: Add OrbitCamera in (to help verify angles we can't otherwise see)
+
+DONE: Break simpleWebGL.js into smaller pieces
 
 NEXT: Game of Life to create map?
+NEXT: Slopes to allow higher ground? How would that blend?
+NEXT: Detect where mouse is pointing to in world?
+  - This would be most useful, since I don't have an example of this anywhere else
+  - Going to involve shooting a ray at a plane, I think
+  - Detect where we are in projection plane, then apply the inverse of the view matrix? Or something...
+
 
 3/23:
 
