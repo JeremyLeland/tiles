@@ -1,3 +1,95 @@
+3/24:
+
+DONE: Maintain viewport ratio as we resize window (showing extra on edges if needed)
+
+DONE: Add OrbitCamera in (to help verify angles we can't otherwise see)
+
+DONE: Break simpleWebGL.js into smaller pieces
+
+NEXT: Game of Life to create map?
+NEXT: Slopes to allow higher ground? How would that blend?
+NEXT: Detect where mouse is pointing to in world?
+  - This would be most useful, since I don't have an example of this anywhere else
+  - Going to involve shooting a ray at a plane, I think
+  - Detect where we are in projection plane, then apply the inverse of the view matrix? Or something...
+
+
+3/23:
+
+Got it drawing all the NW/NE/SW/SE variations of grass and water
+
+Tried blending tiles from array. 
+  - This seemed like it made sense before, but is giving me weird results now
+  - Are my grass tiles too thin?
+
+DONE: What I really need is a grid to make it clear which blend tiles are contributing to which actual result
+  - Make something to draw lines...
+
+Translated via keys
+
+Turns out everything gets stretched weird when window resizes
+  - I need to adapt what I was doing with my minimum bounds for canvas view
+  - Resizing window should maintain aspect ratio and show more or less around edges
+
+3/18:
+
+Made WebGL version today
+  - Was able to leverage code from Kingdoms to get something running pretty quickly
+  - Not that hard to build the mesh with curve
+    - Not much worse than creating the 2D coordinates for the SVG, anyway
+  - With 10 segments, looks basically as good as canvas curve
+  - Seamless (as opposed to missing edges when drawing with canvas)
+
+May as well keep pushing with this and turn this into another WebGL experiment
+  - Gives a chance to finish up the lighting shader work from before
+  - A chance to mess with shader textures some more, too
+
+Array of which mesh and which rotation go with each NW/NE/SW/SE combination?
+
+3/17:
+
+Experiment with 3D points drawn with 2D methods
+  - Use matrices to do this in new 3D branch
+
+So I got this to work with a simple pond example, 
+  - but I'm going to want backface culling and z-ordering soon, probably
+  - The curves are theoretically nice, 
+    - but it's probably better to just generate a curve with lots of smaller triangles
+  - If I'm going to all this effort, I may as well just use WebGL proper
+    - Maybe it's time to take another look at that
+
+3/16:
+
+Creating my own tiles is a pain in the ass, but so is using other people's tiles
+
+The ones I create myself are the easiest to use
+
+The ones created by others look good, but require lots of massaging to try to get to display the way I need them to
+The end result hasn't looked that good, anyway
+
+Gonna try making my own version of the roadTiles
+
+Setting the transforms is kind of a neat trick to let me use rects, but it's making it harder to do height now
+  - Easier to just manually specify the diagonals?
+  - What's the trick to increasing/decreasing height?
+  - Can I change transform mid path?
+    - Yes you can!
+    - Though it seems like the math is just adding the amount you want to go down to both x and y
+
+Can I define the top of the tiles in 2D (of sorts) and use transforms to get the 4 different views?
+  - Could similarly define all 4 sides and pick the two that are visible (and appropriately transform them)
+  - Need different "go down" transforms for these
+  - Can't change transform in middle of path (maybe it's for the best)
+
+Future optimization: only drawing visible left/right side surfaces
+
+Would it be easier to just store all these things as 3D points and convert them to 2D with a projection matrix?
+  - Just do the 3D math?
+  - Rather than trying to keep track of directions and have different functions for the sides and whatnot
+  - Just define everything in 3D space and then project it
+  - Make this a different branch
+
+
 3/15:
 
 Since the desert tiles all have 4 directions, can rotate around map to show 4 different angles
