@@ -1,7 +1,7 @@
 import { GLGameCanvas } from '../src/common/GLGameCanvas.js';
 import * as MeshCommon from '../src/common/MeshCommon.js';
 import * as ShaderCommon from '../src/common/ShaderCommon.js';
-import { mat4 } from '../lib/gl-matrix.js';
+import { mat4, vec3, vec4 } from '../lib/gl-matrix.js';
 import { OrbitCamera } from '../src/common/OrbitCamera.js';
 
 import * as GrassTiles from '../src/GrassTiles.js';
@@ -36,19 +36,25 @@ const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidC
 const gridMesh = MeshCommon.createLineMesh( glGameCanvas.gl, gridGeo, colorShader );
 
 
-const camera = new OrbitCamera();
+const camera = new OrbitCamera( {
+  center: [ 3, 0, 3 ],
+  distance: 10,
+  phi: Math.PI / 4,
+  theta: Math.PI / 4,
+} );
+
+
+const viewProjMatrix = mat4.create();
+const mvp = mat4.create();
+const normalMatrix = mat4.create();
 
 glGameCanvas.draw = ( gl ) => {
   const modelMatrix = mat4.create();
-  const viewMatrix = camera.getViewMatrix();
-  const projMatrix = mat4.perspective( [], Math.PI / 4, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 100 );
 
-  const viewProjMatrix = mat4.mul( [], projMatrix, viewMatrix );
+  mat4.mul( viewProjMatrix, glGameCanvas.getProjectionMatrix(), camera.getViewMatrix() );
+  mat4.mul( mvp, viewProjMatrix, modelMatrix );
 
-  const mvp = mat4.mul( [], viewMatrix, modelMatrix );
-  mat4.mul( mvp, projMatrix, mvp );
-
-  const normalMatrix = mat4.invert( [], modelMatrix );
+  mat4.invert( normalMatrix, modelMatrix );
   mat4.transpose( normalMatrix, normalMatrix );
 
   gl.useProgram( gridMesh.shader.program );
@@ -63,9 +69,9 @@ glGameCanvas.draw = ( gl ) => {
   for ( let row = 0; row <= rows; row ++ ) {
     for ( let col = 0; col <= cols; col ++ ) {
       const wc = col == 0 ? 0 : col - 1;
-      const ec = col == ( cols ) ? ( cols - 1 ) : ( col );
       const nr = row == 0 ? 0 : row - 1;
-      const sr = row == ( rows ) ? ( rows - 1 ) : ( row );
+      const ec = col == cols ? cols - 1 : col;
+      const sr = row == rows ? rows - 1 : row;
 
       const nw = grassLayer[ wc + nr * cols ];
       const ne = grassLayer[ ec + nr * cols ];
@@ -80,6 +86,10 @@ glGameCanvas.draw = ( gl ) => {
     }
   }
 }
+
+//
+// Keyboard input
+//
 
 const TranslateSpeed = 0.05;
 const Translate = {
@@ -102,14 +112,91 @@ document.addEventListener( 'keydown', e => {
   glGameCanvas.redraw();
 } );
 
+
+//
+// Pointer input
+//
+
+
+// Cast ray for clicking
+function clickOnGrid( e ) {
+  const x = ( e.clientX / glGameCanvas.canvas.clientWidth ) * 2 - 1;
+  const y = 1 - ( e.clientY / glGameCanvas.canvas.clientHeight ) * 2; // flip Y
+
+  const nearPoint = [ x, y, -1, 1 ];
+  const farPoint  = [ x, y,  1, 1 ];
+
+  const invPV = mat4.create();
+  mat4.multiply( invPV, glGameCanvas.getProjectionMatrix(), camera.getViewMatrix() );
+  mat4.invert( invPV, invPV );
+
+  const nearWorld = unproject( nearPoint, invPV );
+  const farWorld  = unproject( farPoint, invPV );
+
+  const origin = camera.getEyePos();
+
+  const dir = vec3.normalize( vec3.create(), [
+    farWorld[ 0 ] - nearWorld[ 0 ],
+    farWorld[ 1 ] - nearWorld[ 1 ],
+    farWorld[ 2 ] - nearWorld[ 2 ],
+  ] );
+
+  const intersection = rayPlaneIntersection( vec3.create(), origin, dir, [ 0, 0.5, 0 ], [ 0, 1, 0 ] );
+  const col = Math.floor( intersection[ 0 ] );
+  const row = Math.floor( intersection[ 2 ] );
+
+  if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
+    grassLayer[ col + row * cols ] = 1;
+    glGameCanvas.redraw();
+  }
+}
+
+function unproject( p, invPV ) {
+  const out = vec4.transformMat4( [], p, invPV );
+  return [
+    out[ 0 ] / out[ 3 ],
+    out[ 1 ] / out[ 3 ],
+    out[ 2 ] / out[ 3 ],
+  ];
+}
+
+const diff = vec3.create();
+
+function rayPlaneIntersection( out, rayOrigin, rayDir, planePoint, planeNormal ) {
+  const denom = vec3.dot( planeNormal, rayDir );
+
+  // Parallel?
+  if ( Math.abs( denom ) < 1e-6 ) return null;
+
+  vec3.subtract( diff, planePoint, rayOrigin );
+  const t = vec3.dot(diff, planeNormal) / denom;
+
+  // Behind the ray?
+  if ( t < 0 ) return null;
+
+  // out = O + tD
+  return vec3.scaleAndAdd( out, rayOrigin, rayDir, t );
+}
+
+glGameCanvas.canvas.addEventListener( 'pointerdown', e => {
+  if ( e.buttons == 1 ) {
+    clickOnGrid( e );
+  }
+} );
+
 const X_TURN_SENSITIVITY = 100;
 const Y_TURN_SENSITIVITY = -100;
 const X_MOVE_SENSITIVITY = -50;
 const Y_MOVE_SENSITIVITY = -50;
 
 glGameCanvas.canvas.addEventListener( 'pointermove', e => {
-  // Rotate around origin with left mouse button
+
   if ( e.buttons == 1 ) {
+    clickOnGrid( e );
+  }
+
+  // Rotate around origin with right mouse button
+  if ( e.buttons == 2 ) {
     const dPhi   = e.movementX / X_TURN_SENSITIVITY;
     const dTheta = e.movementY / Y_TURN_SENSITIVITY;
 
@@ -118,8 +205,8 @@ glGameCanvas.canvas.addEventListener( 'pointermove', e => {
     glGameCanvas.redraw();
   }
 
-  // Pan with right mouse button
-  else if ( e.buttons == 2 ) {
+  // Pan with middle mouse button
+  else if ( e.buttons == 4 ) {
     const dx = e.movementX / X_MOVE_SENSITIVITY;
     const dy = e.movementY / Y_MOVE_SENSITIVITY;
 

@@ -10,71 +10,71 @@ const GrassEdge = 0.5;
 function getBigCurveGeometry() {
   const geometry = {
     positions: [
-      // Left side
-      0, 1, 0,
-      0, 1, 1,
-      0, 1 - GrassHeight, 1,
-      0, 1 - GrassHeight, 0,
+      // // Left side
+      // 0, 1, 0,
+      // 0, 1, 1,
+      // 0, 1 - GrassHeight, 1,
+      // 0, 1 - GrassHeight, 0,
 
-      // Back side
-      0, 1, 0,
-      1, 1, 0,
-      1, 1 - GrassHeight, 0,
-      0, 1 - GrassHeight, 0,
+      // // Back side
+      // 0, 1, 0,
+      // 1, 1, 0,
+      // 1, 1 - GrassHeight, 0,
+      // 0, 1 - GrassHeight, 0,
 
-      // Right side
-      1, 1, GrassEdge,
-      1, 1, 0,
-      1, 1 - GrassHeight, 0,
-      1, 1 - GrassHeight, GrassEdge,
+      // // Right side
+      // 1, 1, GrassEdge,
+      // 1, 1, 0,
+      // 1, 1 - GrassHeight, 0,
+      // 1, 1 - GrassHeight, GrassEdge,
 
-      // Front side
-      0, 1, 1,
-      GrassEdge, 1, 1,
-      GrassEdge, 1 - GrassHeight, 1,
-      0, 1 - GrassHeight, 1,
+      // // Front side
+      // 0, 1, 1,
+      // GrassEdge, 1, 1,
+      // GrassEdge, 1 - GrassHeight, 1,
+      // 0, 1 - GrassHeight, 1,
     ],
     normals: [
-      // Left side
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
+      // // Left side
+      // -1, 0, 0,
+      // -1, 0, 0,
+      // -1, 0, 0,
+      // -1, 0, 0,
 
-      // Back side
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
+      // // Back side
+      // 0, 0, -1,
+      // 0, 0, -1,
+      // 0, 0, -1,
+      // 0, 0, -1,
 
-      // Right side
-      1, 0, 0,
-      1, 0, 0,
-      1, 0, 0,
-      1, 0, 0,
+      // // Right side
+      // 1, 0, 0,
+      // 1, 0, 0,
+      // 1, 0, 0,
+      // 1, 0, 0,
 
-      // Front side
-      0, 0, 1,
-      0, 0, 1,
-      0, 0, 1,
-      0, 0, 1,
+      // // Front side
+      // 0, 0, 1,
+      // 0, 0, 1,
+      // 0, 0, 1,
+      // 0, 0, 1,
     ],
     indices: [
-      // Left side
-      0, 2, 1,
-      0, 3, 2,
+      // // Left side
+      // 0, 2, 1,
+      // 0, 3, 2,
 
-      // Back side
-      4, 6, 5,
-      4, 7, 6,
+      // // Back side
+      // 4, 6, 5,
+      // 4, 7, 6,
 
-      // Right side
-      8, 10, 9,
-      8, 11, 10,
+      // // Right side
+      // 8, 10, 9,
+      // 8, 11, 10,
 
-      // Front side
-      12, 14, 13,
-      12, 15, 14,
+      // // Front side
+      // 12, 14, 13,
+      // 12, 15, 14,
     ],
   };
 
@@ -160,39 +160,39 @@ function getBigCurveGeometry() {
 function getSmallCurveGeometry() {
   const geometry = {
     positions: [
-      // Left side
-      0, 1, 0,
-      0, 1, GrassEdge,
-      0, 1 - GrassHeight, GrassEdge,
-      0, 1 - GrassHeight, 0,
+      // // Left side
+      // 0, 1, 0,
+      // 0, 1, GrassEdge,
+      // 0, 1 - GrassHeight, GrassEdge,
+      // 0, 1 - GrassHeight, 0,
 
-      // Back side
-      0, 1, 0,
-      GrassEdge, 1, 0,
-      GrassEdge, 1 - GrassHeight, 0,
-      0, 1 - GrassHeight, 0,
+      // // Back side
+      // 0, 1, 0,
+      // GrassEdge, 1, 0,
+      // GrassEdge, 1 - GrassHeight, 0,
+      // 0, 1 - GrassHeight, 0,
     ],
     normals: [
-      // Left side
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
+      // // Left side
+      // -1, 0, 0,
+      // -1, 0, 0,
+      // -1, 0, 0,
+      // -1, 0, 0,
 
-      // Back side
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
+      // // Back side
+      // 0, 0, -1,
+      // 0, 0, -1,
+      // 0, 0, -1,
+      // 0, 0, -1,
     ],
     indices: [
-      // Left side
-      0, 2, 1,
-      0, 3, 2,
+      // // Left side
+      // 0, 2, 1,
+      // 0, 3, 2,
 
-      // Back side
-      4, 6, 5,
-      4, 7, 6,
+      // // Back side
+      // 4, 6, 5,
+      // 4, 7, 6,
     ],
   };
 
@@ -484,11 +484,11 @@ function getTwoSmallCurveGeometry() {
 
 const edgeGeometry = {
   positions: [
-    // Left side
-    0, 1, 0,
-    0, 1, 1,
-    0, 1 - GrassHeight, 1,
-    0, 1 - GrassHeight, 0,
+    // // Left side
+    // 0, 1, 0,
+    // 0, 1, 1,
+    // 0, 1 - GrassHeight, 1,
+    // 0, 1 - GrassHeight, 0,
 
     // Back side
     0, 1, 0,
@@ -516,11 +516,11 @@ const edgeGeometry = {
 
   ].map( e => e - 0.5 ),
   normals: [
-    // Left side
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
-    -1, 0, 0,
+    // // Left side
+    // -1, 0, 0,
+    // -1, 0, 0,
+    // -1, 0, 0,
+    // -1, 0, 0,
 
     // Back side
     0, 0, -1,
@@ -547,25 +547,28 @@ const edgeGeometry = {
     0, 1, 0,
   ],
   indices: [
-    // Left side
+    // // Left side
+    // Back side
     0, 2, 1,
     0, 3, 2,
 
-    // Back side
+    // // Back side
+    // Front side
     4, 6, 5,
     4, 7, 6,
 
-    // Right side
+    // // Right side
+    // Top
     8, 10, 9,
     8, 11, 10,
 
-    // Front side
+    // // Front side
     12, 14, 13,
     12, 15, 14,
 
-    // Top
-    16, 18, 17,
-    16, 19, 18,
+    // // Top
+    // 16, 18, 17,
+    // 16, 19, 18,
   ],
 };
 
@@ -653,6 +656,33 @@ const fullGeometry = {
     // Top
     16, 18, 17,
     16, 19, 18,
+  ],
+};
+
+const slantAngle = Math.PI / 4;
+const slantNormal = [ Math.cos( slantAngle ), Math.sin( slantAngle ), 0 ];
+
+// TODO: When to draw slant vs straight down?
+
+const slantGeometry = {
+  positions: [
+    // Top
+    0, 1, 0,
+    0, 1, 1,
+    1, 0, 1,
+    1, 0, 0,
+  ].map( e => e - 0.5 ),
+  normals: [
+    // Top
+    ...slantNormal,
+    ...slantNormal,
+    ...slantNormal,
+    ...slantNormal,
+  ],
+  indices: [
+    // Top
+    0, 2, 1,
+    0, 3, 2,
   ],
 };
 
@@ -775,6 +805,9 @@ export function drawGrass( gl, type, modelMatrix, viewProjMatrix ) {
   gl.uniformMatrix4fv( waterShader.uniformLocations.normalMatrix, false, normalMatrix );
 
   gl.uniform3fv( waterShader.uniformLocations.color, [ 0, 0, 1 ] );
+
+
+  // TODO: Should water be drawn entirely separately? (shouldn't be drawn for upper levels of grass)
 
   waterMesh ??= MeshCommon.createMesh( gl, waterGeo, waterShader );
   gl.bindVertexArray( waterMesh.vao );

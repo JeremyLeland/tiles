@@ -1,6 +1,15 @@
+import { mat4 } from '../../lib/gl-matrix.js';
+
+// TODO: Make these setable?
+const FOV = Math.PI / 4;
+const NEAR = 0.1;
+const FAR = 100;
+
 export class GLGameCanvas {
   #lastTime;
   #isAnimated = false;
+
+  #projMatrix = [];
 
   constructor( canvas ) {
     if ( canvas ) {
@@ -47,8 +56,15 @@ export class GLGameCanvas {
 
       this.gl.viewport( 0, 0, this.canvas.width, this.canvas.height );
 
+      mat4.perspective( this.#projMatrix, FOV, this.canvas.clientWidth / this.canvas.clientHeight, NEAR, FAR );
+
+
       this.redraw();
     } ).observe( this.canvas );
+  }
+
+  getProjectionMatrix() {
+    return this.#projMatrix;
   }
 
   //

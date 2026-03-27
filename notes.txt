@@ -1,3 +1,27 @@
+3/26:
+
+Use mouse input for editing grass/water tiles in 3D
+  - Just the flat plane for now
+
+View matrix can live in camera
+Proj matrix live in GLGameCanvas so we can convert click into clip space?
+  - For flexibility, maybe the rest of the process of applying view matrix will have to happen in caller
+
+3/25:
+
+Merged branch, since I'm going to focus on WebGL for now 
+
+NOW: Experiment with additional layers/levels for elevation
+  - Draw blocks without water if above ground level
+  - Eventually figure out some blending downward
+
+Need a test that will draw the tiles directly for now
+  - so I can see how the slopes look until I figure out the blending
+
+LATER: Keep level flat, add details to grass and water?
+  - Flowers, tufts of grass, lillypads, reeds
+  - Bridge over water (cylinder logs)
+
 3/24:
 
 DONE: Maintain viewport ratio as we resize window (showing extra on edges if needed)
