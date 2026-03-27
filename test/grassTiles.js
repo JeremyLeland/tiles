@@ -117,6 +117,7 @@ document.addEventListener( 'keydown', e => {
 // Pointer input
 //
 
+let activeTileIndex = 1;
 
 // Cast ray for clicking
 function clickOnGrid( e ) {
@@ -146,7 +147,7 @@ function clickOnGrid( e ) {
   const row = Math.floor( intersection[ 2 ] );
 
   if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
-    grassLayer[ col + row * cols ] = 1;
+    grassLayer[ col + row * cols ] = activeTileIndex;
     glGameCanvas.redraw();
   }
 }
@@ -223,3 +224,25 @@ glGameCanvas.canvas.addEventListener( 'wheel', e => {
 
   glGameCanvas.redraw();
 } );
+
+//
+// UI
+//
+
+const tileNames = [ 'Water', 'Grass' ];
+
+const buttonDiv = document.createElement( 'div' );
+Object.assign( buttonDiv.style, {
+  position: 'absolute',
+  left: 0,
+  top: 0,
+} );
+
+tileNames.forEach( ( name, index ) => {
+  const button = document.createElement( 'button' );
+  button.textContent = name;
+  button.addEventListener( 'click', _ => activeTileIndex = index );
+  buttonDiv.appendChild( button );
+} );
+
+document.body.appendChild( buttonDiv );
