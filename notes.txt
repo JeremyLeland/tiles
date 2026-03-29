@@ -1,3 +1,28 @@
+3/29:
+
+DONE: Add/Delete cols and rows with c and r keys
+  - How can I resize the grid when I do this?
+
+Someday: trees (but the normals and merging for these could be tricky)
+
+Sooner: clumps of grass, flowers
+  - Foxtail like plants are a steam and colorful cone
+    - Simulate this with two planes, each plane having a sawtooth-ish color texture/shader?
+  - Grass clump
+    - Two planes with a series of curves?
+    - Or would it be fast enough to just do these with actual geometry?
+      - Maybe do that first -- I feel like the curve calculations are going to be slow
+  - All of this should get a billboard test runner, a quick template I can put shaders into to try out
+
+Rocks/boulders
+  - Perturbed spheres?
+  - Or generate them in fractal-y way?
+    - Big general shape with a few polygons, then add detail to these?
+
+Tiles:
+  - Sand, paths?
+  - Water -> Sand -> Path -> Grass?
+
 3/26:
 
 Use mouse input for editing grass/water tiles in 3D
@@ -6,6 +31,10 @@ Use mouse input for editing grass/water tiles in 3D
 View matrix can live in camera
 Proj matrix live in GLGameCanvas so we can convert click into clip space?
   - For flexibility, maybe the rest of the process of applying view matrix will have to happen in caller
+
+DONE above
+
+Maybe add buttons for duplicating/deleting rows and cols to make bigger?
 
 3/25:
 

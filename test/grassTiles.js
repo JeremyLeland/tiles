@@ -8,7 +8,7 @@ import * as GrassTiles from '../src/GrassTiles.js';
 
 const glGameCanvas = new GLGameCanvas();
 
-const cols = 5, rows = 6;
+let cols = 5, rows = 6;
 const grassLayer = [
   1, 1, 1, 1, 0,
   1, 1, 0, 0, 0,
@@ -99,15 +99,62 @@ const Translate = {
   Right:  () => camera.pan(  TranslateSpeed, 0 ),
 };
 
-const TranslateKeys = {
+const Resize = {
+  AddRow: () => {
+    const row = getPointerGridPos( pointerX, pointerY )[ 1 ];
+    const startIndex = row * cols;
+
+    rows ++;
+
+    grassLayer.splice( startIndex, 0, ...grassLayer.slice( startIndex, startIndex + cols ) );
+  },
+  DeleteRow: () => {
+    const row = getPointerGridPos( pointerX, pointerY )[ 1 ];
+
+    rows --;
+
+    grassLayer.splice( row * cols, cols );
+  },
+  AddCol: () => {
+    const col = getPointerGridPos( pointerX, pointerY )[ 0 ];
+
+    cols ++;
+
+    for ( let row = 0; row < rows; row ++ ) {
+      const index = col + row * cols;
+      grassLayer.splice( index, 0, grassLayer[ index ] );
+    }
+  },
+  DeleteCol: () => {
+    const col = getPointerGridPos( pointerX, pointerY )[ 0 ];
+
+    cols --;
+
+    for ( let row = 0; row < rows; row ++ ) {
+      grassLayer.splice( col + row * cols, 1 );
+    }
+  }
+}
+
+const KeyActions = {
   'w': Translate.Up,
   'a': Translate.Left,
   's': Translate.Down,
   'd': Translate.Right,
+
+  'ArrowUp':    Translate.Up,
+  'ArrowLeft':  Translate.Left,
+  'ArrowDown':  Translate.Down,
+  'ArrowRight': Translate.Right,
+
+  'c': Resize.AddCol,
+  'r': Resize.AddRow,
+  'C': Resize.DeleteCol,
+  'R': Resize.DeleteRow,
 };
 
 document.addEventListener( 'keydown', e => {
-  TranslateKeys[ e.key ]?.();
+  KeyActions[ e.key ]?.();
 
   glGameCanvas.redraw();
 } );
@@ -120,9 +167,9 @@ document.addEventListener( 'keydown', e => {
 let activeTileIndex = 1;
 
 // Cast ray for clicking
-function clickOnGrid( e ) {
-  const x = ( e.clientX / glGameCanvas.canvas.clientWidth ) * 2 - 1;
-  const y = 1 - ( e.clientY / glGameCanvas.canvas.clientHeight ) * 2; // flip Y
+function getPointerGridPos( pointerX, pointerY ) {
+  const x = ( pointerX / glGameCanvas.canvas.clientWidth ) * 2 - 1;
+  const y = 1 - ( pointerY / glGameCanvas.canvas.clientHeight ) * 2; // flip Y
 
   const nearPoint = [ x, y, -1, 1 ];
   const farPoint  = [ x, y,  1, 1 ];
@@ -143,9 +190,13 @@ function clickOnGrid( e ) {
   ] );
 
   const intersection = rayPlaneIntersection( vec3.create(), origin, dir, [ 0, 0.5, 0 ], [ 0, 1, 0 ] );
-  const col = Math.floor( intersection[ 0 ] );
-  const row = Math.floor( intersection[ 2 ] );
+  return [
+    Math.floor( intersection[ 0 ] ),
+    Math.floor( intersection[ 2 ] ),
+  ];
+}
 
+function clickOnGrid( col, row ) {
   if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
     grassLayer[ col + row * cols ] = activeTileIndex;
     glGameCanvas.redraw();
@@ -179,9 +230,14 @@ function rayPlaneIntersection( out, rayOrigin, rayDir, planePoint, planeNormal )
   return vec3.scaleAndAdd( out, rayOrigin, rayDir, t );
 }
 
+let pointerX, pointerY;
+
 glGameCanvas.canvas.addEventListener( 'pointerdown', e => {
+  pointerX = e.clientX;
+  pointerY = e.clientY;
+
   if ( e.buttons == 1 ) {
-    clickOnGrid( e );
+    clickOnGrid( ...getPointerGridPos( pointerX, pointerY ) );
   }
 } );
 
@@ -191,9 +247,11 @@ const X_MOVE_SENSITIVITY = -50;
 const Y_MOVE_SENSITIVITY = -50;
 
 glGameCanvas.canvas.addEventListener( 'pointermove', e => {
+  pointerX = e.clientX;
+  pointerY = e.clientY;
 
   if ( e.buttons == 1 ) {
-    clickOnGrid( e );
+    clickOnGrid( ...getPointerGridPos( pointerX, pointerY ) );
   }
 
   // Rotate around origin with right mouse button
