@@ -29,14 +29,14 @@ const gridMesh = MeshCommon.createLineMesh( glGameCanvas.gl, gridGeo, colorShade
 const camera = new OrbitCamera( {
   center: [ 0, 0, 0 ],
   distance: 4,
-  phi: Math.PI / 3,
-  theta: Math.PI / 3,
+  phi: Math.PI / 2,
+  theta: 0.1,
 } );
 
 function getAngles( startAngle, endAngle, numSections ) {
   const angles = [];
 
-  const deltaAngle = Angle.deltaAngle( startAngle, endAngle );
+  const deltaAngle = Angle.sweepAngle( startAngle, endAngle, endAngle < startAngle );
 
   for ( let i = 0; i <= numSections; i ++ ) {
     angles.push( startAngle + ( i / numSections ) * deltaAngle );
@@ -52,56 +52,81 @@ function makeBladeGeo() {
     indices: [],
   }
 
-  const numSections = 5;
+  const bladeSections = 2;
+  const tiltAngles = getAngles( 0, 1, bladeSections );
 
-  const angles = getAngles( 0, 1, numSections );
+  const numBlades = 8;
+  const facingAngles = getAngles( 0, Math.PI * 2, numBlades );
 
-  for ( let i = 0; i < numSections; i ++ ) {
-    const A = [
-      Math.cos( angles[ i ] ),
-      Math.sin( angles[ i ] ),
+  let startIndex = 0;
+
+  for ( let j = 0; j < numBlades; j ++ ) {
+    const base = [
+      Math.cos( facingAngles[ j ] ),
+      Math.sin( facingAngles[ j ] ),
     ];
 
-    const B = [
-      Math.cos( angles[ i + 1 ] ),
-      Math.sin( angles[ i + 1 ] ),
-    ];
+    for ( let i = 0; i < bladeSections; i ++ ) {
+      const A = [
+        Math.cos( tiltAngles[ i ] ),
+        Math.sin( tiltAngles[ i ] ),
+      ];
 
-    const width = 0.1;
-    const widthA = width * ( 1 - i / numSections );
-    const widthB = width * ( 1 - ( i + 1 ) / numSections );
+      const B = [
+        Math.cos( tiltAngles[ i + 1 ] ),
+        Math.sin( tiltAngles[ i + 1 ] ),
+      ];
 
-    geo.positions.push(
-      ...B,
-      -widthB,
-    );
+      const width = 0.1;
+      const widthA = width * ( 1 - i / bladeSections );
+      const widthB = width * ( 1 - ( i + 1 ) / bladeSections );
 
-    geo.positions.push(
-      ...A,
-      -widthA,
-    );
+      geo.positions.push(
+        B[ 0 ] * base[ 0 ] - widthB * base[ 1 ],
+        B[ 1 ],
+        B[ 0 ] * base[ 1 ] + widthB * base[ 0 ],
+      );
 
-    geo.positions.push(
-      ...A,
-      widthA,
-    );
+      geo.positions.push(
+        A[ 0 ] * base[ 0 ] - widthA * base[ 1 ],
+        A[ 1 ],
+        A[ 0 ] * base[ 1 ] + widthA * base[ 0 ],
+      );
 
-    geo.positions.push(
-      ...B,
-      widthB,
-    );
+      geo.positions.push(
+        A[ 0 ] * base[ 0 ] + widthA * base[ 1 ],
+        A[ 1 ],
+        A[ 0 ] * base[ 1 ] - widthA * base[ 0 ],
+      );
 
-    const C = vec2.sub( [], B, A );
-    vec2.normalize( C, C );
+      geo.positions.push(
+        B[ 0 ] * base[ 0 ] + widthB * base[ 1 ],
+        B[ 1 ],
+        B[ 0 ] * base[ 1 ] - widthB * base[ 0 ],
+      );
 
-    for ( let i = 0; i < 4; i ++ ) {
-      geo.normals.push( C[ 1 ], -C[ 0 ], 0 );
+      const C = vec2.sub( [], B, A );
+      vec2.normalize( C, C );
+
+      const normal = [
+         C[ 1 ] * base[ 0 ],
+        -C[ 0 ],
+         C[ 1 ] * base[ 1 ],
+      ];
+
+      vec3.normalize( normal, normal );
+
+      for ( let i = 0; i < 4; i ++ ) {
+        geo.normals.push( ...normal );
+      }
+
+      geo.indices.push( startIndex, startIndex + 2, startIndex + 1 );
+      geo.indices.push( startIndex, startIndex + 3, startIndex + 2 );
+      startIndex += 4;
     }
-
-    const startIndex = i * 4;
-    geo.indices.push( startIndex, startIndex + 2, startIndex + 1 );
-    geo.indices.push( startIndex, startIndex + 3, startIndex + 2 );
   }
+
+  console.log( geo );
 
   return geo;
 }

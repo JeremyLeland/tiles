@@ -10,13 +10,17 @@ export function deltaAngle( a, b ) {
   return fixAngle( b - a );
 }
 
-export function sweepAngle( a, b, counterclockwise ) { 
+export function sweepAngle( a, b, counterclockwise ) {
+  if ( a == b ) {
+    return 0;
+  }
+
   const delta = deltaAngle( a, b );
 
-  if ( delta < 0 && !counterclockwise ) {
+  if ( delta <= 0 && !counterclockwise ) {
     return delta + TWO_PI;
   }
-  else if ( delta > 0 && counterclockwise ) {
+  else if ( delta >= 0 && counterclockwise ) {
     return delta - TWO_PI;
   }
   else {
