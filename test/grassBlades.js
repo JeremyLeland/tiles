@@ -29,8 +29,8 @@ const gridMesh = MeshCommon.createLineMesh( glGameCanvas.gl, gridGeo, colorShade
 const camera = new OrbitCamera( {
   center: [ 0, 0, 0 ],
   distance: 4,
-  phi: Math.PI / 2,
-  theta: 0.1,
+  phi: Math.PI / 4,
+  theta: Math.PI / 3,
 } );
 
 function getAngles( startAngle, endAngle, numSections ) {
@@ -52,10 +52,14 @@ function makeBladeGeo() {
     indices: [],
   }
 
-  const bladeWidth = 0.05;
-
-  const numBlades = 16;
+  const numBlades = 20;
   const facingAngles = getAngles( 0, Math.PI * 2, numBlades );
+
+  const clumpDepth = 0.5;
+  const clumpHeight = 0.5;
+  const clumpRadius = 0.1;
+  const bladeWidth = 2 * clumpRadius * Math.PI / numBlades;
+
 
   let startIndex = 0;
 
@@ -66,25 +70,26 @@ function makeBladeGeo() {
     ];
 
     const bladeSections = 12;
-    const tiltAngles = getAngles( 0, 1 + Math.random(), bladeSections );
+    const tiltAngles = getAngles( 0, 0.75 + 0.25 * Math.random(), bladeSections );
 
-    const height = 1 + Math.random();
+    const height = clumpHeight + 0.5 * Math.random();
+    const depth = clumpDepth + 0.5 * Math.random();
+
+    const offset = -depth - clumpRadius * ( 0.25 + 0.75 * Math.random() );
 
     for ( let i = 0; i < bladeSections; i ++ ) {
       const A = [
-        Math.cos( tiltAngles[ i ] ),
+        Math.cos( tiltAngles[ i ] ) * depth,
         Math.sin( tiltAngles[ i ] ) * height,
       ];
 
       const B = [
-        Math.cos( tiltAngles[ i + 1 ] ),
+        Math.cos( tiltAngles[ i + 1 ] ) * depth,
         Math.sin( tiltAngles[ i + 1 ] ) * height,
       ];
 
       const widthA = bladeWidth * ( 1 - i / bladeSections );
       const widthB = bladeWidth * ( 1 - ( i + 1 ) / bladeSections );
-
-      const offset = -1.2;
 
       geo.positions.push(
         A[ 0 ] * facing[ 0 ] + widthA * facing[ 1 ] + offset * facing[ 0 ],
@@ -177,7 +182,7 @@ glGameCanvas.draw = ( gl ) => {
 
   gl.uniform3fv( bladeShader.uniformLocations.color, [ 0, 1, 0 ] );
 
-  gl.uniform3fv( bladeShader.uniformLocations.lightPos, [ 10, 0, 0 ] );
+  gl.uniform3fv( bladeShader.uniformLocations.lightPos, [ 10, 10, 10 ] );
   gl.uniform3fv( bladeShader.uniformLocations.lightColor, [ 1, 1, 1 ] );
 
   gl.uniform3fv( bladeShader.uniformLocations.eyePos, camera.getEyePos() );
