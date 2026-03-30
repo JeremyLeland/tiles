@@ -1,3 +1,10 @@
+3/30:
+
+TODAY:
+  - Blades of grass (geometry)
+  - Texture test with repeating triangles (in hexagon shape?)
+
+
 3/29:
 
 DONE: Add/Delete cols and rows with c and r keys
@@ -22,6 +29,13 @@ Rocks/boulders
 Tiles:
   - Sand, paths?
   - Water -> Sand -> Path -> Grass?
+
+NEXT: Grass
+  - I have the clearest idea of how to do this, so start here
+  - Several curved blades of grass in a circle
+
+TIDY:
+  - Should have GLGameCanvas track mouse state like GameCanvas does
 
 3/26:
 
