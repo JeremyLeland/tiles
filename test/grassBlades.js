@@ -54,9 +54,6 @@ function makeBladeGeo() {
 
   const bladeWidth = 0.05;
 
-  const bladeSections = 12;
-  const tiltAngles = getAngles( 0, 1, bladeSections );
-
   const numBlades = 16;
   const facingAngles = getAngles( 0, Math.PI * 2, numBlades );
 
@@ -68,15 +65,20 @@ function makeBladeGeo() {
       Math.sin( facingAngles[ j ] ),
     ];
 
+    const bladeSections = 12;
+    const tiltAngles = getAngles( 0, 1 + Math.random(), bladeSections );
+
+    const height = 1 + Math.random();
+
     for ( let i = 0; i < bladeSections; i ++ ) {
       const A = [
         Math.cos( tiltAngles[ i ] ),
-        Math.sin( tiltAngles[ i ] ),
+        Math.sin( tiltAngles[ i ] ) * height,
       ];
 
       const B = [
         Math.cos( tiltAngles[ i + 1 ] ),
-        Math.sin( tiltAngles[ i + 1 ] ),
+        Math.sin( tiltAngles[ i + 1 ] ) * height,
       ];
 
       const widthA = bladeWidth * ( 1 - i / bladeSections );
@@ -108,20 +110,17 @@ function makeBladeGeo() {
         B[ 0 ] * facing[ 1 ] - widthB * facing[ 0 ] + offset * facing[ 1 ],
       );
 
-      // const C = vec2.sub( [], B, A );
-      // vec2.normalize( C, C );
-
       const normalA = [
-         A[ 1 ] * facing[ 0 ],
-        -A[ 0 ],
-         A[ 1 ] * facing[ 1 ],
+        A[ 0 ] * facing[ 0 ],
+        A[ 1 ],
+        A[ 0 ] * facing[ 1 ],
       ];
       vec3.normalize( normalA, normalA );
 
       const normalB = [
-         B[ 1 ] * facing[ 0 ],
-        -B[ 0 ],
-         B[ 1 ] * facing[ 1 ],
+        B[ 0 ] * facing[ 0 ],
+        B[ 1 ],
+        B[ 0 ] * facing[ 1 ],
       ];
       vec3.normalize( normalB, normalB );
 
@@ -135,8 +134,6 @@ function makeBladeGeo() {
       startIndex += 4;
     }
   }
-
-  console.log( geo );
 
   return geo;
 }
@@ -169,6 +166,7 @@ glGameCanvas.draw = ( gl ) => {
   //
   // TODO: Blades of grass here
   //
+  // bladeShader ??= ShaderCommon.getShader( gl, ShaderCommon.NormalColor );
   bladeShader ??= ShaderCommon.getShader( gl, ShaderCommon.Lighting );
 
   gl.useProgram( bladeShader.program );
@@ -179,7 +177,7 @@ glGameCanvas.draw = ( gl ) => {
 
   gl.uniform3fv( bladeShader.uniformLocations.color, [ 0, 1, 0 ] );
 
-  gl.uniform3fv( bladeShader.uniformLocations.lightPos, [ 10, 10, 10 ] );
+  gl.uniform3fv( bladeShader.uniformLocations.lightPos, [ 10, 0, 0 ] );
   gl.uniform3fv( bladeShader.uniformLocations.lightColor, [ 1, 1, 1 ] );
 
   gl.uniform3fv( bladeShader.uniformLocations.eyePos, camera.getEyePos() );
