@@ -149,8 +149,7 @@ export const Lighting = {
     in vec3 normal;
 
     uniform mat4 modelMatrix;
-    uniform mat4 viewMatrix;
-    uniform mat4 projectionMatrix;
+    uniform mat4 viewProjMatrix;
     uniform mat4 normalMatrix;
 
     out vec3 v_pos;
@@ -160,7 +159,7 @@ export const Lighting = {
       v_pos = ( modelMatrix * vec4( position, 1.0 ) ).xyz;
       v_norm = ( normalMatrix * vec4( normal, 1.0 ) ).xyz;
 
-      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+      gl_Position = viewProjMatrix * modelMatrix * vec4( position, 1.0 );
     }
   `,
   fragment: /*glsl*/ `# version 300 es

@@ -14,13 +14,13 @@ const gridGeo = {
 }
 
 for ( let col = 0; col <= cols; col ++ ) {
-  gridGeo.positions.push( col, 0.5001, 0 );
-  gridGeo.positions.push( col, 0.5001, rows );
+  gridGeo.positions.push( col, 0, 0 );
+  gridGeo.positions.push( col, 0, rows );
 }
 
 for ( let row = 0; row <= rows; row ++ ) {
-  gridGeo.positions.push( 0, 0.5001, row );
-  gridGeo.positions.push( cols, 0.5001, row );
+  gridGeo.positions.push( 0, 0, row );
+  gridGeo.positions.push( cols, 0, row );
 }
 
 const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidColor );
@@ -61,7 +61,7 @@ function makeBladeGeo() {
   let startIndex = 0;
 
   for ( let j = 0; j < numBlades; j ++ ) {
-    const base = [
+    const facing = [
       Math.cos( facingAngles[ j ] ),
       Math.sin( facingAngles[ j ] ),
     ];
@@ -81,37 +81,39 @@ function makeBladeGeo() {
       const widthA = width * ( 1 - i / bladeSections );
       const widthB = width * ( 1 - ( i + 1 ) / bladeSections );
 
-      geo.positions.push(
-        B[ 0 ] * base[ 0 ] - widthB * base[ 1 ],
-        B[ 1 ],
-        B[ 0 ] * base[ 1 ] + widthB * base[ 0 ],
-      );
+      const offset = -1.2;
 
       geo.positions.push(
-        A[ 0 ] * base[ 0 ] - widthA * base[ 1 ],
+        A[ 0 ] * facing[ 0 ] + widthA * facing[ 1 ] + offset * facing[ 0 ],
         A[ 1 ],
-        A[ 0 ] * base[ 1 ] + widthA * base[ 0 ],
+        A[ 0 ] * facing[ 1 ] - widthA * facing[ 0 ] + offset * facing[ 1 ],
       );
 
       geo.positions.push(
-        A[ 0 ] * base[ 0 ] + widthA * base[ 1 ],
+        A[ 0 ] * facing[ 0 ] - widthA * facing[ 1 ] + offset * facing[ 0 ],
         A[ 1 ],
-        A[ 0 ] * base[ 1 ] - widthA * base[ 0 ],
+        A[ 0 ] * facing[ 1 ] + widthA * facing[ 0 ] + offset * facing[ 1 ],
       );
 
       geo.positions.push(
-        B[ 0 ] * base[ 0 ] + widthB * base[ 1 ],
+        B[ 0 ] * facing[ 0 ] - widthB * facing[ 1 ] + offset * facing[ 0 ],
         B[ 1 ],
-        B[ 0 ] * base[ 1 ] - widthB * base[ 0 ],
+        B[ 0 ] * facing[ 1 ] + widthB * facing[ 0 ] + offset * facing[ 1 ],
+      );
+
+      geo.positions.push(
+        B[ 0 ] * facing[ 0 ] + widthB * facing[ 1 ] + offset * facing[ 0 ],
+        B[ 1 ],
+        B[ 0 ] * facing[ 1 ] - widthB * facing[ 0 ] + offset * facing[ 1 ],
       );
 
       const C = vec2.sub( [], B, A );
       vec2.normalize( C, C );
 
       const normal = [
-         C[ 1 ] * base[ 0 ],
+         C[ 1 ] * facing[ 0 ],
         -C[ 0 ],
-         C[ 1 ] * base[ 1 ],
+         C[ 1 ] * facing[ 1 ],
       ];
 
       vec3.normalize( normal, normal );
@@ -159,13 +161,20 @@ glGameCanvas.draw = ( gl ) => {
   //
   // TODO: Blades of grass here
   //
-  bladeShader ??= ShaderCommon.getShader( gl, ShaderCommon.BasicLighting );
+  bladeShader ??= ShaderCommon.getShader( gl, ShaderCommon.Lighting );
 
   gl.useProgram( bladeShader.program );
-  gl.uniformMatrix4fv( bladeShader.uniformLocations.mvp, false, mvp );
+  // gl.uniformMatrix4fv( bladeShader.uniformLocations.mvp, false, mvp );
+  gl.uniformMatrix4fv( bladeShader.uniformLocations.modelMatrix, false, modelMatrix );
+  gl.uniformMatrix4fv( bladeShader.uniformLocations.viewProjMatrix, false, viewProjMatrix );
   gl.uniformMatrix4fv( bladeShader.uniformLocations.normalMatrix, false, normalMatrix );
 
   gl.uniform3fv( bladeShader.uniformLocations.color, [ 0, 1, 0 ] );
+
+  gl.uniform3fv( bladeShader.uniformLocations.lightPos, [ 10, 10, 10 ] );
+  gl.uniform3fv( bladeShader.uniformLocations.lightColor, [ 1, 1, 1 ] );
+
+  gl.uniform3fv( bladeShader.uniformLocations.eyePos, camera.getEyePos() );
 
   bladeMesh ??= MeshCommon.createMesh( gl, bladeGeo, bladeShader );
   gl.bindVertexArray( bladeMesh.vao );
