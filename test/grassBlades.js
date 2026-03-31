@@ -77,68 +77,48 @@ function makeBladeGeo() {
 
     const offset = -depth - clumpRadius * ( 0.25 + 0.75 * Math.random() );
 
-    for ( let i = 0; i < bladeSections; i ++ ) {
+    tiltAngles.forEach( ( tiltAngle, index ) => {
       const A = [
-        Math.cos( tiltAngles[ i ] ) * depth,
-        Math.sin( tiltAngles[ i ] ) * height,
+        Math.cos( tiltAngle ) * depth,
+        Math.sin( tiltAngle ) * height,
       ];
 
-      const B = [
-        Math.cos( tiltAngles[ i + 1 ] ) * depth,
-        Math.sin( tiltAngles[ i + 1 ] ) * height,
-      ];
-
-      const widthA = bladeWidth * ( 1 - i / bladeSections );
-      const widthB = bladeWidth * ( 1 - ( i + 1 ) / bladeSections );
+      const width = bladeWidth * ( 1 - index / bladeSections );
 
       geo.positions.push(
-        A[ 0 ] * facing[ 0 ] + widthA * facing[ 1 ] + offset * facing[ 0 ],
+        A[ 0 ] * facing[ 0 ] + width * facing[ 1 ] + offset * facing[ 0 ],
         A[ 1 ],
-        A[ 0 ] * facing[ 1 ] - widthA * facing[ 0 ] + offset * facing[ 1 ],
+        A[ 0 ] * facing[ 1 ] - width * facing[ 0 ] + offset * facing[ 1 ],
       );
 
       geo.positions.push(
-        A[ 0 ] * facing[ 0 ] - widthA * facing[ 1 ] + offset * facing[ 0 ],
+        A[ 0 ] * facing[ 0 ] - width * facing[ 1 ] + offset * facing[ 0 ],
         A[ 1 ],
-        A[ 0 ] * facing[ 1 ] + widthA * facing[ 0 ] + offset * facing[ 1 ],
+        A[ 0 ] * facing[ 1 ] + width * facing[ 0 ] + offset * facing[ 1 ],
       );
 
-      geo.positions.push(
-        B[ 0 ] * facing[ 0 ] - widthB * facing[ 1 ] + offset * facing[ 0 ],
-        B[ 1 ],
-        B[ 0 ] * facing[ 1 ] + widthB * facing[ 0 ] + offset * facing[ 1 ],
-      );
-
-      geo.positions.push(
-        B[ 0 ] * facing[ 0 ] + widthB * facing[ 1 ] + offset * facing[ 0 ],
-        B[ 1 ],
-        B[ 0 ] * facing[ 1 ] - widthB * facing[ 0 ] + offset * facing[ 1 ],
-      );
-
-      const normalA = [
+      const normal = [
         A[ 0 ] * facing[ 0 ],
         A[ 1 ],
         A[ 0 ] * facing[ 1 ],
       ];
-      vec3.normalize( normalA, normalA );
+      vec3.normalize( normal, normal );
 
-      const normalB = [
-        B[ 0 ] * facing[ 0 ],
-        B[ 1 ],
-        B[ 0 ] * facing[ 1 ],
-      ];
-      vec3.normalize( normalB, normalB );
+      geo.normals.push( ...normal );
+      geo.normals.push( ...normal );
+    } );
 
-      geo.normals.push( ...normalA );
-      geo.normals.push( ...normalA );
-      geo.normals.push( ...normalB );
-      geo.normals.push( ...normalB );
-
+    for ( let i = 0; i < bladeSections; i ++ ) {
       geo.indices.push( startIndex, startIndex + 2, startIndex + 1 );
-      geo.indices.push( startIndex, startIndex + 3, startIndex + 2 );
-      startIndex += 4;
+      geo.indices.push( startIndex + 1, startIndex + 2, startIndex + 3 );
+      startIndex += 2;
     }
+
+    // Clean break for next blade
+    startIndex += 2;
   }
+
+  console.log( geo );
 
   return geo;
 }

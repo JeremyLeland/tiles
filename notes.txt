@@ -4,6 +4,16 @@ TODAY:
   - Blades of grass (geometry)
   - Texture test with repeating triangles (in hexagon shape?)
 
+DONE: Blades
+  - Got some I'm decently happy with
+  - Normals are tricky, I think I have them mostly correct
+    - Looks decent with the Lighting shader
+
+I created planes for each section of curve, but I don't need to do that!
+  - Need to duplicate when same point is part of different surfaces with different normals
+  - In this case, it's all the same curve and sharing normals
+  - So I should be able to take out extras!
+
 
 3/29:
 
