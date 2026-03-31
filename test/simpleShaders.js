@@ -82,12 +82,25 @@ const shaderInfo = {
 
     void main() {
 
-      const float NumSquares = 10.0;
+      const float NumSquares = 20.0;
 
       vec3 integer;
       vec3 floating = modf( mod( v_pos * NumSquares, 2.0 ), integer );
 
-      outColor = vec4( integer, 1.0 );
+      vec3 integer2;
+      vec3 floating2 = modf( v_pos * NumSquares, integer2 );
+
+      float integer3;
+
+      vec3 color1 = vec3( 0, mod( 2.8 * integer2.x + 1.3 * integer2.y, 1.5 ), 0 );
+      vec3 color2 = vec3( 0, mod( 3.1 * integer2.x + 2.4 * integer2.y, 1.5 ), 0 );
+
+      if ( floating.x < floating.y ) {
+        outColor = vec4( color1, 1.0 );
+      }
+      else {
+        outColor = vec4( color2, 1.0 );
+      }
     }
   `,
 }
