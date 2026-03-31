@@ -1,3 +1,22 @@
+3/31:
+
+DONE: Blades of grass 
+  - Removed extra vertices, since these are all part of same surface
+
+GLSL syntax highlighting in javascript string literals
+  - I need the glsl-literal extension
+  - For some reason, this isn't available through OSS Code marketplace
+  - Was able to download VSIX through VS Code proper on my laptop
+    - Saved to my conf folder in website for future
+    - This is dependent on "Shader languages support for VS Code" (slevesque.shader)
+      - ...which is available through OSS Code, fortunately
+
+NOW: Play with shaders
+  - DONE: Simple rectangle to try shaders on
+  - Squares
+  - Trianges (split squares diagonally)
+  - Triangles equilatoral?
+
 3/30:
 
 TODAY:
