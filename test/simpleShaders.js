@@ -27,10 +27,10 @@ const colorShader = ShaderCommon.getShader( glGameCanvas.gl, ShaderCommon.SolidC
 const gridMesh = MeshCommon.createLineMesh( glGameCanvas.gl, gridGeo, colorShader );
 
 const camera = new OrbitCamera( {
-  center: [ 2, 0, 2 ],
+  center: [ 2.5, 0, 2.5 ],
   distance: 5,
   phi: Math.PI / 4,
-  theta: Math.PI / 3,
+  theta: Math.PI / 4,
 } );
 
 
@@ -52,6 +52,56 @@ const geo = {
     1, 2, 3,
   ],
 };
+
+const grassFragment = /*glsl*/ `# version 300 es
+  precision mediump float;
+
+  in vec3 v_pos;
+  in vec3 v_norm;
+
+  out vec4 outColor;
+
+  float hash(vec2 p) {
+    return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453123 );
+  }
+
+  float ign(vec2 p) {
+    return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+  }
+
+  float ign2(vec2 p) {
+    p += vec2(0.75487765, 0.56984026); // arbitrary offset
+    return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+  }
+
+  void main() {
+
+    const vec3 NumSquares = vec3( 20.0, 1.0, 10.0 );
+
+    vec3 integer;
+    vec3 floating = modf( mod( v_pos * NumSquares, 2.0 ), integer );
+
+    vec3 integer2;
+    vec3 floating2 = modf( v_pos * NumSquares, integer2 );
+
+    float integer3;
+
+    vec2 cell = integer2.xz;
+
+    float g1 = mix( 0.3, 0.6, hash( cell ) );
+    float g2 = mix( 0.3, 0.6, hash( cell + 17.0 ) ); // offset for variation
+
+    vec3 color1 = vec3( 0.0, g1, 0.0 );
+    vec3 color2 = vec3( 0.0, g2, 0.0 );
+
+    if ( floating.x < floating.z ) {
+      outColor = vec4( color1, 1.0 );
+    }
+    else {
+      outColor = vec4( color2, 1.0 );
+    }
+  }
+`;
 
 const shaderInfo = {
   vertex: /*glsl*/`# version 300 es
@@ -84,41 +134,58 @@ const shaderInfo = {
       return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453123 );
     }
 
-    float ign(vec2 p) {
-      return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+    vec2 hash2(vec2 p) {
+      return fract(sin(vec2(
+        dot(p, vec2(127.1, 311.7)),
+        dot(p, vec2(269.5, 183.3))
+      )) * 43758.5453123);
     }
 
-    float ign2(vec2 p) {
-      p += vec2(0.75487765, 0.56984026); // arbitrary offset
-      return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+    vec2 hash2B(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.xx + p3.yz) * p3.zy);
     }
 
     void main() {
 
-      const vec3 NumSquares = vec3( 20.0, 1.0, 10.0 );
+      const float NumSquares = 4.0;
 
-      vec3 integer;
-      vec3 floating = modf( mod( v_pos * NumSquares, 2.0 ), integer );
+      vec3 cell3;
+      vec3 local3 = modf( v_pos * NumSquares, cell3 );
 
-      vec3 integer2;
-      vec3 floating2 = modf( v_pos * NumSquares, integer2 );
+      vec2 cell = cell3.xz;
+      vec2 pos = local3.xz;
 
-      float integer3;
+      float minDist = 1.0;
+      vec2 bestOffset;
 
-      vec2 cell = integer2.xz;
+      for ( int j = -1; j <= 1; j ++ ) {
+        for ( int i = -1; i <= 1; i ++ ) {
+          vec2 offset = vec2( float( i ), float( j ) );
+          // vec2 center = hash2(cell + offset) + offset;
+          vec2 center = offset + 0.5 + 0.5 * ( hash2( cell + offset ) - 0.5 );  // keep points closer to center, less clumpy
 
-      float g1 = mix( 0.3, 0.6, hash( cell ) );
-      float g2 = mix( 0.3, 0.6, hash( cell + 17.0 ) ); // offset for variation
+          // float d = distance( center, pos );
+          float d = dot( center - pos, center - pos );  // distance w/o square root?
+          // minDist = min( minDist, d );
 
-      vec3 color1 = vec3( 0.0, g1, 0.0 );
-      vec3 color2 = vec3( 0.0, g2, 0.0 );
-
-      if ( floating.x < floating.z ) {
-        outColor = vec4( color1, 1.0 );
+          if ( d < minDist ) {
+            minDist = d;
+            bestOffset = offset;
+          }
+        }
       }
-      else {
-        outColor = vec4( color2, 1.0 );
-      }
+
+      float dist = sqrt( minDist );
+
+      // outColor = vec4( dist, dist, 1.0, 1.0 ); // water-like
+      outColor = vec4( 0.0, 1.0 - dist, 0.0, 1.0 );  // worley green
+
+      // outColor = vec4( 0.0, hash( cell + bestOffset ), 0.0, 1.0 );
+
+      // TODO: A border between cells
+      //  - keep track of the second best distance, and make it black if these are less than X different?
     }
   `,
 }

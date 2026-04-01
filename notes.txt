@@ -1,3 +1,19 @@
+4/1:
+
+Shaders: Distance from point
+  - Start with basic: distance from center of each cell
+  - Random offsets per cell, check neighbors
+    - Worley is the name for this
+
+Grass idea:
+  - Like worley, but with solid colors -- stained glass look?
+
+Water idea:
+  - Like worley, but with dark blue center and bright white borders (to be disturbances in water)
+  - Have the points move? 
+    - Either slowly around mostly in place for a stable body of water, or...
+    - Have them all moving in one direction, as well as somewhat up and down, for a river?
+
 3/31:
 
 DONE: Blades of grass 
@@ -16,6 +32,15 @@ NOW: Play with shaders
   - Squares
   - Trianges (split squares diagonally)
   - Triangles equilatoral?
+
+Shader ideas
+  - Do the 'distance from point' thing
+    - Rocks, scales
+  - List of points? Point in each cell, check against this and adjacent ones
+    - Then we can generate based on wherever
+  - This should give us a Voroni map, which we could fill with solid colors instead of gradients
+    - That might look nice for grass
+  - Can also make my little flowers from before, maybe at a random point in each cell
 
 3/30:
 
