@@ -8,7 +8,7 @@ const glGameCanvas = new GLGameCanvas();
 
 const camera = new OrbitCamera( {
   center: [ 2.5, 0, 2.5 ],
-  distance: 20,
+  distance: 5,
   phi: Math.PI / 4,
   theta: Math.PI / 4,
 } );
@@ -54,7 +54,7 @@ const shaderInfo = {
     }
   `,
   fragment: /*glsl*/ `# version 300 es
-    precision mediump float;
+    precision highp float;
 
     in vec3 v_pos;
     in vec3 v_norm;
@@ -71,34 +71,30 @@ const shaderInfo = {
       vec2 cell = cell3.xz;
       vec2 pos = local3.xz;
 
+      vec2 diff = vec2( 0.5, 0.5 ) - pos;
+      float angle = atan( diff.y, diff.x );
+      float dist = sqrt( dot( diff, diff ) );
+      float val = 1.0 - dist;
 
-      float sampleOffset = fwidth( v_pos ).x * 4.0;
-      vec2 offsets[4] = vec2[](
-        vec2( sampleOffset,  sampleOffset),
-        vec2(-sampleOffset,  sampleOffset),
-        vec2( sampleOffset, -sampleOffset),
-        vec2(-sampleOffset, -sampleOffset)
-      );
+      // https://shadergif.com/guides/anti-aliasing-basics/
+      float centerDist = dist - 0.1;
+      float petalDist = dist - 0.4 * abs( sin( angle * 4.0 ) );
 
-      vec3 accum = vec3( 0.0 );
+      float wCenter = fwidth( centerDist );
+      float centerMask = smoothstep( wCenter, -wCenter, centerDist );
 
-      for ( int i = 0; i < 4; i ++ ) {
-        vec2 p = pos + offsets[ i ] / NumSquares;
+      float wPetal = fwidth( petalDist );
+      float petalMask = smoothstep( wPetal, -wPetal, petalDist );
 
-        vec2 diff = vec2( 0.5, 0.5 ) - p;
-        float angle = atan( diff.y, diff.x );
-        float dist = sqrt( dot( diff, diff ) );
-        float val = 1.0 - dist;
+      float petalsOnly = petalMask * ( 1.0 - centerMask );
 
-        if ( dist < 0.125 ) {
-          accum += vec3( val, val, 0.0 );
-        }
-        else if ( dist < 0.5 * abs( sin( angle * 4.0 ) ) ) {
-          accum += vec3( val, val, val );
-        }
-      }
+      vec3 yellow = vec3( 1.0, 1.0, 0.0 );
+      vec3 white  = vec3( 1.0 );
 
-      outColor = vec4( accum * 0.25, 1.0 );
+      vec3 color = yellow * centerMask + white * petalsOnly;
+
+      outColor = vec4( color * val, 1.0 );
+
     }
   `,
 }
