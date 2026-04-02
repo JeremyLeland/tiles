@@ -1,3 +1,26 @@
+4/2:
+
+- Shaders: hexagon pattern (for fun/practice) vs worley
+
+- Shaders: anti-aliasing? (average out nearby points?)
+  - Trying super sampling
+    - seems like this will be less useful further away
+    - would want to sample more things?
+  - Would it be easier to generate the texture once with shader?
+    - then use the regular mip mapping and whatnot to sample down?
+
+- Move some common code out of simpleShaders so we can make more of these and be shorter
+  - Move camera mouse input code to OrbitCamera?
+  - Move grid to its own thing? Grid helper, axes helper of some sort?
+  - Use Plane helper instead of creating my own?
+  - Shader hash functions into ShaderCommon?
+
+- Add grass clumps to grass tiles (as a combined demo)
+
+I'm having all these problems with distance
+  - Can I avoid all that with orthographic projection?
+    - And no zooming. Keeps everything at predictable level of detail.
+
 4/1:
 
 Shaders: Distance from point
@@ -13,6 +36,13 @@ Water idea:
   - Have the points move? 
     - Either slowly around mostly in place for a stable body of water, or...
     - Have them all moving in one direction, as well as somewhat up and down, for a river?
+
+Made some flowers
+
+The textures all look crappy when I zoom out
+  - They get grainy and pixelated, rather than nicely blurring
+    - Can I do this sampling myself?
+    - Or is it easier to just use textures
 
 3/31:
 
