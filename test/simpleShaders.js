@@ -149,7 +149,7 @@ const shaderInfo = {
 
     void main() {
 
-      const float NumSquares = 4.0;
+      const float NumSquares = 14.0;
 
       vec3 cell3;
       vec3 local3 = modf( v_pos * NumSquares, cell3 );
@@ -158,6 +158,7 @@ const shaderInfo = {
       vec2 pos = local3.xz;
 
       float minDist = 1.0;
+      float secondMinDist = 1.0;
       vec2 bestOffset;
 
       for ( int j = -1; j <= 1; j ++ ) {
@@ -171,6 +172,7 @@ const shaderInfo = {
           // minDist = min( minDist, d );
 
           if ( d < minDist ) {
+            secondMinDist = minDist;
             minDist = d;
             bestOffset = offset;
           }
@@ -180,12 +182,14 @@ const shaderInfo = {
       float dist = sqrt( minDist );
 
       // outColor = vec4( dist, dist, 1.0, 1.0 ); // water-like
-      outColor = vec4( 0.0, 1.0 - dist, 0.0, 1.0 );  // worley green
+      // outColor = vec4( 0.0, 1.0 - dist, 0.0, 1.0 );  // worley green
 
-      // outColor = vec4( 0.0, hash( cell + bestOffset ), 0.0, 1.0 );
-
-      // TODO: A border between cells
-      //  - keep track of the second best distance, and make it black if these are less than X different?
+      if ( abs( secondMinDist - minDist ) < 0.2 ) {
+        outColor = vec4( 0.25, 0.125, 0.0, 1.0 );
+      }
+      else {
+        outColor = vec4( 0.0, 0.4 + 0.25 * hash( cell + bestOffset ), 0.0, 1.0 );
+      }
     }
   `,
 }

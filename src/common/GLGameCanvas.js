@@ -38,7 +38,7 @@ export class GLGameCanvas {
       console.error( 'Unable to initialize WebGL2.' );
     }
 
-    this.gl.clearColor( 0.3, 0.2, 0.1, 1.0 ); // TODO: Setable color, maybe from vec4?
+    this.gl.clearColor( 0.1, 0.1, 0.1, 1.0 ); // TODO: Setable color, maybe from vec4?
     this.gl.clearDepth( 1.0 );
     this.gl.enable( this.gl.DEPTH_TEST );
     this.gl.depthFunc( this.gl.LEQUAL );
