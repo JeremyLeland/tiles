@@ -28,7 +28,7 @@ const gridMesh = MeshCommon.createLineMesh( glGameCanvas.gl, gridGeo, colorShade
 
 const camera = new OrbitCamera( {
   center: [ 2.5, 0, 2.5 ],
-  distance: 5,
+  distance: 1,
   phi: Math.PI / 4,
   theta: Math.PI / 4,
 } );
@@ -103,6 +103,77 @@ const grassFragment = /*glsl*/ `# version 300 es
   }
 `;
 
+const voronoiGrassFrament = /*glsl*/ `# version 300 es
+  precision mediump float;
+
+  in vec3 v_pos;
+  in vec3 v_norm;
+
+  out vec4 outColor;
+
+  float hash(vec2 p) {
+    return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453123 );
+  }
+
+  vec2 hash2(vec2 p) {
+    return fract(sin(vec2(
+      dot(p, vec2(127.1, 311.7)),
+      dot(p, vec2(269.5, 183.3))
+    )) * 43758.5453123);
+  }
+
+  vec2 hash2B(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.xx + p3.yz) * p3.zy);
+  }
+
+  void main() {
+
+    const float NumSquares = 14.0;
+
+    vec3 cell3;
+    vec3 local3 = modf( v_pos * NumSquares, cell3 );
+
+    vec2 cell = cell3.xz;
+    vec2 pos = local3.xz;
+
+    float minDist = 1.0;
+    float secondMinDist = 1.0;
+    vec2 bestOffset;
+
+    for ( int j = -1; j <= 1; j ++ ) {
+      for ( int i = -1; i <= 1; i ++ ) {
+        vec2 offset = vec2( float( i ), float( j ) );
+        // vec2 center = hash2(cell + offset) + offset;
+        vec2 center = offset + 0.5 + 0.5 * ( hash2( cell + offset ) - 0.5 );  // keep points closer to center, less clumpy
+
+        // float d = distance( center, pos );
+        float d = dot( center - pos, center - pos );  // distance w/o square root?
+        // minDist = min( minDist, d );
+
+        if ( d < minDist ) {
+          secondMinDist = minDist;
+          minDist = d;
+          bestOffset = offset;
+        }
+      }
+    }
+
+    float dist = sqrt( minDist );
+
+    // outColor = vec4( dist, dist, 1.0, 1.0 ); // water-like
+    // outColor = vec4( 0.0, 1.0 - dist, 0.0, 1.0 );  // worley green
+
+    // if ( abs( secondMinDist - minDist ) < 0.2 ) {
+    //   outColor = vec4( 0.25, 0.125, 0.0, 1.0 );
+    // }
+    // else {
+      outColor = vec4( 0.0, 0.4 + 0.25 * hash( cell + bestOffset ), 0.0, 1.0 );
+    // }
+  }
+`;
+
 const shaderInfo = {
   vertex: /*glsl*/`# version 300 es
     in vec3 position;
@@ -141,15 +212,9 @@ const shaderInfo = {
       )) * 43758.5453123);
     }
 
-    vec2 hash2B(vec2 p) {
-      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
-      p3 += dot(p3, p3.yzx + 33.33);
-      return fract((p3.xx + p3.yz) * p3.zy);
-    }
-
     void main() {
 
-      const float NumSquares = 14.0;
+      const float NumSquares = 2.0;
 
       vec3 cell3;
       vec3 local3 = modf( v_pos * NumSquares, cell3 );
@@ -158,7 +223,7 @@ const shaderInfo = {
       vec2 pos = local3.xz;
 
       float minDist = 1.0;
-      float secondMinDist = 1.0;
+      float bestAngle;
       vec2 bestOffset;
 
       for ( int j = -1; j <= 1; j ++ ) {
@@ -167,13 +232,15 @@ const shaderInfo = {
           // vec2 center = hash2(cell + offset) + offset;
           vec2 center = offset + 0.5 + 0.5 * ( hash2( cell + offset ) - 0.5 );  // keep points closer to center, less clumpy
 
+          vec2 diff = center - pos;
+
           // float d = distance( center, pos );
-          float d = dot( center - pos, center - pos );  // distance w/o square root?
+          float d = dot( diff, diff );  // distance w/o square root?
           // minDist = min( minDist, d );
 
           if ( d < minDist ) {
-            secondMinDist = minDist;
             minDist = d;
+            bestAngle = atan( diff.y, diff.x );
             bestOffset = offset;
           }
         }
@@ -181,15 +248,15 @@ const shaderInfo = {
 
       float dist = sqrt( minDist );
 
+      if ( dist < 0.025 ) {
+        outColor = vec4( 1.0 - dist, 1.0 - dist, 0.0, 1.0 );
+      }
+      else if ( dist < 0.1 * abs( sin( bestAngle * 4.0 ) ) ) {
+        outColor = vec4( 1.0 - dist, 1.0 - dist, 1.0 - dist, 1.0 );
+      }
+
       // outColor = vec4( dist, dist, 1.0, 1.0 ); // water-like
       // outColor = vec4( 0.0, 1.0 - dist, 0.0, 1.0 );  // worley green
-
-      if ( abs( secondMinDist - minDist ) < 0.2 ) {
-        outColor = vec4( 0.25, 0.125, 0.0, 1.0 );
-      }
-      else {
-        outColor = vec4( 0.0, 0.4 + 0.25 * hash( cell + bestOffset ), 0.0, 1.0 );
-      }
     }
   `,
 }
