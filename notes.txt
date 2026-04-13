@@ -1,6 +1,34 @@
+4/13:
+
+- Still want to experiment with metaballs below
+- Also want to try varient: metalines
+  - Use to model vein-y leaves? Oak, maybe? 
+  - Line for main vein, then lines for branches
+  - Distance from lines determines color (or transparent)
+
+4/9:
+
+- Shader experiment: 2D Metaballs for Motes (Osmos clone)
+  - https://en.wikipedia.org/wiki/Metaballs
+  - Not sure how this would actually look in game, but for kicks
+  - See how a bunch of metaballs of different sizes look as they bounce around a square
+  - Send list of balls to shader, have it iterate through them to render blended balls
+  - Does it look good? Is it performant?
+  - This would mostly be for the effect of one mote eating another
+    - Could have the color be brighter when its part of two motes as well as having the shape
+  - Do we need to render entire area like this?
+    - Maybe we could send a rect that is just the balls involved in collision?
+      - That's a later optimisation
+      - For kicks, see how it goes with a giant rect for all of them for now
+
 4/2:
 
 - Shaders: hexagon pattern (for fun/practice) vs worley
+  - Started something
+  - I think I figured out most of this a while ago with some hex tests
+    - Was it the Tantrix code? That had hexagonal stuff
+  - Need to turn a given point into a hex cell coordinate
+    - So I can give each hexagon a consistent color
 
 - Shaders: anti-aliasing? (average out nearby points?)
   - Trying super sampling
@@ -8,6 +36,8 @@
     - would want to sample more things?
   - Would it be easier to generate the texture once with shader?
     - then use the regular mip mapping and whatnot to sample down?
+  - Got something that looks pretty good with fwidth and smoothstep
+    - https://shadergif.com/guides/anti-aliasing-basics/
 
 - Move some common code out of simpleShaders so we can make more of these and be shorter
   - Move camera mouse input code to OrbitCamera?

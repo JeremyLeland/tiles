@@ -75,4 +75,49 @@ export class OrbitCamera {
       [ 0, 1, 0 ],
     );
   }
+
+  addEventListeners( glGameCanvas ) {
+    glGameCanvas.canvas.addEventListener( 'pointerdown', e => {
+      if ( e.buttons == 1 ) {
+      }
+    } );
+
+    const X_TURN_SENSITIVITY = 100;
+    const Y_TURN_SENSITIVITY = -100;
+    const X_MOVE_SENSITIVITY = -50;
+    const Y_MOVE_SENSITIVITY = -50;
+
+    glGameCanvas.canvas.addEventListener( 'pointermove', e => {
+      if ( e.buttons == 1 ) {
+      }
+
+      // Rotate around origin with right mouse button
+      if ( e.buttons == 2 ) {
+        const dPhi   = e.movementX / X_TURN_SENSITIVITY;
+        const dTheta = e.movementY / Y_TURN_SENSITIVITY;
+
+        this.rotate( dPhi, dTheta );
+
+        glGameCanvas.redraw();
+      }
+
+      // Pan with middle mouse button
+      else if ( e.buttons == 4 ) {
+        const dx = e.movementX / X_MOVE_SENSITIVITY;
+        const dy = e.movementY / Y_MOVE_SENSITIVITY;
+
+        this.pan( dx, dy );
+
+        glGameCanvas.redraw();
+      }
+    } );
+
+    const ZOOM_SENSIVITY = -200;
+
+    glGameCanvas.canvas.addEventListener( 'wheel', e => {
+      this.zoom( e.wheelDelta / ZOOM_SENSIVITY );
+
+      glGameCanvas.redraw();
+    } );
+  }
 }
