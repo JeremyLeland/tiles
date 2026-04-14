@@ -6,6 +6,12 @@
   - Line for main vein, then lines for branches
   - Distance from lines determines color (or transparent)
 
+Ok, maybe fuck hex stuff for now. This is way more effort than I actually care about for grass texture
+  - I'm not even making a hex game here
+  - Some resources for later: 
+    - https://www.redblobgames.com/grids/hexagons/
+    - https://observablehq.com/@jrus/hexround
+
 4/9:
 
 - Shader experiment: 2D Metaballs for Motes (Osmos clone)
