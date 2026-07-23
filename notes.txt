@@ -1,16 +1,62 @@
+7/22:
+  - Using this project to experiment with partial edge tiles
+    - A square has 8 points at corners and edges
+      - these tiles are made up of every possible line between these points
+        - I'm sure there's a name for this, but I don't want to ruin this by looking it up
+      - Can get some more interesting slopes, still keep it constrained
+  - Can play with this here so I'm not making a new project
+
+
+4/14:
+
+Thinking about games I actually want to play that I could make
+  - Brotato is something I keep coming back to
+  - Simple graphics
+    - just one side image that gets squished up and down, I think
+    - and flipped depending on direction?
+  - Simple arena
+    - don't need to design any levels, really
+    - could add some cover if I want, maybe
+  - Simple controls
+    - since we auto-fire, could play on tablet without mouse
+  - This would be yet another case for smooth movement of crowds
+    - avoiding each other (plus maybe obstacles?)
+    - swarming player (if melee, or firing from distance)
+    - I feel like I keep re-doing this, so I may get annoying deja vu
+      - but I also feel like I've never actually gotten it
+
+Could use Kenny monster builder pack
+  - Individual limbs and bodies to mix and match
+    - Potential rabit hole, though could be funny to automatically mix and match as experiment
+    - May need to determine attachment point for each limb to animate around, which could be slog
+
+Can probably find still images of front facing monsters
+  - Maybe rotate these side to side as they move to player?
+  - Side facing would squish up and down
+
+Land Monster
+  - Maybe use "Land Monsters" from https://opengameart.org/content/monster-cc0
+
 4/13:
 
 - Still want to experiment with metaballs below
 - Also want to try varient: metalines
-  - Use to model vein-y leaves? Oak, maybe? 
+  - Use to model vein-y leaves? Oak, maybe?
   - Line for main vein, then lines for branches
   - Distance from lines determines color (or transparent)
 
 Ok, maybe fuck hex stuff for now. This is way more effort than I actually care about for grass texture
   - I'm not even making a hex game here
-  - Some resources for later: 
+  - Some resources for later:
     - https://www.redblobgames.com/grids/hexagons/
     - https://observablehq.com/@jrus/hexround
+
+Messed with metaballs
+  - Kind of a bright mess
+  - If I want to blend between motes, I already have code for joining two circles with another curve
+    - All the road intersection shit
+    - I could just use that to make a blend between the circles at their intersection point
+      - and draw it in 2D
 
 4/9:
 
@@ -69,7 +115,7 @@ Grass idea:
 
 Water idea:
   - Like worley, but with dark blue center and bright white borders (to be disturbances in water)
-  - Have the points move? 
+  - Have the points move?
     - Either slowly around mostly in place for a stable body of water, or...
     - Have them all moving in one direction, as well as somewhat up and down, for a river?
 
@@ -82,7 +128,7 @@ The textures all look crappy when I zoom out
 
 3/31:
 
-DONE: Blades of grass 
+DONE: Blades of grass
   - Removed extra vertices, since these are all part of same surface
 
 GLSL syntax highlighting in javascript string literals
@@ -172,7 +218,7 @@ Maybe add buttons for duplicating/deleting rows and cols to make bigger?
 
 3/25:
 
-Merged branch, since I'm going to focus on WebGL for now 
+Merged branch, since I'm going to focus on WebGL for now
 
 NOW: Experiment with additional layers/levels for elevation
   - Draw blocks without water if above ground level
@@ -205,7 +251,7 @@ NEXT: Detect where mouse is pointing to in world?
 
 Got it drawing all the NW/NE/SW/SE variations of grass and water
 
-Tried blending tiles from array. 
+Tried blending tiles from array.
   - This seemed like it made sense before, but is giving me weird results now
   - Are my grass tiles too thin?
 
@@ -238,9 +284,9 @@ Array of which mesh and which rotation go with each NW/NE/SW/SE combination?
 Experiment with 3D points drawn with 2D methods
   - Use matrices to do this in new 3D branch
 
-So I got this to work with a simple pond example, 
+So I got this to work with a simple pond example,
   - but I'm going to want backface culling and z-ordering soon, probably
-  - The curves are theoretically nice, 
+  - The curves are theoretically nice,
     - but it's probably better to just generate a curve with lots of smaller triangles
   - If I'm going to all this effort, I may as well just use WebGL proper
     - Maybe it's time to take another look at that
