@@ -58,6 +58,7 @@ gameCanvas.draw = ( ctx ) => {
         // value
         const value = ( col << 3 ) | row;
 
+        drawText( ctx, `${ col } 🡪 ${ row }`, 0.5, 0.25 );
         drawText( ctx, `0x${ value.toString( 2 ).padStart( 6, 0 ) }`, 0.5, 0.5 );
         drawText( ctx, value, 0.5, 0.75 );
 
