@@ -20,18 +20,18 @@ import { GameCanvas } from "../src/common/GameCanvas.js";
 
 const gameCanvas = new GameCanvas();
 
-gameCanvas.setBounds( -0.5, -0.5, NumPoints + 1.5, NumPoints + 1.5 );
+gameCanvas.setBounds( -0.5, -0.5, 0.5 + NumPoints * 1.1, 0.5 + NumPoints * 1.1 );
 
 gameCanvas.draw = ( ctx ) => {
-  for ( let i = 0; i < NumPoints; i ++ ) {
-    for ( let j = 0; j < NumPoints; j ++ ) {
+  for ( let row = 0; row < NumPoints; row ++ ) {
+    for ( let col = 0; col < NumPoints; col ++ ) {
 
-      if ( Math.abs( i - j ) < 2 || Math.abs( i - j ) > 6 ) {
+      if ( Math.abs( row - col ) < 2 || Math.abs( row - col ) > 6 ) {
         continue;
       }
 
       ctx.save(); {
-        ctx.translate( i * 1.1, j * 1.1 );
+        ctx.translate( col * 1.1, row * 1.1 );
 
         ctx.lineWidth = 0.01;
         ctx.strokeStyle = 'dimgray';
@@ -40,19 +40,26 @@ gameCanvas.draw = ( ctx ) => {
         ctx.lineWidth = 0.01;
         ctx.strokeStyle = 'yellow';
         ctx.fillStyle = 'gray';
-        drawTile( ctx, i, j );
+        drawTile( ctx, col, row );
 
 
         // sanity check
         ctx.lineWidth = 0.02;
         ctx.strokeStyle = 'white';
-        drawLine( ctx, TilePoints[ i ], TilePoints[ j ] );
+        drawLine( ctx, TilePoints[ col ], TilePoints[ row ] );
 
         ctx.fillStyle = 'lime';
-        drawPoint( ctx, TilePoints[ i ], 0.03 );
+        drawPoint( ctx, TilePoints[ col ], 0.03 );
 
         ctx.fillStyle = 'red';
-        drawPoint( ctx, TilePoints[ j ], 0.03 );
+        drawPoint( ctx, TilePoints[ row ], 0.03 );
+
+
+        // value
+        const value = ( col << 3 ) | row;
+
+        drawText( ctx, `0x${ value.toString( 2 ).padStart( 6, 0 ) }`, 0.5, 0.5 );
+        drawText( ctx, value, 0.5, 0.75 );
 
       }
       ctx.restore();
@@ -84,4 +91,23 @@ function drawPoint( ctx, p, radius = 0.02 ) {
   ctx.beginPath();
   ctx.arc( p[ 0 ], p[ 1 ], radius, 0, Math.PI * 2 );
   ctx.fill();
+}
+
+function drawText( ctx, text, x, y ) {
+  ctx.save(); {
+    // Firefox doesn't play nice with small font sizes, so scale it instead
+    ctx.translate( x, y );
+    ctx.scale( 0.02, 0.02 );
+    ctx.font = '10px Arial';
+
+    ctx.fillStyle = 'white';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
+    ctx.shadowColor = 'black';
+    ctx.shadowBlur = 8;
+
+    ctx.fillText( text, 0, 0 );
+  }
+  ctx.restore();
 }
