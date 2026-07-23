@@ -25,6 +25,11 @@ gameCanvas.setBounds( -0.5, -0.5, NumPoints + 1.5, NumPoints + 1.5 );
 gameCanvas.draw = ( ctx ) => {
   for ( let i = 0; i < NumPoints; i ++ ) {
     for ( let j = 0; j < NumPoints; j ++ ) {
+
+      if ( Math.abs( i - j ) < 2 || Math.abs( i - j ) > 6 ) {
+        continue;
+      }
+
       ctx.save(); {
         ctx.translate( i * 1.1, j * 1.1 );
 

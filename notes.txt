@@ -4,6 +4,21 @@
       - these tiles are made up of every possible line between these points
         - I'm sure there's a name for this, but I don't want to ruin this by looking it up
       - Can get some more interesting slopes, still keep it constrained
+        - So I think there are 36 viable titles here, out of 64 combinations
+          - 4 border edges could potentiall be collapsed, if treated as all walls solid
+          - 4 corners
+          - 4 30-60-90's one way
+          - 4 30-60-90's other way
+          - 4 halfs
+          - 4 diagonals
+          - 8 opposite 30-60-90's
+          - 4 opposite corners
+        - Even if only half of them are viable, I still think this makes sense as a way to organize them
+          - If I include edges with no fill, it's 40
+            - valid if abs( startIndex - endIndex ) >= 2 or <= 6
+            - not sure I'd draw these, but they are valid
+            - this focuses on edges, rather than fill
+
   - Can play with this here so I'm not making a new project
 
 
