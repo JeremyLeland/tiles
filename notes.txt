@@ -1,3 +1,9 @@
+7/23:
+
+  - Adjust an edge up when I click
+    - Move right tile's point clockwise (index goes down)
+    - Move left tile's point counter-clockwise (index goes up)
+
 7/22:
   - Using this project to experiment with partial edge tiles
     - A square has 8 points at corners and edges
@@ -21,6 +27,12 @@
 
   - Can play with this here so I'm not making a new project
 
+  - Ideas for editing a map like this
+    - Click on intersection to form smallest opening (small diamond)
+    - Drag along grid lines to move startIndex in that direction?
+      - Small diamond widens in dragged axis?
+    - Hover over closest edge and show the applicable start/end points on that edge
+      - Edit both start/end points by clicking and dragging?
 
 4/14:
 

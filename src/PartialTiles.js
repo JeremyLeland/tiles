@@ -12,6 +12,18 @@ export const TilePoints = [
 
 export const NumPoints = TilePoints.length;
 
+export function getValue( startIndex, endIndex ) {
+  return ( startIndex << 3 ) | endIndex;
+}
+
+export function getStartIndex( value ) {
+  return value >> 3;
+}
+
+export function getEndIndex( value ) {
+  return value & 0b000111;
+}
+
 export function drawTile( ctx, startIndex, endIndex ) {
 
   // Special values:
