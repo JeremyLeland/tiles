@@ -1,8 +1,26 @@
-7/23:
+7/29:
+  - DONE: Place small diamond in empty corner
+  - If two diamonds are placed next to each other, need to properly join them
+  - Look at existing start/end points, incorporate those?
+    - min/max sometimes works, but this seems fragile. Need to account for wrapping at 7?
 
+7/28:
+  - Which points would be affected by a given spot?
+    - DONE: Show closest spot on grid near mouse
+    - Say which points would be moved?
+  - What if I make a diamond around every intersection?
+    - Move whichever points are necessary to do this
+    - Then figure out the cases of midpoints on edges
+
+7/23:
   - Adjust an edge up when I click
     - Move right tile's point clockwise (index goes down)
     - Move left tile's point counter-clockwise (index goes up)
+
+  - Can we determine what start/end points are near mouse and nudge them out of the way?
+    - On a filled in corner, this should create a minimal offset (small diamond)
+    - If click near a middle, if has middle index it should move
+      - Don't need to move everything on side, just the ones that join near that point?
 
 7/22:
   - Using this project to experiment with partial edge tiles
