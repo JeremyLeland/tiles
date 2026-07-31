@@ -89,7 +89,15 @@ gameCanvas.pointerDown = ( m ) => {
   // Starting diamond (if nothing else there)
   //
 
-  map[ NW_index ] = PartialTiles.getValue( 0, 6 );
+  {
+    const oldValue   = map[ NW_index ];
+    const startIndex = PartialTiles.getStartIndex( oldValue );
+    const endIndex   = PartialTiles.getEndIndex( oldValue );
+
+    // TODO: min() isn't quite right here. Need to account for wrap around values, like with angles
+    map[ NW_index ] = oldValue == 63 ? PartialTiles.getValue( 0, 6 ) :
+      PartialTiles.getValue( Math.min( startIndex, 0 ), Math.min( endIndex, 6 ) );
+  }
 
   {
     const oldValue   = map[ NE_index ];
@@ -101,7 +109,16 @@ gameCanvas.pointerDown = ( m ) => {
       PartialTiles.getValue( Math.min( startIndex, 6 ), Math.min( endIndex, 4 ) );
   }
 
-  map[ SW_index ] = PartialTiles.getValue( 2, 0 );
+  {
+    const oldValue   = map[ SW_index ];
+    const startIndex = PartialTiles.getStartIndex( oldValue );
+    const endIndex   = PartialTiles.getEndIndex( oldValue );
+
+    console.log( `existing SW = ${ startIndex }, ${ endIndex }` );
+
+    map[ SW_index ] = oldValue == 63 ? PartialTiles.getValue( 2, 0 ) :
+      PartialTiles.getValue( Math.max( startIndex, 2 ), Math.min( endIndex, 0 ) );
+  }
 
   {
     const oldValue   = map[ SE_index ];
