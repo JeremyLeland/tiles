@@ -89,79 +89,10 @@ gameCanvas.pointerDown = ( m ) => {
   // Starting diamond (if nothing else there)
   //
 
-  {
-    const oldValue   = map[ NW_index ];
-    const startIndex = PartialTiles.getStartIndex( oldValue );
-    const endIndex   = PartialTiles.getEndIndex( oldValue );
-
-    // TODO: min() isn't quite right here. Need to account for wrap around values, like with angles
-    map[ NW_index ] = oldValue == 63 ? PartialTiles.getValue( 0, 6 ) :
-      PartialTiles.getValue( Math.min( startIndex, 0 ), Math.min( endIndex, 6 ) );
-  }
-
-  {
-    const oldValue   = map[ NE_index ];
-    const startIndex = PartialTiles.getStartIndex( oldValue );
-    const endIndex   = PartialTiles.getEndIndex( oldValue );
-
-    // TODO: min() isn't quite right here. Need to account for wrap around values, like with angles
-    map[ NE_index ] = oldValue == 63 ? PartialTiles.getValue( 6, 4 ) :
-      PartialTiles.getValue( Math.min( startIndex, 6 ), Math.min( endIndex, 4 ) );
-  }
-
-  {
-    const oldValue   = map[ SW_index ];
-    const startIndex = PartialTiles.getStartIndex( oldValue );
-    const endIndex   = PartialTiles.getEndIndex( oldValue );
-
-    console.log( `existing SW = ${ startIndex }, ${ endIndex }` );
-
-    map[ SW_index ] = oldValue == 63 ? PartialTiles.getValue( 2, 0 ) :
-      PartialTiles.getValue( Math.max( startIndex, 2 ), Math.min( endIndex, 0 ) );
-  }
-
-  {
-    const oldValue   = map[ SE_index ];
-    const startIndex = PartialTiles.getStartIndex( oldValue );
-    const endIndex   = PartialTiles.getEndIndex( oldValue );
-
-    console.log( `existing SE = ${ startIndex }, ${ endIndex }` );
-
-    map[ SE_index ] = oldValue == 63 ? PartialTiles.getValue( 4, 2 ) :
-      PartialTiles.getValue( Math.max( startIndex, 4 ), Math.min( endIndex, 2 ) );
-  }
-
-  //
-  // Simple expand upward as proof-of-concept
-  //
-
-  // const col = Math.round( m.x );
-  // const row = Math.floor( m.y );
-
-  // console.log( col, row );
-
-  // const leftIndex  = col - 1 + row * cols;
-  // const rightIndex = col     + row * cols;
-
-  // {
-  //   const oldValue = map[ leftIndex ];
-  //   const startIndex = PartialTiles.getStartIndex( oldValue );
-  //   const endIndex = PartialTiles.getEndIndex( oldValue );
-
-  //   const newValue = PartialTiles.getValue( startIndex + 1, endIndex );
-
-  //   map[ leftIndex ] = newValue;
-  // }
-
-  // {
-  //   const oldValue = map[ rightIndex ];
-  //   const startIndex = PartialTiles.getStartIndex( oldValue );
-  //   const endIndex = PartialTiles.getEndIndex( oldValue );
-
-  //   const newValue = PartialTiles.getValue( startIndex, endIndex - 1 );
-
-  //   map[ rightIndex ] = newValue;
-  // }
+  doIt( NW_index, 0, 6 );
+  doIt( NE_index, 6, 4 );
+  doIt( SW_index, 2, 0 );
+  doIt( SE_index, 4, 2 );
 
   gameCanvas.redraw();
 }
@@ -171,4 +102,29 @@ gameCanvas.pointerMove = ( m ) => {
   hoverPoint[ 1 ] = m.y;
 
   gameCanvas.redraw();
+}
+
+function doIt( index, plannedStart, plannedEnd ) {
+  const oldValue   = map[ index ];
+  const startIndex = PartialTiles.getStartIndex( oldValue );
+  const endIndex   = PartialTiles.getEndIndex( oldValue );
+
+  console.log( `existing = ${ startIndex }, ${ endIndex }` );
+  console.log( `planned = ${ plannedStart }, ${ plannedEnd }` );
+
+  if ( oldValue == 63 ) {
+    map[ index ] = PartialTiles.getValue( plannedStart, plannedEnd );
+  }
+  else {
+    console.log( `points are ${ startIndex }, ${ endIndex } and ${ plannedStart }, ${ plannedEnd }` );
+
+    if ( Math.abs( plannedEnd - startIndex ) < Math.abs( endIndex - plannedStart ) ) {
+      console.log( `setting to ${ plannedStart }, ${ endIndex }` );
+      map[ index ] = PartialTiles.getValue( plannedStart, endIndex );
+    }
+    else {
+      console.log( `setting to ${ startIndex }, ${ plannedEnd }` );
+      map[ index ] = PartialTiles.getValue( startIndex, plannedEnd );
+    }
+  }
 }
