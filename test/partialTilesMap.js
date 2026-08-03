@@ -99,9 +99,7 @@ gameCanvas.pointerDown = ( m ) => {
     doDiamond( SE_index, 4, 2 );
   }
   else if ( !wholeX ) {
-    const col = Math.floor( gridPoint[ 0 ] );
-
-    const S_index = col + gridPoint[ 1 ] * cols;
+    const S_index = Math.floor( gridPoint[ 0 ] ) + gridPoint[ 1 ] * cols;
     const N_index = S_index - cols;
 
     console.log( N_index, S_index );
@@ -136,6 +134,46 @@ gameCanvas.pointerDown = ( m ) => {
         map[ index ] = PartialTiles.getValue( startIndex, endIndex - 1 );
       }
       else if ( startIndex === 2 ) {
+        map[ index ] = PartialTiles.getValue( startIndex + 1, endIndex );
+      }
+    }
+  }
+  else if ( !wholeY ) {
+    const E_index = gridPoint[ 0 ] + Math.floor( gridPoint[ 1 ] ) * cols;
+    const W_index = E_index - 1;
+
+    console.log( W_index, E_index );
+
+    {
+      const index = W_index;
+
+      const oldValue = map[ index ];
+      const startIndex = PartialTiles.getStartIndex( oldValue );
+      const endIndex   = PartialTiles.getEndIndex( oldValue );
+
+      console.log( `existing = ${ startIndex }, ${ endIndex }` );
+
+      if ( startIndex === 0 ) {
+        map[ index ] = PartialTiles.getValue( startIndex + 1, endIndex );
+      }
+      else if ( endIndex === 0 ) {
+        map[ index ] = PartialTiles.getValue( startIndex, endIndex - 1 );
+      }
+    }
+
+    {
+      const index = E_index;
+
+      const oldValue = map[ index ];
+      const startIndex = PartialTiles.getStartIndex( oldValue );
+      const endIndex   = PartialTiles.getEndIndex( oldValue );
+
+      console.log( `existing = ${ startIndex }, ${ endIndex }` );
+
+      if ( endIndex === 4 ) {
+        map[ index ] = PartialTiles.getValue( startIndex, endIndex - 1 );
+      }
+      else if ( startIndex === 4 ) {
         map[ index ] = PartialTiles.getValue( startIndex + 1, endIndex );
       }
     }

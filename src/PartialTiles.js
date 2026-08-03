@@ -13,6 +13,15 @@ export const TilePoints = [
 export const NumPoints = TilePoints.length;
 
 export function getValue( startIndex, endIndex ) {
+
+  // Wrap negative values here (for simpler calling)
+  if ( startIndex < 0 ) {
+    startIndex += 8;
+  }
+  if ( endIndex < 0 ) {
+    endIndex += 8;
+  }
+
   return ( startIndex << 3 ) | endIndex;
 }
 

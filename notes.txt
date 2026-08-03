@@ -1,8 +1,11 @@
 8/2:
   - What happens when we click on an edge midpoint?
-    - Nudge existing points outward? Away from current gap?
+    - DONE: Nudge existing points outward? Away from current gap?
   - BUG: Making a big diamond and clicking in the same corner twice messes up
     - Click top corner, center, then right corner twice. Messes up NW corner.
+    - Lots of errors when extending a shape
+      - Cases where more tiles need to be updated?
+      - Cases where tiles should be changed to completely empty?
 
 7/30:
   - DONE: Even out the horizontal on both sides
