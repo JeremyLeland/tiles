@@ -1,3 +1,40 @@
+8/3:
+  - There are lots of invalid cases that come up while dragging the mouse around this way
+    - For instance, click at 1,1 and 2,2
+    - This would result in a tile with two walls
+    - To avoid this, we have to backtrack and further shift walls
+      - We certainly can make user do it manually
+        - You can still make good looking shapes this way
+        - You just can't do everything
+      - It requires altering several tiles around it
+        - not sure how messy it will get to figure this out automatically
+        - It's like rasterizing a line
+  - The question is how useful is the constraint of one wall per tile
+    - Does this end up being that much more useful than a bunch of lines, with or without loop info?
+  - NOW: Another possibility
+    - Bits to define which corners/edges are solid?
+      - 9 bits for corners, edges, middle
+      - Use mouse to turn these off and on
+      - Bits shared by adjacent tiles? More like how we did our partial tile blending before
+        - But with an extra col/row, so we can do 30/60 degree slants
+        - The sharing might make things weirder
+          - If we don't share, we can have more options with slants on one side and cut offs on other
+          - Just need to treat the edges of a triangle as solid too, not just the slope
+          - er, wait...how are we representing a slant across?
+            - maybe we do need the far end
+        - The middle is kind of a spoiler
+          - Could just ignore it if it looks bad
+          - Leave it for now just to try the thing out.
+    - Key is that the bits represent corners and edges (same as we were indexing before), not a 3x3 grid inside
+      - This makes it more clear that side bits are shared
+      - Probably need to ignore the middle, since it doesn't represent an edge or corner
+      - Gives us some potentially weird blocks (like all corners/edges except one?)
+        - We can sketch these out in a demo and see what they look like
+    - Draw start point and stop points for each tile
+      - Go in circle to find first off point. This is start.
+      - Continue circle until next off point. This is stop.
+      - Draw green and red dots for proof of concept before trying lines.
+
 8/2:
   - What happens when we click on an edge midpoint?
     - DONE: Nudge existing points outward? Away from current gap?
