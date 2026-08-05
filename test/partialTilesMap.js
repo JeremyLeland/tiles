@@ -3,19 +3,8 @@
 import * as PartialTiles from '../src/PartialTiles.js';
 import * as Util from '../src/common/Util.js';
 
-const cols = 8, rows = 5;
-const map = [
-  63, 63, 63, 63, 63, 63, 63, 63,
-  63, 63, 63, 63, 63, 63, 63, 63,
-  63, 63, 63, 63, 63, 63, 63, 63,
-  63, 63, 63, 63, 63, 63, 63, 63,
-  63, 63, 63, 63, 63, 63, 63, 63,
-  // 63,  6, 52, 63, 63, 63, 63, 63,
-  //  6, 20,  2, 52, 63, 13, 59, 63,
-  // 16, 38, 48, 34, 63, 31, 41, 63,
-  // 63, 16, 34,  6, 52,  6, 60, 63,
-  // 63, 63, 63, 16, 34, 16, 33, 63,
-];
+const cols = 10, rows = 8;
+const map = Array( cols * rows ).fill( 63 );
 
 
 import { GameCanvas } from '../src/common/GameCanvas.js';

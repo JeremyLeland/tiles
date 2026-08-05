@@ -1,3 +1,33 @@
+8/4:
+  - 9 bits for corners has weird/invalid cases, too
+    - Two parallel collinear lines created with no space between them?
+    - Make a table of all possible tiles (like we did for the other version)
+      - Oh man, there's a ton of tiles that don't make any sense
+      - Might be easier to try to make the other editor work than deal with all these cases
+  - First way
+    - Maybe we automatically 'clean up' non-sensical tiles after every placement?
+      - Not sure if the fix is easy to determine programatically
+    - Or maybe we just make the human do it
+    - NOW: Support clicking and dragging so we can at least get a sense of how it looks
+      - Move much of pointerDown into pointerMove
+      - Could choose to leave hard edges
+        - This creates case where a tile has more than 1 line
+        - Not sure the constraint ends up being all that useful
+        - Maybe we just want a nicer way to "carve out" a shape from a solid as a bunch of lines?
+  - It's feeling like these constraints aren't super useful
+    - I'm looking for a way to "dig" out of a solid, like an ant colony
+    - Maybe a better way to think of this is to start with a simple pixel grid based digger
+      - Just click and drag around to make things solid or empty
+      - Then apply differet ways of interpretting that pattern
+        - Direct boxes
+        - corners
+        - corners and edges
+      - See if any of those make sense or look good
+      - Clearly things *can* be represented with these tiles
+        - I think the question I'm asking is does this make things any easiser to create/edit/deal with?
+          - Potentially makes easier to draw without knowing entire loop, that's all I have so far!
+          - I haven't even tried using these to collision detect/navigate yet
+
 8/3:
   - There are lots of invalid cases that come up while dragging the mouse around this way
     - For instance, click at 1,1 and 2,2
