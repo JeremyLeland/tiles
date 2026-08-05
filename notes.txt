@@ -1,3 +1,10 @@
+8/5:
+  - Making version of gridPaint for 3x3 tiles
+    - Actually worked pretty well on first attempt
+    - Isn't reacting to missing N, W, S, E
+      - I can make a diamond by taking out corners, but not the inverse by taking out edges
+      - Issue with how I'm drawing shape, probably
+
 8/4:
   - 9 bits for corners has weird/invalid cases, too
     - Two parallel collinear lines created with no space between them?
