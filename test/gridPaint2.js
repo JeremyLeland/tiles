@@ -20,7 +20,7 @@ const cols = 3, rows = 3;
 
 const map = [
   0, 0, 1,
-  0, 0, 0,
+  0, 0, 1,
   0, 0, 0,
 ];
 
@@ -92,9 +92,11 @@ gameCanvas.draw = ( ctx ) => {
             const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
             const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
 
-            ctx.lineTo( x, y );
-
-            ctx.closePath();
+            // Wait until we've found our good starting point to draw
+            if ( firstIndex !== null ) {
+              ctx.lineTo( x, y );
+              ctx.closePath();
+            }
           }
           foundEmpty = true;
           foundSolid = false;
