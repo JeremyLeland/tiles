@@ -1,3 +1,12 @@
+8/6:
+  - 2x2 could be fun to play with at higher resolutions
+    - 32x32 could work for players same size as tile
+      - If players smaler than tile, maybe get into weirder collision situations
+    - Try 64x64 grid with larger circle cursor
+    - Show cursor as outline
+    - Scroll wheel to change cursor size
+
+
 8/5:
   - Making version of gridPaint for 3x3 tiles
     - Actually worked pretty well on first attempt
@@ -14,6 +23,16 @@
         - If center is solid, give us a middle shape
         - If center is empty, draw separate corners?
     - Or is it that empty corners mean something different than empty edges?
+  - Seems like the first way is simplest, I got to into the weeds on what 3x3 shapes should look like
+  - Regardless, 2x2 is easier to deal with. 3x3 always feels awkward.
+    - Not sure how useful 2x2 ends up being, though
+      - Gets back to me not having a real use case for this yet, beyond a vague idea of 'ant farm'
+  - Next step could be a gridPaint with regular triangles (hexes broken into triangles)
+    - Align so that you could have flat horizontal and then slopes
+      - Doesn't allow vertical walls, but might still look interesting
+  - Honestly, maybe I just need something to manually cut holes
+    - Use mouse to "nudge" points away?
+      - Have points try to stay away from each other so the line segments are somewhat uniform?
 
 8/4:
   - 9 bits for corners has weird/invalid cases, too

@@ -15,12 +15,14 @@ const TilePoints = [
   [ 1,   1   ],
 ];
 
-const cols = 16, rows = 16;
+const cols = 64, rows = 64;
 const map = Array( cols * rows ).fill( 1 );
 
 const tileCols = cols - 1;
 const tileRows = rows - 1;
 const tileSize = 1;
+
+let mouseX, mouseY, cursorRadius = 0.5;
 
 const gameCanvas = new GameCanvas();
 
@@ -87,26 +89,56 @@ gameCanvas.draw = ( ctx ) => {
     }
   }
 
-  ctx.lineWidth = 0.02;
   ctx.strokeStyle = '#ff04';
   for ( let row = 0; row < tileRows; row ++ ) {
     for ( let col = 0; col < tileCols; col ++ ) {
       ctx.strokeRect( 0.5 + col * tileSize, 0.5 + row * tileSize, tileSize, tileSize );
     }
   }
+
+  //
+  // Cursor
+  //
+
+  const mouseCol = Math.round( mouseX - cursorRadius );
+  const mouseRow = Math.round( mouseY - cursorRadius );
+
+  ctx.lineWidth = 0.02;
+  ctx.strokeStyle = 'lime';
+  ctx.strokeRect( mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
 }
 
 function pointerInput( m ) {
+  mouseX = m.x;
+  mouseY = m.y;
+
   if ( m.buttons > 0 ) {
-    const col = Math.floor( m.x );
-    const row = Math.floor( m.y );
-    const index = col + row * cols;
 
-    map[ index ] = m.buttons === 1 ? 1 : 0;
+    const value = m.buttons === 1 ? 1 : 0;
 
-    gameCanvas.redraw();
+    const mouseCol = Math.round( mouseX - cursorRadius );
+    const mouseRow = Math.round( mouseY - cursorRadius );
+
+    for ( let rowOffset = 0; rowOffset < cursorRadius * 2; rowOffset ++ ) {
+      for ( let colOffset = 0; colOffset < cursorRadius * 2; colOffset ++ ) {
+        const col = mouseCol + colOffset;
+        const row = mouseRow + rowOffset;
+
+        if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
+          const index = col + row * cols;
+          map[ index ] = value;
+        }
+      }
+    }
   }
+
+  gameCanvas.redraw();
 }
 
 gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
+
+gameCanvas.wheelInput = ( m ) => {
+  cursorRadius = Math.max( 0.5, cursorRadius + 0.5 * Math.sign( m.wheel ) );
+  gameCanvas.redraw();
+}
