@@ -90,36 +90,46 @@ gameCanvas.draw = ( ctx ) => {
       const SW = map[ SW_index ];// === 1;
       const SE = map[ SE_index ];// === 1;
 
-      // const N = NW || NE;
-      // const W = NW || SW;
-      // const S = SW || SE;
-      // const E = SE || NE;
+      //
+      // Draw every time vs use premade paths?
+      //
+      const N = NW || NE;
+      const W = NW || SW;
+      const S = SW || SE;
+      const E = SE || NE;
 
-      // // match TilePoints order
-      // const values = [
-      //   E, NE, N, NW, W, SW, S, SE
-      // ];
+      // match TilePoints order
+      const values = [
+        E, NE, N, NW, W, SW, S, SE
+      ];
 
-      // ctx.beginPath();
-      // TilePoints.forEach( ( p, pIndex ) => {
-      //   if ( values[ pIndex ] ) {
-      //     ctx.lineTo( 0.5 + col + p[ 0 ], 0.5 + row + p[ 1 ] );
-      //   }
-      // } );
-      // ctx.closePath();
-
-      const path = TilePaths[ NW ][ NE ][ SW ][ SE ];
-
-      ctx.save();
-
-      ctx.translate( col, row );
+      ctx.beginPath();
+      TilePoints.forEach( ( p, pIndex ) => {
+        if ( values[ pIndex ] ) {
+          ctx.lineTo( 0.5 + col + p[ 0 ], 0.5 + row + p[ 1 ] );
+        }
+      } );
+      ctx.closePath();
 
       ctx.fillStyle = '#888';
-      ctx.fill( path );
+      ctx.fill();
+
+      //
+      // Use premade paths
+      //
+
+      // const path = TilePaths[ NW ][ NE ][ SW ][ SE ];
+
+      // ctx.save();
+
+      // ctx.translate( col, row );
+
+      // ctx.fillStyle = '#888';
+      // ctx.fill( path );
       // ctx.strokeStyle = 'white';
       // ctx.stroke( path );
 
-      ctx.restore();
+      // ctx.restore();
     }
   }
 
