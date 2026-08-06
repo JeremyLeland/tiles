@@ -4,6 +4,16 @@
     - Isn't reacting to missing N, W, S, E
       - I can make a diamond by taking out corners, but not the inverse by taking out edges
       - Issue with how I'm drawing shape, probably
+      - Got convex behaving better, but still issues around 0-index boundary
+        - Maybe wait until I find firstIndex to start the actual drawing?
+  - Dang, now we've broken the basic diamond case
+    - Re-think that with new method
+    - Need to know if we're in concave mode or convex mode?
+      - If you reverse the 1s and 0s, you should inverse the shape
+      - What if the unused middle bit was used to determine drawing method?
+        - If center is solid, give us a middle shape
+        - If center is empty, draw separate corners?
+    - Or is it that empty corners mean something different than empty edges?
 
 8/4:
   - 9 bits for corners has weird/invalid cases, too

@@ -15,18 +15,24 @@ const TilePoints = [
   [ 1,   1   ],
 ];
 
-const cols = 3, rows = 3;
-// const map = Array( cols * rows ).fill( 1 );
+const cols = 17, rows = 17;
+const map = Array( cols * rows ).fill( 1 );
 
-const map = [
-  0, 0, 1,
-  0, 0, 1,
-  0, 0, 0,
-];
+// const map = [
+//   0, 0, 1,
+//   0, 0, 0,
+//   0, 0, 0,
+// ];
 
 const tileCols = ( cols - 1 ) / 2;
 const tileRows = ( rows - 1 ) / 2;
 const tileSize = 2;
+
+let testFuncIndex = 0;
+let testFuncs = [
+  testTwo,
+  testOne,
+];
 
 const gameCanvas = new GameCanvas();
 
@@ -73,55 +79,7 @@ gameCanvas.draw = ( ctx ) => {
         E, NE, N, NW, W, SW, S, SE
       ];
 
-      ctx.beginPath();
-
-      let foundEmpty = false, foundSolid = false;
-      let firstIndex = null;
-
-      for ( let i = 0; i < TilePoints.length * 2; i ++ ) {
-        const pIndex = i % TilePoints.length;
-        if ( pIndex === firstIndex ) {
-          break;
-        }
-
-        const value = values[ pIndex ];
-
-        if ( value === false ) {
-          if ( foundSolid ) {
-            const p = TilePoints.at( pIndex );
-            const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
-            const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
-
-            // Wait until we've found our good starting point to draw
-            if ( firstIndex !== null ) {
-              ctx.lineTo( x, y );
-              ctx.closePath();
-            }
-          }
-          foundEmpty = true;
-          foundSolid = false;
-        }
-        else {
-          if ( foundEmpty ) {
-            const p = TilePoints.at( pIndex - 1 );
-            const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
-            const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
-
-            ctx.moveTo( x, y );
-            firstIndex ??= pIndex;
-          }
-          foundEmpty = false;
-          foundSolid = true;
-
-          const p = TilePoints.at( pIndex );
-          const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
-          const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
-
-          ctx.lineTo( x, y );
-        }
-      }
-
-      ctx.closePath();
+      testFuncs[ testFuncIndex ]( ctx, col, row, values );
 
       ctx.fillStyle = '#8885';
       ctx.fill();
@@ -141,13 +99,13 @@ gameCanvas.draw = ( ctx ) => {
     }
   }
 
-  // ctx.lineWidth = 0.02;
-  // ctx.strokeStyle = '#ff04';
-  // for ( let row = 0; row < tileRows; row ++ ) {
-  //   for ( let col = 0; col < tileCols; col ++ ) {
-  //     ctx.strokeRect( 0.5 + col * tileSize, 0.5 + row * tileSize, tileSize, tileSize );
-  //   }
-  // }
+  ctx.lineWidth = 0.02;
+  ctx.strokeStyle = '#ff04';
+  for ( let row = 0; row < tileRows; row ++ ) {
+    for ( let col = 0; col < tileCols; col ++ ) {
+      ctx.strokeRect( 0.5 + col * tileSize, 0.5 + row * tileSize, tileSize, tileSize );
+    }
+  }
 }
 
 function pointerInput( m ) {
@@ -164,3 +122,90 @@ function pointerInput( m ) {
 
 gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
+
+document.addEventListener( 'keydown', e => {
+  testFuncIndex = ( testFuncIndex + 1 ) % testFuncs.length;
+
+  gameCanvas.redraw();
+} );
+
+function testTwo( ctx, col, row, values ) {
+  ctx.beginPath();
+
+  TilePoints.forEach( ( p, pIndex ) => {
+    if ( values[ pIndex ] ) {
+
+      const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
+      const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
+
+      ctx.lineTo( x, y );
+    }
+  } );
+
+  ctx.closePath();
+}
+
+function testOne( ctx, col, row, values ) {
+  ctx.beginPath();
+
+  let foundEmpty = false, foundSolid = false;
+  let firstIndex = null;
+
+  for ( let i = 0; i < TilePoints.length * 2; i ++ ) {
+    const pIndex = i % TilePoints.length;
+    if ( pIndex === firstIndex ) {
+      break;
+    }
+
+    const value = values[ pIndex ];
+
+    if ( value === false ) {
+      if ( foundSolid ) {
+        const p = TilePoints.at( pIndex );
+        const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
+        const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
+
+        // Wait until we've found our good starting point to draw
+        if ( firstIndex !== null ) {
+          console.log( `ctx.lineTo( ${ x }, ${ y } )` );
+          ctx.lineTo( x, y );
+
+          console.log( `ctx.closePath()` );
+          ctx.closePath();
+        }
+      }
+      foundEmpty = true;
+      foundSolid = false;
+    }
+    else {
+      if ( foundEmpty ) {
+        if ( firstIndex === null ) {
+          firstIndex ??= pIndex;
+          console.log( `First index is ${ firstIndex }` );
+        }
+
+        const p = TilePoints.at( pIndex - 1 );
+        const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
+        const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
+
+        console.log( `ctx.moveTo( ${ x }, ${ y } )` );
+        ctx.moveTo( x, y );
+
+      }
+      foundEmpty = false;
+      foundSolid = true;
+
+      const p = TilePoints.at( pIndex );
+      const x = 0.5 + ( col + p[ 0 ] ) * tileSize;
+      const y = 0.5 + ( row + p[ 1 ] ) * tileSize;
+
+      // Wait until we've found our good starting point to draw
+      if ( firstIndex !== null ) {
+        console.log( `ctx.lineTo( ${ x }, ${ y } )` );
+        ctx.lineTo( x, y );
+      }
+    }
+  }
+
+  ctx.closePath();
+}
