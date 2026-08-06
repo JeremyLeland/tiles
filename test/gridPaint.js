@@ -89,23 +89,28 @@ gameCanvas.draw = ( ctx ) => {
     }
   }
 
-  ctx.strokeStyle = '#ff04';
-  for ( let row = 0; row < tileRows; row ++ ) {
-    for ( let col = 0; col < tileCols; col ++ ) {
-      ctx.strokeRect( 0.5 + col * tileSize, 0.5 + row * tileSize, tileSize, tileSize );
-    }
-  }
+  // ctx.strokeStyle = '#ff04';
+  // for ( let row = 0; row < tileRows; row ++ ) {
+  //   for ( let col = 0; col < tileCols; col ++ ) {
+  //     ctx.strokeRect( 0.5 + col * tileSize, 0.5 + row * tileSize, tileSize, tileSize );
+  //   }
+  // }
 
   //
   // Cursor
   //
 
-  const mouseCol = Math.round( mouseX - cursorRadius );
-  const mouseRow = Math.round( mouseY - cursorRadius );
 
   ctx.lineWidth = 0.02;
   ctx.strokeStyle = 'lime';
-  ctx.strokeRect( mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
+
+  const mouseCol = Math.round( mouseX - cursorRadius );
+  const mouseRow = Math.round( mouseY - cursorRadius );
+  // ctx.strokeRect( mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
+
+  ctx.beginPath();
+  ctx.arc( mouseCol + cursorRadius, mouseRow + cursorRadius, cursorRadius, 0, Math.PI * 2 );
+  ctx.stroke();
 }
 
 function pointerInput( m ) {
@@ -125,8 +130,10 @@ function pointerInput( m ) {
         const row = mouseRow + rowOffset;
 
         if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
-          const index = col + row * cols;
-          map[ index ] = value;
+          if ( Math.hypot( 0.5 + colOffset - cursorRadius, 0.5 + rowOffset - cursorRadius ) <= cursorRadius ) {
+            const index = col + row * cols;
+            map[ index ] = value;
+          }
         }
       }
     }
