@@ -15,7 +15,44 @@ const TilePoints = [
   [ 1,   1   ],
 ];
 
-const cols = 64, rows = 64;
+function makeTilePath( NW, NE, SW, SE ) {
+  const N = NW || NE;
+  const W = NW || SW;
+  const S = SW || SE;
+  const E = SE || NE;
+
+  // match TilePoints order
+  const values = [
+    E, NE, N, NW, W, SW, S, SE
+  ];
+
+  const path = new Path2D();
+  TilePoints.forEach( ( p, pIndex ) => {
+    if ( values[ pIndex ] ) {
+      path.lineTo( 0.5 + p[ 0 ], 0.5 + p[ 1 ] );
+    }
+  } );
+  path.closePath();
+
+  return path;
+}
+
+const TilePaths = [];
+
+[ 0, 1 ].forEach( NW => {
+  TilePaths[ NW ] = [];
+  [ 0, 1 ].forEach( NE => {
+    TilePaths[ NW ][ NE ] = [];
+    [ 0, 1 ].forEach( SW => {
+      TilePaths[ NW ][ NE ][ SW ] = [];
+      [ 0, 1 ].forEach( SE => {
+        TilePaths[ NW ][ NE ][ SW ][ SE ] = makeTilePath( NW, NE, SW, SE );
+      } );
+    } );
+  } );
+} );
+
+const cols = 32, rows = 32;
 const map = Array( cols * rows ).fill( 1 );
 
 const tileCols = cols - 1;
@@ -48,33 +85,41 @@ gameCanvas.draw = ( ctx ) => {
       const SW_index = NW_index + cols;
       const SE_index = SW_index + 1;
 
-      const NW = map[ NW_index ] === 1;
-      const NE = map[ NE_index ] === 1;
-      const SW = map[ SW_index ] === 1;
-      const SE = map[ SE_index ] === 1;
+      const NW = map[ NW_index ];// === 1;
+      const NE = map[ NE_index ];// === 1;
+      const SW = map[ SW_index ];// === 1;
+      const SE = map[ SE_index ];// === 1;
 
-      const N = NW || NE;
-      const W = NW || SW;
-      const S = SW || SE;
-      const E = SE || NE;
+      // const N = NW || NE;
+      // const W = NW || SW;
+      // const S = SW || SE;
+      // const E = SE || NE;
 
-      // match TilePoints order
-      const values = [
-        E, NE, N, NW, W, SW, S, SE
-      ];
+      // // match TilePoints order
+      // const values = [
+      //   E, NE, N, NW, W, SW, S, SE
+      // ];
 
-      ctx.beginPath();
-      TilePoints.forEach( ( p, pIndex ) => {
-        if ( values[ pIndex ] ) {
-          ctx.lineTo( 0.5 + col + p[ 0 ], 0.5 + row + p[ 1 ] );
-        }
-      } );
-      ctx.closePath();
+      // ctx.beginPath();
+      // TilePoints.forEach( ( p, pIndex ) => {
+      //   if ( values[ pIndex ] ) {
+      //     ctx.lineTo( 0.5 + col + p[ 0 ], 0.5 + row + p[ 1 ] );
+      //   }
+      // } );
+      // ctx.closePath();
 
-      ctx.fillStyle = '#8885';
-      ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
+      const path = TilePaths[ NW ][ NE ][ SW ][ SE ];
+
+      ctx.save();
+
+      ctx.translate( col, row );
+
+      ctx.fillStyle = '#888';
+      ctx.fill( path );
+      // ctx.strokeStyle = 'white';
+      // ctx.stroke( path );
+
+      ctx.restore();
     }
   }
 
@@ -99,7 +144,6 @@ gameCanvas.draw = ( ctx ) => {
   //
   // Cursor
   //
-
 
   ctx.lineWidth = 0.02;
   ctx.strokeStyle = 'lime';
@@ -139,13 +183,15 @@ function pointerInput( m ) {
     }
   }
 
-  gameCanvas.redraw();
+  // gameCanvas.redraw();
 }
 
 gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
 
 gameCanvas.wheelInput = ( m ) => {
-  cursorRadius = Math.max( 0.5, cursorRadius + 0.5 * Math.sign( m.wheel ) );
-  gameCanvas.redraw();
+  cursorRadius = Math.max( 0.5, Math.min( 10.5, cursorRadius + 0.5 * Math.sign( m.wheel ) ) );
+  // gameCanvas.redraw();
 }
+
+gameCanvas.start();
