@@ -8,7 +8,7 @@ const map = Array( cols * rows ).fill( 1 );
 
 let mouseX, mouseY, cursorRadius = 10;
 
-const backgroundImage = createLayer( cols, rows, '#421' );
+const backgroundImage = createLayer( cols, rows, '#321' );
 const dirtImage = createLayer( cols, rows, 'rgb(208, 98, 20)' );
 
 function createLayer( width, height, color ) {
@@ -18,7 +18,7 @@ function createLayer( width, height, color ) {
   ctx.fillStyle = 'black';
   ctx.fillRect( 0, 0, width, height );
 
-  ctx.fillStyle = color;
+  ctx.fillStyle = '#888';
 
   for ( let i = 0; i < 3000; i ++ ) {
     const size = Math.random();
@@ -32,6 +32,10 @@ function createLayer( width, height, color ) {
     ctx.globalAlpha = 0.123 - 0.1 * size;
     ctx.fill();
   }
+
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.75;
+  ctx.fillRect( 0, 0, width, height );
 
   return canvas;
 }
