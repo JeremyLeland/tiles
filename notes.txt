@@ -5,6 +5,39 @@
     - Try 64x64 grid with larger circle cursor
     - Show cursor as outline
     - Scroll wheel to change cursor size
+  - Going down a performance rabbit hole on old laptop
+    - Stroke is definitely slow
+      - 30fps to 60fps taking out strokes and just doing fills
+    - All the fills is still a lot
+      - 64x64 is 40fps
+      - Tried premaking the paths, but that didn't help at all
+        - Actually, seemed even slower on 64x64!
+        - Should probably make this toggleable to check for sure (and to avoid all the commenting out of code)
+      - Haven't successfully tried combining into one huge fill() operation vs smaller fill operations
+        - Could experiment!
+          - Also made things slow
+        - Could also special-case the solid square to be just a rect
+      - Ideally, all these should be toggle-able for easier testing on same map (and avoiding commenting out code)
+
+  - Other tile ideas
+    - Square broken into 4 triangles? Tetrakis -- https://en.wikipedia.org/wiki/Tetrakis_square_tiling
+      - This can support 45 degree lines as well as horiz and vertical
+      - Not sure if that ends up being much better than what I have now
+
+
+  - Trying to stay focused on this being used for something
+    - Something Liero-like?
+    - Add a box that can move around on ground and shoot projectiles
+      - Maybe give it a jetpack, too -- easier than grappling hook for now
+    - Projectiles should take out part of the wall
+    - This can be test of different map infrastructure ideas
+
+  - Maybe just do actual Liero
+    - Pixels instead of blended tiles. Make it lower resolution and scale it to fill canvas.
+    - "Draw" circles of explosions onto it
+    - Render dirt image with a mask of the level
+    - Have a box for character for now that goes around level
+    - Play with what height to place box at, when it should climb, when it should be stopped
 
 
 8/5:
