@@ -1,5 +1,3 @@
-// Let's make an editable grid of solid and empty, then see how it would get interpretted as 2x2 or 3x3 tiles
-
 import { GameCanvas } from '../src/common/GameCanvas.js';
 import * as Util from '../src/common/Util.js';
 
@@ -117,10 +115,6 @@ gameCanvas.draw = ( ctx ) => {
   ctx.arc( mouseX, mouseY, cursorRadius, 0, Math.PI * 2 );
   ctx.stroke();
 }
-
-document.addEventListener( 'keydown', e => {
-
-} );
 
 function pointerInput( m ) {
   mouseX = Math.floor( m.x );
