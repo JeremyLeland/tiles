@@ -3,8 +3,14 @@
 import { GameCanvas } from '../src/common/GameCanvas.js';
 import * as Util from '../src/common/Util.js';
 
+const Terrain = {
+  Empty: 0,
+  Dirt: 1,
+  Rock: 2,
+};
+
 const cols = 320, rows = 240;
-const map = Array( cols * rows ).fill( 1 );
+const map = Array( cols * rows ).fill( Terrain.Dirt );
 
 let mouseX, mouseY, cursorRadius = 10;
 
@@ -46,26 +52,29 @@ const maskCtx = maskImage.getContext( '2d' );
 maskCtx.fillStyle = 'white';
 maskCtx.fillRect( 0, 0, cols, rows );
 
-// maskCtx.clearRect( 100, 100, 100, 100 );
-
 const maskImageData = maskCtx.getImageData( 0, 0, cols, rows );
 const maskData = maskImageData.data;
 
-function removeCircle( x, y, radius ) {
+function setTerrain( col, row, value ) {
+  const mapIndex = col + row * cols;
+  map[ mapIndex ] = value;
+  maskData[ 4 * mapIndex + 3 ] = value;
+}
+
+function setTerrainCircle( x, y, radius, value ) {
   for ( let row = y - radius; row < y + radius; row ++ ) {
     for ( let col = x - radius; col < x + radius; col ++ ) {
       if ( Math.hypot( col - x, row - y ) < radius ) {
-        const index = 4 * ( col + row * cols );
-        maskData[ index + 3 ] = 0;
+        setTerrain( col, row, value );
       }
     }
   }
 }
 
-removeCircle( 100, 100, 50 );
-removeCircle( 200, 200, 30 );
-removeCircle( 250, 50, 20 );
-removeCircle( 170, 70, 10 );
+setTerrainCircle( 100, 100, 50, Terrain.Empty );
+setTerrainCircle( 200, 200, 30, Terrain.Empty );
+setTerrainCircle( 250, 50, 20, Terrain.Empty );
+setTerrainCircle( 170, 70, 10, Terrain.Empty );
 
 maskCtx.putImageData( maskImageData, 0, 0 );
 
@@ -104,43 +113,26 @@ gameCanvas.draw = ( ctx ) => {
   // ctx.lineWidth = 0.02;
   ctx.strokeStyle = '#0f08';
 
-  const mouseCol = Math.round( mouseX - cursorRadius );
-  const mouseRow = Math.round( mouseY - cursorRadius );
-
   ctx.beginPath();
-  ctx.arc( mouseCol + cursorRadius, mouseRow + cursorRadius, cursorRadius, 0, Math.PI * 2 );
+  ctx.arc( mouseX, mouseY, cursorRadius, 0, Math.PI * 2 );
   ctx.stroke();
 }
 
+document.addEventListener( 'keydown', e => {
+
+} );
+
 function pointerInput( m ) {
-  mouseX = m.x;
-  mouseY = m.y;
+  mouseX = Math.floor( m.x );
+  mouseY = Math.floor( m.y );
 
   if ( m.buttons > 0 ) {
+    const value = m.buttons === 1 ? Terrain.Empty : Terrain.Dirt;
 
-    const value = m.buttons === 1 ? 0 : 255;
-
-    const mouseCol = Math.round( mouseX - cursorRadius );
-    const mouseRow = Math.round( mouseY - cursorRadius );
-
-    for ( let rowOffset = 0; rowOffset < cursorRadius * 2; rowOffset ++ ) {
-      for ( let colOffset = 0; colOffset < cursorRadius * 2; colOffset ++ ) {
-        const col = mouseCol + colOffset;
-        const row = mouseRow + rowOffset;
-
-        if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
-          if ( Math.hypot( 0.5 + colOffset - cursorRadius, 0.5 + rowOffset - cursorRadius ) <= cursorRadius ) {
-            const index = 4 * ( col + row * cols );
-            // map[ index ] = value;
-
-            maskData[ index + 3 ] = value;
-          }
-        }
-      }
-    }
+    setTerrainCircle( mouseX, mouseY, cursorRadius, Terrain );
 
     // TODO: does dirty rect make any perf difference?
-    maskCtx.putImageData( maskImageData, 0, 0, mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
+    maskCtx.putImageData( maskImageData, 0, 0 );
   }
 
   gameCanvas.redraw();
@@ -150,7 +142,7 @@ gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
 
 gameCanvas.wheelInput = ( m ) => {
-  cursorRadius = Math.max( 0.5, Math.min( 50.5, cursorRadius + 0.5 * Math.sign( m.wheel ) ) );
+  cursorRadius = Math.max( 1, Math.min( 50, cursorRadius + Math.sign( m.wheel ) ) );
   gameCanvas.redraw();
 }
 

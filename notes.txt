@@ -3,6 +3,15 @@
     - Can re-use existing maskData and keep calling putImageData
       - Does dirty rect help us here?
       - Probably makes things more complicated if we ever need to update several parts of map at once
+  - Map representation
+    - Uint8Array? I think I just need 0-empty, 1-diggable, 2-solid
+    - Easy way to turn Uint8Array into base64 encode and back? Better than 320x240 of numbers?
+    - Modify map and then update mask as part of the change?
+      - How slow would it be to putImageData data every frame?
+        - rabbit hole danger
+        - Also probably not that hard to update them both as changes are made
+        - But if lots of changes are happening at once, then "every frame" becomes the base case
+        - Can see if it's noticeable on laptop
 
 
 8/9:
