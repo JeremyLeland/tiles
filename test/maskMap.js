@@ -88,27 +88,28 @@ gameCanvas.draw = ( ctx ) => {
 
   ctx.drawImage( backgroundImage, 0, 0 );
 
-  ctx.shadowColor = '#0009';
-  ctx.shadowOffsetX = -20;
-  ctx.shadowOffsetY = 20;
-  ctx.shadowBlur = 0;
+  ctx.shadowColor = '#0009'; {
+    ctx.shadowOffsetX = -9;
+    ctx.shadowOffsetY = 9;
+    ctx.shadowBlur = 0;
 
-  ctx.drawImage( foregroundImage, 0, 0 );
+    ctx.drawImage( foregroundImage, 0, 0 );
+  }
+  ctx.shadowColor = 'transparent';
 
   //
   // Cursor
   //
 
   // ctx.lineWidth = 0.02;
-  // ctx.strokeStyle = 'lime';
+  ctx.strokeStyle = '#0f08';
 
-  // const mouseCol = Math.round( mouseX - cursorRadius );
-  // const mouseRow = Math.round( mouseY - cursorRadius );
-  // // ctx.strokeRect( mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
+  const mouseCol = Math.round( mouseX - cursorRadius );
+  const mouseRow = Math.round( mouseY - cursorRadius );
 
-  // ctx.beginPath();
-  // ctx.arc( mouseCol + cursorRadius, mouseRow + cursorRadius, cursorRadius, 0, Math.PI * 2 );
-  // ctx.stroke();
+  ctx.beginPath();
+  ctx.arc( mouseCol + cursorRadius, mouseRow + cursorRadius, cursorRadius, 0, Math.PI * 2 );
+  ctx.stroke();
 }
 
 function pointerInput( m ) {
@@ -117,7 +118,7 @@ function pointerInput( m ) {
 
   if ( m.buttons > 0 ) {
 
-    const value = m.buttons === 1 ? 1 : 0;
+    const value = m.buttons === 1 ? 0 : 255;
 
     const mouseCol = Math.round( mouseX - cursorRadius );
     const mouseRow = Math.round( mouseY - cursorRadius );
@@ -129,12 +130,17 @@ function pointerInput( m ) {
 
         if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
           if ( Math.hypot( 0.5 + colOffset - cursorRadius, 0.5 + rowOffset - cursorRadius ) <= cursorRadius ) {
-            const index = col + row * cols;
-            map[ index ] = value;
+            const index = 4 * ( col + row * cols );
+            // map[ index ] = value;
+
+            maskData[ index + 3 ] = value;
           }
         }
       }
     }
+
+    // TODO: does dirty rect make any perf difference?
+    maskCtx.putImageData( maskImageData, 0, 0, mouseCol, mouseRow, cursorRadius * 2, cursorRadius * 2 );
   }
 
   gameCanvas.redraw();
@@ -144,7 +150,7 @@ gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
 
 gameCanvas.wheelInput = ( m ) => {
-  cursorRadius = Math.max( 0.5, Math.min( 10.5, cursorRadius + 0.5 * Math.sign( m.wheel ) ) );
+  cursorRadius = Math.max( 0.5, Math.min( 50.5, cursorRadius + 0.5 * Math.sign( m.wheel ) ) );
   gameCanvas.redraw();
 }
 

@@ -1,3 +1,17 @@
+8/10:
+  - Interactive carving of circles
+    - Can re-use existing maskData and keep calling putImageData
+      - Does dirty rect help us here?
+      - Probably makes things more complicated if we ever need to update several parts of map at once
+
+
+8/9:
+  - Generate fractal clouds for layers instead of all those circles?
+    - Since I'm doing a pixelated image anyway, can render noise per pixel
+  - Interactive carving of circles (like the last editor)
+  - Move character around screen and shoot projectiles that will make tiny circles on detected impact
+    - Will need some sort of collision test (sweep eventually?)
+
 8/6:
   - 2x2 could be fun to play with at higher resolutions
     - 32x32 could work for players same size as tile
