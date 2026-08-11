@@ -1,4 +1,5 @@
 import { GameCanvas } from '../src/common/GameCanvas.js';
+import { GameState } from '../src/common/GameState.js';
 import * as Util from '../src/common/Util.js';
 
 const Terrain = {
@@ -8,7 +9,11 @@ const Terrain = {
 };
 
 const cols = 320, rows = 240;
-const map = Array( cols * rows ).fill( Terrain.Dirt );
+
+const gameState = new GameState( 'tiles_maskMap_main' );
+gameState.map ??= Array( cols * rows ).fill( Terrain.Dirt );
+
+console.log( gameState.map );
 
 let mouseX, mouseY, cursorRadius = 10;
 
@@ -47,16 +52,28 @@ function createLayer( width, height, color ) {
 const maskImage = new OffscreenCanvas( cols, rows );
 const maskCtx = maskImage.getContext( '2d' );
 
-maskCtx.fillStyle = 'white';
-maskCtx.fillRect( 0, 0, cols, rows );
+// maskCtx.fillStyle = 'white';
+// maskCtx.fillRect( 0, 0, cols, rows );
 
 const maskImageData = maskCtx.getImageData( 0, 0, cols, rows );
 const maskData = maskImageData.data;
 
+for ( let index = 0; index < cols * rows; index ++ ) {
+  const maskIndex = 4 * index;
+  maskData[ maskIndex ] = 255;
+  maskData[ maskIndex + 1 ] = 255;
+  maskData[ maskIndex + 2 ] = 255;
+  maskData[ maskIndex + 3 ] = gameState.map[ index ] === Terrain.Empty ? 0 : 255;
+}
+
+maskCtx.putImageData( maskImageData, 0, 0 );
+
 function setTerrain( col, row, value ) {
-  const mapIndex = col + row * cols;
-  map[ mapIndex ] = value;
-  maskData[ 4 * mapIndex + 3 ] = value;
+  if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
+    const mapIndex = col + row * cols;
+    gameState.map[ mapIndex ] = value;
+    maskData[ 4 * mapIndex + 3 ] = value;
+  }
 }
 
 function setTerrainCircle( x, y, radius, value ) {
@@ -123,7 +140,7 @@ function pointerInput( m ) {
   if ( m.buttons > 0 ) {
     const value = m.buttons === 1 ? Terrain.Empty : Terrain.Dirt;
 
-    setTerrainCircle( mouseX, mouseY, cursorRadius, Terrain );
+    setTerrainCircle( mouseX, mouseY, cursorRadius, value );
 
     // TODO: does dirty rect make any perf difference?
     maskCtx.putImageData( maskImageData, 0, 0 );

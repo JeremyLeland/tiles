@@ -12,6 +12,14 @@
         - Also probably not that hard to update them both as changes are made
         - But if lots of changes are happening at once, then "every frame" becomes the base case
         - Can see if it's noticeable on laptop
+  - Looking at a Level object
+    - lets us implement toJSON(), which is something I should've been using much earlier on
+    - need to make some decisions on where mask image goes and how that gets kept in sync
+    - Ideally, I feel like Level shouldn't know anything about drawing
+    - Maybe it can have an updateMaskImage() function that takes in the mask data object?
+    - Test this separately from my maskMap test, since it's breaking things
+  - Forget all that. Don't worry about base64 for now, just save it as a big array. Who cares?
+    - Would only be an issue if storage size became an issue. No one actually has to look at this right now.
 
 
 8/9:
