@@ -1,3 +1,13 @@
+8/11:
+  - DONE: Did line versus level test
+  - DONE: How can I make this sweep for larger objects?
+    - Advance the edge of a circle?
+      - Check the center point + the radius from angle -PI/2 to angle + PI/2?
+      - How do I know how many points to check?
+        - Find out what the angle distance is per pixel
+        - Or, just do 10 of them for now?
+  - NEXT: Shoot projectiles, have them take out circles when they hit wall
+
 8/10:
   - Interactive carving of circles
     - Can re-use existing maskData and keep calling putImageData
