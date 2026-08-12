@@ -83,7 +83,7 @@ gameCanvas.draw = ( ctx ) => {
   ctx.fillStyle = 'green';
 
   ctx.beginPath();
-  ctx.arc( playerX, playerY, 10, 0, Math.PI * 2 );
+  ctx.arc( playerX, playerY, cursorRadius, 0, Math.PI * 2 );
   ctx.fill();
 
   ctx.strokeStyle = 'red';
@@ -94,6 +94,32 @@ gameCanvas.draw = ( ctx ) => {
   // Find collision point
   //
 
+  const hit = getHit();
+
+  if ( hit ) {
+    ctx.strokeStyle = 'yellow';
+    Util.drawLine( ctx, [ playerX, playerY ], hit );
+    Util.drawPoint( ctx, hit, cursorRadius );
+
+    // debug: what the test points look like
+    const lineAngle = Math.atan2( mouseY - playerY, mouseX - playerX );
+
+    const numChecks = cursorRadius * 2;
+
+    for ( let j = 0; j <= numChecks; j ++ ) {
+      for ( const dir of [ -1, 1 ] ) {
+        const testAngle = lineAngle + dir * ( j / numChecks ) * Math.PI / 2;
+        const x = hit[ 0 ] + Math.cos( testAngle ) * cursorRadius;
+        const y = hit[ 1 ] + Math.sin( testAngle ) * cursorRadius;
+
+        ctx.fillStyle = 'white';
+        Util.drawPoint( ctx, [ x, y ], 0.5 );
+      }
+    }
+  }
+}
+
+function getHit() {
   const lineLen = Math.hypot( mouseX - playerX, mouseY - playerY );
   const lineAngle = Math.atan2( mouseY - playerY, mouseX - playerX );
   const stepX = Math.cos( lineAngle );
@@ -101,21 +127,25 @@ gameCanvas.draw = ( ctx ) => {
 
   let testX = playerX, testY = playerY, foundHit = false;
 
-  for ( let i = 0; i < lineLen; i ++ ) {
-    const index = Math.floor( testX ) + Math.floor( testY ) * cols;
+  const numChecks = cursorRadius * 2;      // radius * 2 is all of the points; fewer checks will space these out
 
-    if ( map[ index ] === Terrain.Dirt ) {
-      foundHit = true;
-      break;
+  for ( let i = 0; i < lineLen; i ++ ) {
+    for ( let j = 0; j <= numChecks; j ++ ) {
+      for ( const dir of [ -1, 1 ] ) {
+        const testAngle = lineAngle + dir * ( j / numChecks ) * Math.PI / 2;
+        const x = testX + Math.cos( testAngle ) * cursorRadius;
+        const y = testY + Math.sin( testAngle ) * cursorRadius;
+
+        const index = Math.floor( x ) + Math.floor( y ) * cols;
+
+        if ( map[ index ] === Terrain.Dirt ) {
+          return [ testX, testY ];
+        }
+      }
     }
 
     testX += stepX;
     testY += stepY;
-  }
-
-  if ( foundHit ) {
-    ctx.strokeStyle = 'yellow';
-    Util.drawLine( ctx, [ playerX, playerY ], [ testX, testY ] );
   }
 }
 
