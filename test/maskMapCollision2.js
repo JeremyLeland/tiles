@@ -35,11 +35,14 @@ function setTerrain( col, row, value ) {
   if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
     const mapIndex = col + row * cols;
     map[ mapIndex ] = value;
-    maskData[ 4 * mapIndex + 3 ] = value;
+    maskData[ 4 * mapIndex + 3 ] = value === Terrain.Empty ? 0 : 255;
   }
 }
 
 function setTerrainCircle( x, y, radius, value ) {
+  x = Math.floor( x );
+  y = Math.floor( y );
+
   for ( let row = y - radius; row < y + radius; row ++ ) {
     for ( let col = x - radius; col < x + radius; col ++ ) {
       if ( Math.hypot( col - x, row - y ) < radius ) {
@@ -68,6 +71,11 @@ gameCanvas.update = ( dt ) => {
     const hit = getMapHit( map, bullet, dt );
     if ( hit ) {
       bullet.health = 0;
+
+      setTerrainCircle( bullet.pos[ 0 ], bullet.pos[ 1 ], bullet.radius * 4, Terrain.Empty );
+
+      maskCtx.putImageData( maskImageData, 0, 0 );
+
     }
     else {
       vec2.scaleAndAdd( bullet.pos, bullet.pos, bullet.vel, dt );
@@ -153,7 +161,7 @@ function pointerInput( m ) {
     bullets.push( {
       pos: [ playerX, playerY ],
       vel: [ Math.cos( lineAngle ) * bulletSpeed, Math.sin( lineAngle ) * bulletSpeed ],
-      radius: 2,
+      radius: 1,
       health: 1,
     } );
   }
