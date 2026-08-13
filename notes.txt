@@ -1,3 +1,10 @@
+8/12:
+  - DONE: Shoot projectiles
+  - DONE: Have them take out circles when hit wall
+    - It even stays near 60 fps on my laptop
+  - Can I use something similar to move the player?
+  
+
 8/11:
   - DONE: Did line versus level test
   - DONE: How can I make this sweep for larger objects?

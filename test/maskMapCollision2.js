@@ -11,8 +11,13 @@ const Terrain = {
 const cols = 320, rows = 240;
 const map = Array( cols * rows ).fill( Terrain.Dirt );
 
-let playerX = 100, playerY = 100;
-let mouseX, mouseY, cursorRadius = 10;
+let player = {
+  pos: [ 100, 100 ],
+  vel: [ 0, 0 ],
+  radius: 8,
+};
+
+const mousePos = [ 0, 0 ];
 
 let bullets = [];
 
@@ -67,6 +72,18 @@ const gameCanvas = new GameCanvas();
 gameCanvas.setBounds( 0, 0, cols, rows );
 
 gameCanvas.update = ( dt ) => {
+
+  const hit = getMapHit( map, player, dt );
+  if ( hit ) {
+    player.vel[ 0 ] = 0;
+    player.vel[ 1 ] = 0;
+  }
+  else {
+    vec2.scaleAndAdd( player.pos, player.pos, player.vel, dt );
+
+    player.vel[ 1 ] = 0.1;
+  }
+
   bullets.forEach( bullet => {
     const hit = getMapHit( map, bullet, dt );
     if ( hit ) {
@@ -107,13 +124,11 @@ gameCanvas.draw = ( ctx ) => {
   // ctx.lineWidth = 0.02;
   ctx.fillStyle = 'green';
 
-  ctx.beginPath();
-  ctx.arc( playerX, playerY, cursorRadius, 0, Math.PI * 2 );
-  ctx.fill();
+  Util.drawPoint( ctx, player.pos, player.radius );
 
   ctx.strokeStyle = 'red';
 
-  Util.drawLine( ctx, [ playerX, playerY ], [ mouseX, mouseY ] );
+  Util.drawLine( ctx, player.pos, mousePos );
 
   ctx.fillStyle = 'white';
   bullets.forEach( bullet => {
@@ -150,24 +165,44 @@ function getMapHit( map, entity, dt ) {
   }
 }
 
+document.addEventListener( 'keydown', e => {
+  if ( e.key === 'a' ) {
+    player.vel[ 0 ] = -0.1;
+  }
+  else if ( e.key === 'd' ) {
+    player.vel[ 0 ] = 0.1;
+  }
+} );
+
+document.addEventListener( 'keyup', e => {
+  if ( e.key === 'a' ) {
+    player.vel[ 0 ] = 0;
+  }
+  else if ( e.key === 'd' ) {
+    player.vel[ 0 ] = 0;
+  }
+} );
+
 function pointerInput( m ) {
-  mouseX = Math.floor( m.x );
-  mouseY = Math.floor( m.y );
+  mousePos[ 0 ] = Math.floor( m.x );
+  mousePos[ 1 ] = Math.floor( m.y );
 
   if ( m.buttons === 1 ) {
-    const lineAngle = Math.atan2( mouseY - playerY, mouseX - playerX );
+    const lineAngle = Math.atan2( mousePos[ 1 ] - player.pos[ 1 ], mousePos[ 0 ] - player.pos[ 0 ] );
     const bulletSpeed = 0.1;
 
+    const lineVec = [ Math.cos( lineAngle ), Math.sin( lineAngle ) ];
+
     bullets.push( {
-      pos: [ playerX, playerY ],
-      vel: [ Math.cos( lineAngle ) * bulletSpeed, Math.sin( lineAngle ) * bulletSpeed ],
+      pos: vec2.scaleAndAdd( [], player.pos, lineVec, player.radius ),
+      vel: vec2.scale( [], lineVec, bulletSpeed ),
       radius: 1,
       health: 1,
     } );
   }
   else if ( m.buttons === 2 ) {
-    playerX = mouseX;
-    playerY = mouseY;
+    player.pos[ 0 ] = mousePos[ 0 ];
+    player.pos[ 1 ] = mousePos[ 1 ];
   }
 
   // gameCanvas.redraw();
@@ -177,7 +212,6 @@ gameCanvas.pointerDown = pointerInput;
 gameCanvas.pointerMove = pointerInput;
 
 gameCanvas.wheelInput = ( m ) => {
-  cursorRadius = Math.max( 1, Math.min( 50, cursorRadius + Math.sign( m.wheel ) ) );
   // gameCanvas.redraw();
 }
 
