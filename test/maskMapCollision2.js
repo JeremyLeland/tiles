@@ -12,10 +12,14 @@ const cols = 320, rows = 240;
 const map = Array( cols * rows ).fill( Terrain.Dirt );
 
 let player = {
-  pos: [ 100, 100 ],
+  pos: [ 100, 175 ],
   vel: [ 0, 0 ],
   radius: 8,
+  movingLeft: false,
+  movingRight: false,
 };
+
+const PlayerMoveSpeed = 0.1;
 
 const mousePos = [ 0, 0 ];
 
@@ -73,16 +77,79 @@ gameCanvas.setBounds( 0, 0, cols, rows );
 
 gameCanvas.update = ( dt ) => {
 
-  const hit = getMapHit( map, player, dt );
-  if ( hit ) {
-    player.vel[ 0 ] = 0;
-    player.vel[ 1 ] = 0;
+  if ( player.movingLeft ) {
+    player.pos[ 0 ] -= PlayerMoveSpeed * dt;
   }
-  else {
-    vec2.scaleAndAdd( player.pos, player.pos, player.vel, dt );
 
-    player.vel[ 1 ] = 0.1;
+  if ( player.movingRight ) {
+    player.pos[ 0 ] += PlayerMoveSpeed * dt;
   }
+
+  // Find closest floor
+  const testCol = Math.floor( player.pos[ 0 ] );
+  for ( let yOffset = 0; yOffset < player.radius; yOffset ++ ) {
+    const testRow = Math.floor( player.pos[ 1 ] + yOffset );
+    const index = testCol + testRow * cols;
+    const value = map[ index ];
+
+    if ( value !== Terrain.Empty ) {
+      player.pos[ 1 ] = testRow - player.radius;
+      break;
+    }
+  }
+
+  // // Find slope under player
+  // {
+  //   const x = player.pos[ 0 ];
+  //   const y = player.pos[ 1 ] + player.radius;
+
+  //   const index = Math.floor( x ) + Math.floor( y ) * cols;
+
+  //   const floorY = Math.floor( y );
+  //   const floorValue = map[ index ];
+
+  //   if ( floorValue === Terrain.Dirt ) {
+  //     console.log( 'solid floor at ', floorY );
+  //   }
+
+  //   if ( player.movingLeft ) {
+  //     let leftY = floorY;
+
+  //     let leftIndex = index - 1;
+  //     let leftValue = map[ leftIndex ];
+
+  //     if ( leftValue === Terrain.Dirt ) {
+  //       console.log( 'solid left at ', leftY );
+
+  //       leftY --;
+  //       leftIndex -= cols;
+
+  //       leftValue = map[ leftIndex ];
+
+  //       if ( leftValue === Terrain.Empty ) {
+  //         console.log( 'empty left at ', leftY );
+  //       }
+  //     }
+
+  //   }
+  //   else if ( player.movingRight ) {
+  //     let rightIndex = index + 1;
+  //     const rightValue = map[ rightIndex ];
+  //   }
+
+  // }
+
+
+  // const hit = getMapHit( map, player, dt );
+  // if ( hit ) {
+  //   player.vel[ 0 ] = 0;
+  //   player.vel[ 1 ] = 0;
+  // }
+  // else {
+  //   vec2.scaleAndAdd( player.pos, player.pos, player.vel, dt );
+
+  //   player.vel[ 1 ] = 0.1;
+  // }
 
   bullets.forEach( bullet => {
     const hit = getMapHit( map, bullet, dt );
@@ -167,19 +234,19 @@ function getMapHit( map, entity, dt ) {
 
 document.addEventListener( 'keydown', e => {
   if ( e.key === 'a' ) {
-    player.vel[ 0 ] = -0.1;
+    player.movingLeft = true;
   }
   else if ( e.key === 'd' ) {
-    player.vel[ 0 ] = 0.1;
+    player.movingRight = true;
   }
 } );
 
 document.addEventListener( 'keyup', e => {
   if ( e.key === 'a' ) {
-    player.vel[ 0 ] = 0;
+    player.movingLeft = false;
   }
   else if ( e.key === 'd' ) {
-    player.vel[ 0 ] = 0;
+    player.movingRight = false;
   }
 } );
 

@@ -1,9 +1,20 @@
+8/13:
+  - Move playing left or right, then move them up to the closest floor
+  - In arcade style, let player move left or right while in the air
+    - It doesn't make any sense, but it feels wrong if you can't
+
 8/12:
   - DONE: Shoot projectiles
   - DONE: Have them take out circles when hit wall
     - It even stays near 60 fps on my laptop
   - Can I use something similar to move the player?
-  
+    - Something like getMapHit...check points around bottom, see which ones are open
+      - If one is open within that bottom arc, move player in that direction?
+        - No, that's all wrong
+  - Keep it real simple to start, ignore our sides
+    - Find the floor under us
+      - Check height of next column over (left or right)
+        - If that height is less than X pixels different (maybe 2 for now), move us up to that height  
 
 8/11:
   - DONE: Did line versus level test
