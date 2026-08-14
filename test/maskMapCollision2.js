@@ -21,7 +21,7 @@ let player = {
 };
 
 const Gravity = 0.0005;
-const PlayerMoveSpeed = 0.1;
+const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
 
 const mousePos = [ 0, 0 ];
@@ -95,7 +95,7 @@ gameCanvas.update = ( dt ) => {
 
   // Find closest floor
   const testCol = Math.floor( player.pos[ 0 ] );
-  for ( let yOffset = 0; yOffset <= player.radius; yOffset ++ ) {
+  for ( let yOffset = 0; yOffset <= player.radius + 2 /* so we go down hills? */; yOffset ++ ) {
     const testRow = Math.floor( player.pos[ 1 ] + yOffset );
     const index = testCol + testRow * cols;
     const value = map[ index ];

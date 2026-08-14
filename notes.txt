@@ -1,7 +1,13 @@
 8/13:
-  - Move playing left or right, then move them up to the closest floor
+  - DONE: Move playing left or right, then move them up to the closest floor
   - In arcade style, let player move left or right while in the air
     - It doesn't make any sense, but it feels wrong if you can't
+  - What about my earlier method of checking every spot in the half-circle?
+    - This should give me the first empty spot
+    - We could get a slope from bottom to first empty spot and travel along that?
+  - Floor finding works pretty well
+    - Need to prevent us from walking sideways through walls (or ceiling!)
+    - Should prevent us from moving up too steep of a slope
 
 8/12:
   - DONE: Shoot projectiles
