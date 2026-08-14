@@ -12,14 +12,17 @@ const cols = 320, rows = 240;
 const map = Array( cols * rows ).fill( Terrain.Dirt );
 
 let player = {
-  pos: [ 100, 175 ],
+  pos: [ 100, 100 ],
   vel: [ 0, 0 ],
   radius: 8,
-  movingLeft: false,
-  movingRight: false,
+  isMovingLeft: false,
+  isMovingRight: false,
+  isJumping: false,
 };
 
+const Gravity = 0.0005;
 const PlayerMoveSpeed = 0.1;
+const PlayerJumpSpeed = 0.15;
 
 const mousePos = [ 0, 0 ];
 
@@ -77,23 +80,29 @@ gameCanvas.setBounds( 0, 0, cols, rows );
 
 gameCanvas.update = ( dt ) => {
 
-  if ( player.movingLeft ) {
+  player.pos[ 0 ] += player.vel[ 0 ] * dt;
+  player.pos[ 1 ] += player.vel[ 1 ] * dt + ( Gravity / 2 ) * dt ** 2;
+
+  player.vel[ 1 ] += Gravity * dt;
+
+  if ( player.isMovingLeft ) {
     player.pos[ 0 ] -= PlayerMoveSpeed * dt;
   }
 
-  if ( player.movingRight ) {
+  if ( player.isMovingRight ) {
     player.pos[ 0 ] += PlayerMoveSpeed * dt;
   }
 
   // Find closest floor
   const testCol = Math.floor( player.pos[ 0 ] );
-  for ( let yOffset = 0; yOffset < player.radius; yOffset ++ ) {
+  for ( let yOffset = 0; yOffset <= player.radius; yOffset ++ ) {
     const testRow = Math.floor( player.pos[ 1 ] + yOffset );
     const index = testCol + testRow * cols;
     const value = map[ index ];
 
     if ( value !== Terrain.Empty ) {
       player.pos[ 1 ] = testRow - player.radius;
+      player.vel[ 1 ] = player.isJumping ? -PlayerJumpSpeed : 0;
       break;
     }
   }
@@ -234,19 +243,25 @@ function getMapHit( map, entity, dt ) {
 
 document.addEventListener( 'keydown', e => {
   if ( e.key === 'a' ) {
-    player.movingLeft = true;
+    player.isMovingLeft = true;
   }
   else if ( e.key === 'd' ) {
-    player.movingRight = true;
+    player.isMovingRight = true;
+  }
+  else if ( e.key === ' ' ) {
+    player.isJumping = true;
   }
 } );
 
 document.addEventListener( 'keyup', e => {
   if ( e.key === 'a' ) {
-    player.movingLeft = false;
+    player.isMovingLeft = false;
   }
   else if ( e.key === 'd' ) {
-    player.movingRight = false;
+    player.isMovingRight = false;
+  }
+  else if ( e.key === ' ' ) {
+    player.isJumping = false;
   }
 } );
 
