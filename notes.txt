@@ -1,3 +1,19 @@
+8/18:
+  - Right now, we are only checking for floors
+    - We should check in our direction of travel so we don't hit wall or ceilings
+    - Someday: try to unify the getMapHit used by bullets
+      - Move all entities by 1 unit in whatever their velocity is
+      - Check for collisions all around
+      - Either detonate or shift back depending on entity
+      - Use which parts of player hit to figure out vector to back off?
+  - Don't jump through ceiling
+  - Don't walk through walls
+    - Check all points around us?
+      - Does this help us know how to back out?
+      - Draw the points for now (as hit or not hit)
+      - Print the info we might use
+      - See if it's helpful
+
 8/13:
   - DONE: Move playing left or right, then move them up to the closest floor
   - In arcade style, let player move left or right while in the air
@@ -20,7 +36,7 @@
   - Keep it real simple to start, ignore our sides
     - Find the floor under us
       - Check height of next column over (left or right)
-        - If that height is less than X pixels different (maybe 2 for now), move us up to that height  
+        - If that height is less than X pixels different (maybe 2 for now), move us up to that height
 
 8/11:
   - DONE: Did line versus level test
@@ -212,7 +228,7 @@
   - DONE: Even out the horizontal on both sides
   - Technique works for horiz and vertical, pulled out into helper function
   - NEXT: Clicking at mid edges, should make a 30 degree wall instead of 45
-  
+
 7/29:
   - DONE: Place small diamond in empty corner
   - If two diamonds are placed next to each other, need to properly join them
