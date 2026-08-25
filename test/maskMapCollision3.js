@@ -66,10 +66,25 @@ function setTerrainCircle( x, y, radius, value ) {
   }
 }
 
-setTerrainCircle( 100, 100, 80, Terrain.Empty );
-setTerrainCircle( 200, 200, 60, Terrain.Empty );
-setTerrainCircle( 250, 50, 60, Terrain.Empty );
-setTerrainCircle( 170, 70, 30, Terrain.Empty );
+function setTerrainRect( x, y, width, height, value ) {
+  x = Math.floor( x );
+  y = Math.floor( y );
+
+  for ( let row = y; row < y + height; row ++ ) {
+    for ( let col = x; col < x + width; col ++ ) {
+      setTerrain( col, row, value );
+    }
+  }
+}
+
+// setTerrainCircle( 100, 100, 80, Terrain.Empty );
+// setTerrainCircle( 200, 200, 60, Terrain.Empty );
+// setTerrainCircle( 250, 50, 60, Terrain.Empty );
+// setTerrainCircle( 170, 70, 30, Terrain.Empty );
+
+setTerrainCircle( 50, 100, 50, Terrain.Empty );
+setTerrainRect( 50, 50, 200, 100, Terrain.Empty );
+setTerrainCircle( 250, 100, 50, Terrain.Empty );
 
 maskCtx.putImageData( maskImageData, 0, 0 );
 
@@ -93,12 +108,15 @@ gameCanvas.update = ( dt ) => {
 
   player.vel[ 1 ] += Gravity * dt;
 
+  // TODO: Move while in air?
   // if ( player.isMovingLeft ) {
-  //   player.pos[ 0 ] -= PlayerMoveSpeed * dt;
+  //   player.vel[ 0 ] = -PlayerMoveSpeed;
   // }
-
-  // if ( player.isMovingRight ) {
-  //   player.pos[ 0 ] += PlayerMoveSpeed * dt;
+  // else if ( player.isMovingRight ) {
+  //   player.vel[ 0 ] = PlayerMoveSpeed;
+  // }
+  // else {
+  //   player.vel[ 0 ] = 0;
   // }
 
   const moveDist = vec2.length( moveVec );
@@ -110,10 +128,14 @@ gameCanvas.update = ( dt ) => {
 
   // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
   function doMove() {
+    console.log( 'doMove' );
     for ( let i = 0; i <= moveDist; i ++ ) {
       for ( let j = 0; j <= numChecks; j ++ ) {
         for ( const dir of [ -1, 1 ] ) {
           const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
+
+          console.log( '\ttestAngle', testAngle );
+
           const x = player.pos[ 0 ] + Math.cos( testAngle ) * player.radius;
           const y = player.pos[ 1 ] + Math.sin( testAngle ) * player.radius;
 
@@ -122,9 +144,11 @@ gameCanvas.update = ( dt ) => {
           if ( map[ index ] === Terrain.Dirt ) {
             // console.log( `hit at ${ x },${ y } angle ${ testAngle }` );
 
-            vec2.add( player.pos, player.pos, [ -Math.cos( testAngle ), -Math.sin( testAngle ) ] );
+            // vec2.add( player.pos, player.pos, [ -Math.cos( testAngle ), -Math.sin( testAngle ) ] );
 
-            return;
+            player.vel[ 1 ] = 0;
+
+            return testAngle;
           }
         }
       }
@@ -133,7 +157,22 @@ gameCanvas.update = ( dt ) => {
     }
   }
 
-  doMove();
+  const angleToFloor = doMove();
+
+  if ( angleToFloor ) {
+    const floorAngle = angleToFloor - Math.PI / 2;
+    console.log( 'floorAngle = ', floorAngle );
+
+    if ( player.isMovingLeft ) {
+      // TODO: Needs collision check
+      vec2.scaleAndAdd( player.pos, player.pos, [ Math.cos( floorAngle ), Math.sin( floorAngle ) ], -PlayerMoveSpeed * dt );
+    }
+    else if ( player.isMovingRight ) {
+
+      // TODO: Needs collision check
+      vec2.scaleAndAdd( player.pos, player.pos, [ Math.cos( floorAngle ), Math.sin( floorAngle ) ], PlayerMoveSpeed * dt );
+    }
+  }
 
   //
   // Bullets
@@ -192,27 +231,27 @@ gameCanvas.draw = ( ctx ) => {
 
   // Check points around player for hit
 
-  const moveAngle = Math.atan2( player.vel[ 1 ], player.vel[ 0 ] );
-  const numChecks = player.radius;// * 2;      // radius * 2 is all of the points; fewer checks will space these out
+  // const moveAngle = Math.atan2( player.vel[ 1 ], player.vel[ 0 ] );
+  // const numChecks = player.radius;// * 2;      // radius * 2 is all of the points; fewer checks will space these out
 
-  for ( let j = 0; j <= numChecks; j ++ ) {
-    for ( const dir of [ -1, 1 ] ) {
-      const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
-      const x = player.pos[ 0 ] + Math.cos( testAngle ) * player.radius;
-      const y = player.pos[ 1 ] + Math.sin( testAngle ) * player.radius;
+  // for ( let j = 0; j <= numChecks; j ++ ) {
+  //   for ( const dir of [ -1, 1 ] ) {
+  //     const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
+  //     const x = player.pos[ 0 ] + Math.cos( testAngle ) * player.radius;
+  //     const y = player.pos[ 1 ] + Math.sin( testAngle ) * player.radius;
 
-      const index = Math.floor( x ) + Math.floor( y ) * cols;
+  //     const index = Math.floor( x ) + Math.floor( y ) * cols;
 
-      if ( map[ index ] === Terrain.Dirt ) {
-        ctx.fillStyle = 'red';
-      }
-      else {
-        ctx.fillStyle = 'lime';
-      }
+  //     if ( map[ index ] === Terrain.Dirt ) {
+  //       ctx.fillStyle = 'red';
+  //     }
+  //     else {
+  //       ctx.fillStyle = 'lime';
+  //     }
 
-      Util.drawPoint( ctx, [ x, y ], 0.5 );
-    }
-  }
+  //     Util.drawPoint( ctx, [ x, y ], 0.5 );
+  //   }
+  // }
 
   //
   // Bullets

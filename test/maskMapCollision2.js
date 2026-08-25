@@ -85,80 +85,51 @@ gameCanvas.update = ( dt ) => {
 
   player.vel[ 1 ] += Gravity * dt;
 
-  if ( player.isMovingLeft ) {
-    player.pos[ 0 ] -= PlayerMoveSpeed * dt;
-  }
+  // Handle separately below?
+  // if ( player.isMovingLeft ) {
+  //   player.pos[ 0 ] -= PlayerMoveSpeed * dt;
+  // }
 
-  if ( player.isMovingRight ) {
-    player.pos[ 0 ] += PlayerMoveSpeed * dt;
-  }
+  // if ( player.isMovingRight ) {
+  //   player.pos[ 0 ] += PlayerMoveSpeed * dt;
+  // }
 
   // Find closest floor
-  const testCol = Math.floor( player.pos[ 0 ] );
-  for ( let yOffset = 0; yOffset <= player.radius + 2 /* so we go down hills? */; yOffset ++ ) {
-    const testRow = Math.floor( player.pos[ 1 ] + yOffset );
-    const index = testCol + testRow * cols;
-    const value = map[ index ];
+  const fallFloor = getFloorUnder( map, player.pos[ 0 ], player.pos[ 1 ], player.radius /* TODO: Should we include move distance in here? */ );
 
-    if ( value !== Terrain.Empty ) {
-      player.pos[ 1 ] = testRow - player.radius;
-      player.vel[ 1 ] = player.isJumping ? -PlayerJumpSpeed : 0;
-      break;
+  if ( fallFloor !== undefined ) {
+    player.pos[ 1 ] = fallFloor - player.radius;
+    player.vel[ 1 ] = player.isJumping ? -PlayerJumpSpeed : 0;
+  }
+
+  if ( player.isMovingLeft ) {
+    const testX = player.pos[ 0 ] - 1;
+    const testY = player.pos[ 1 ];
+    const floor = getFloorUnder( map, testX, testY, player.radius + 2 /* so we go down hills? */ );
+
+    if ( floor === undefined ) {
+      player.pos[ 0 ] = testX;
+    }
+    else if ( floor > testY + player.radius - 2 ) {
+      player.pos[ 0 ] = testX;
+      player.pos[ 1 ] = floor - player.radius;
     }
   }
 
-  // // Find slope under player
-  // {
-  //   const x = player.pos[ 0 ];
-  //   const y = player.pos[ 1 ] + player.radius;
+  else if ( player.isMovingRight ) {
+    const testX = player.pos[ 0 ] + 1;
+    const testY = player.pos[ 1 ];
+    const floor = getFloorUnder( map, testX, testY, player.radius + 2 /* so we go down hills? */ );
 
-  //   const index = Math.floor( x ) + Math.floor( y ) * cols;
+    if ( floor === undefined ) {
+      player.pos[ 0 ] = testX;
+    }
+    else if ( floor > testY + player.radius - 2 ) {
+      player.pos[ 0 ] = testX;
+      player.pos[ 1 ] = floor - player.radius;
+    }
+  }
 
-  //   const floorY = Math.floor( y );
-  //   const floorValue = map[ index ];
-
-  //   if ( floorValue === Terrain.Dirt ) {
-  //     console.log( 'solid floor at ', floorY );
-  //   }
-
-  //   if ( player.movingLeft ) {
-  //     let leftY = floorY;
-
-  //     let leftIndex = index - 1;
-  //     let leftValue = map[ leftIndex ];
-
-  //     if ( leftValue === Terrain.Dirt ) {
-  //       console.log( 'solid left at ', leftY );
-
-  //       leftY --;
-  //       leftIndex -= cols;
-
-  //       leftValue = map[ leftIndex ];
-
-  //       if ( leftValue === Terrain.Empty ) {
-  //         console.log( 'empty left at ', leftY );
-  //       }
-  //     }
-
-  //   }
-  //   else if ( player.movingRight ) {
-  //     let rightIndex = index + 1;
-  //     const rightValue = map[ rightIndex ];
-  //   }
-
-  // }
-
-
-  // const hit = getMapHit( map, player, dt );
-  // if ( hit ) {
-  //   player.vel[ 0 ] = 0;
-  //   player.vel[ 1 ] = 0;
-  // }
-  // else {
-  //   vec2.scaleAndAdd( player.pos, player.pos, player.vel, dt );
-
-  //   player.vel[ 1 ] = 0.1;
-  // }
 
   bullets.forEach( bullet => {
     const hit = getMapHit( map, bullet, dt );
@@ -176,6 +147,20 @@ gameCanvas.update = ( dt ) => {
   } );
 
   bullets = bullets.filter( b => b.health > 0 );
+}
+
+function getFloorUnder( map, x, y, testDist ) {
+  const testCol = Math.floor( x );
+
+  for ( let yOffset = 0; yOffset <= testDist; yOffset ++ ) {
+    const testRow = Math.floor( y + yOffset );
+    const index = testCol + testRow * cols;
+    const value = map[ index ];
+
+    if ( value !== Terrain.Empty ) {
+      return testRow;
+    }
+  }
 }
 
 gameCanvas.draw = ( ctx ) => {
@@ -250,6 +235,9 @@ document.addEventListener( 'keydown', e => {
   }
   else if ( e.key === ' ' ) {
     player.isJumping = true;
+  }
+  else if ( e.key === 'p' ) {
+    gameCanvas.toggle();
   }
 } );
 

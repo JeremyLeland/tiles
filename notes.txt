@@ -1,3 +1,26 @@
+8/20:
+  - Trying fall and walk as separate steps of update
+  - Works ok for walking along slopes
+  - Need to be able to walk off edge, though
+
+8/19:
+  - Trying testing from top instead of bottom?
+    - Where is it testing from now?
+      - Not sure where to go with this. Find start and end point and get angle from that?
+        - Feels janky and complicated and fragile
+        - Leaning toward going back to floor finding
+          - Prevent from jumping more than X pixels up (1? 2?)
+          - Need to decide how to avoid overlap with wall
+          - Should I think of this as a rectangle instead of a circle?
+            - The original worms were taller than wide, I think
+            - Maybe if they aren't as wide, there's less issue with overlap and you just fudge it
+  - Back to floor finding, just try to make it better?
+    - How to deal with moving X taking us on a slope too steep?
+    - Maybe we need to do this in two steps
+      1) Find our falling floor, see if we're on the ground
+      2) If we're on the ground, move if applicable
+        - Find what our next floor would be after movement and only move if delta less than 2 or whatever
+
 8/18:
   - Right now, we are only checking for floors
     - We should check in our direction of travel so we don't hit wall or ceilings
@@ -10,9 +33,29 @@
   - Don't walk through walls
     - Check all points around us?
       - Does this help us know how to back out?
+        - Yes, it seems to!
       - Draw the points for now (as hit or not hit)
       - Print the info we might use
       - See if it's helpful
+      - This gives us an angle to back off of, and doing that makes us slide down slopes until they are less steep
+        - Could probably tweak the amount of back-off. Seems to kind of work for now, though!
+  - If I try to set vel to 0 on hit with ground, we jitter on the floor
+    - Maybe we're backing off too much?
+    - Was trying to incorporate left/right movement into velocity, but that made things very jittery too
+  - Make test be a rounded rectangle
+    - Should be able to move smoothly back and forth on flat ground
+    - Should be able to walk part-way up slope
+  - What if instead of backing off, we just don't move any further?
+    - Then allow player to walk parallel to the slope found?
+      - Maybe add/remove PI/2 to the floor vector, then let player move in that direction?
+      - Hopefully this would avoid the bouncing and give us a clear walk vector
+        - What if it's walking into a wall, though? Do we need to check every bit of this again?
+          - Maybe its simpler to just check/adjust all the moving one time
+        - You would do two phases.
+          - One check for physics, then after we determine we're on land and walking, another check for walking
+          - They're two different types of movement, so two different collision phases seems reasonable
+      - Trying this, but it's not properly detecting slopes
+        - Need to start check from top instead of bottom?
 
 8/13:
   - DONE: Move playing left or right, then move them up to the closest floor
