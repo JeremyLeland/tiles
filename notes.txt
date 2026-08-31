@@ -1,4 +1,12 @@
-8/20:
+8/31:
+  - Before dealing with walking stuff, deal with jumping into ceilings
+    - Should bounce off, not get moved up like it's a floor
+8/26:
+  - After we verify the next walking step is an ok slope, test the half circle for wall collision
+    - Half circle to left or right depending on walk
+    - Draw test points to get sense if we're testing too far away (will we always hit floor with this?)
+
+8/25:
   - Trying fall and walk as separate steps of update
   - Works ok for walking along slopes
   - Need to be able to walk off edge, though

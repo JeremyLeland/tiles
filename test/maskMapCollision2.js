@@ -64,10 +64,26 @@ function setTerrainCircle( x, y, radius, value ) {
   }
 }
 
-setTerrainCircle( 100, 100, 80, Terrain.Empty );
-setTerrainCircle( 200, 200, 60, Terrain.Empty );
-setTerrainCircle( 250, 50, 60, Terrain.Empty );
-setTerrainCircle( 170, 70, 30, Terrain.Empty );
+function setTerrainRect( x, y, width, height, value ) {
+  x = Math.floor( x );
+  y = Math.floor( y );
+
+  for ( let row = y; row < y + height; row ++ ) {
+    for ( let col = x; col < x + width; col ++ ) {
+      setTerrain( col, row, value );
+    }
+  }
+}
+
+// setTerrainCircle( 100, 100, 80, Terrain.Empty );
+// setTerrainCircle( 200, 200, 60, Terrain.Empty );
+// setTerrainCircle( 250, 50, 60, Terrain.Empty );
+// setTerrainCircle( 170, 70, 30, Terrain.Empty );
+
+
+setTerrainCircle( 50, 100, 15, Terrain.Empty );
+setTerrainRect( 50, 85, 200, 30, Terrain.Empty );
+setTerrainCircle( 250, 100, 15, Terrain.Empty );
 
 maskCtx.putImageData( maskImageData, 0, 0 );
 
@@ -80,10 +96,35 @@ gameCanvas.setBounds( 0, 0, cols, rows );
 
 gameCanvas.update = ( dt ) => {
 
-  player.pos[ 0 ] += player.vel[ 0 ] * dt;
-  player.pos[ 1 ] += player.vel[ 1 ] * dt + ( Gravity / 2 ) * dt ** 2;
+
+  const moveVec = [
+    player.vel[ 0 ] * dt,
+    player.vel[ 1 ] * dt + ( Gravity / 2 ) * dt ** 2,
+  ];
 
   player.vel[ 1 ] += Gravity * dt;
+
+  const moveDist = vec2.length( moveVec );
+  const moveAngle = Math.atan2( moveVec[ 1 ], moveVec[ 0 ] );
+
+  const moveStep = vec2.normalize( [], moveVec );
+
+   // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
+  for ( let i = 0; i <= moveDist; i ++ ) {
+    if ( testMapHit( map, player.pos[ 0 ], player.pos[ 1 ], player.radius, moveAngle ) ) {
+      player.vel[ 0 ] = 0;
+      player.vel[ 1 ] = 0;
+      break;
+    }
+    else {
+      vec2.add( player.pos, player.pos, moveStep );
+    }
+  }
+
+  // player.pos[ 0 ] += player.vel[ 0 ] * dt;
+  // player.pos[ 1 ] += player.vel[ 1 ] * dt + ( Gravity / 2 ) * dt ** 2;
+
+  // player.vel[ 1 ] += Gravity * dt;
 
   // Handle separately below?
   // if ( player.isMovingLeft ) {
@@ -93,6 +134,11 @@ gameCanvas.update = ( dt ) => {
   // if ( player.isMovingRight ) {
   //   player.pos[ 0 ] += PlayerMoveSpeed * dt;
   // }
+
+
+  // NOTE: This currently only checks directly under us (at center x)
+  //       So if another part of us is resting on a pixel, it won't count
+  // TODO: Come up with another way of doing this
 
   // Find closest floor
   const fallFloor = getFloorUnder( map, player.pos[ 0 ], player.pos[ 1 ], player.radius /* TODO: Should we include move distance in here? */ );
@@ -161,6 +207,26 @@ function getFloorUnder( map, x, y, testDist ) {
       return testRow;
     }
   }
+}
+
+function testMapHit( map, x, y, radius, moveAngle ) {
+  const numChecks = radius * 2;      // radius * 2 is all of the points; fewer checks will space these out
+
+  for ( let j = 0; j <= numChecks; j ++ ) {
+    for ( const dir of [ -1, 1 ] ) {
+      const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
+      const testX = x + Math.cos( testAngle ) * radius;
+      const testY = y + Math.sin( testAngle ) * radius;
+
+      const index = Math.floor( testX ) + Math.floor( testY ) * cols;
+
+      if ( map[ index ] !== Terrain.Empty ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 gameCanvas.draw = ( ctx ) => {
