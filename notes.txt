@@ -1,6 +1,9 @@
 8/31:
   - Before dealing with walking stuff, deal with jumping into ceilings
     - Should bounce off, not get moved up like it's a floor
+  - Checking edge of circle for collisions gives different answers than checking for floor
+    - So sometimes we stop from a fall but it isn't detected as being on the floor to walk/jump
+  - Still need to utilize partial-move-then-check-collision for walking (so we don't walk partway into walls)
 8/26:
   - After we verify the next walking step is an ok slope, test the half circle for wall collision
     - Half circle to left or right depending on walk
