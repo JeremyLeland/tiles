@@ -99,6 +99,14 @@ gameCanvas.setBounds( 0, 0, cols, rows );
 gameCanvas.update = ( dt ) => {
 
   entities.forEach( entity => {
+
+    if ( entity.isMovingLeft ) {
+      entity.vel[ 0 ] = -PlayerMoveSpeed;
+    }
+    else if ( entity.isMovingRight ) {
+      entity.vel[ 0 ] = PlayerMoveSpeed;
+    }
+
     const moveVec = [
       entity.vel[ 0 ] * dt,
       entity.vel[ 1 ] * dt + ( Gravity / 2 ) * dt ** 2,
@@ -121,10 +129,19 @@ gameCanvas.update = ( dt ) => {
 
     const moveStep = vec2.normalize( [], moveVec );
 
-      // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
-    for ( let i = 0; i <= moveDist; i ++ ) {
+    // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
+    for ( let testDist = 0; testDist <= moveDist; testDist ++ ) {
+    // for ( let testDist = 0; testDist < moveDist; testDist += Math.min( 1, moveDist - testDist ) ) {
+      // const nextX = entity.pos[ 0 ] + moveStep[ 0 ];
+      // const nextY = entity.pos[ 1 ] + moveStep[ 1 ];
+      // const hitAngle = testMapHit( map, nextX, nextY, entity.radius, moveAngle );
+
       const hitAngle = testMapHit( map, entity.pos[ 0 ], entity.pos[ 1 ], entity.radius, moveAngle );
+
       if ( undefined === hitAngle ) {
+        // entity.pos[ 0 ] = nextX;
+        // entity.pos[ 1 ] = nextY;
+
         vec2.add( entity.pos, entity.pos, moveStep );
       }
       else {
@@ -133,10 +150,35 @@ gameCanvas.update = ( dt ) => {
           entity.vel[ 1 ] = 0;
 
           // If we're on the floor
-          if ( 1 < hitAngle && hitAngle < 2 ) {
+          if ( 0 < hitAngle && hitAngle < Math.PI ) {
 
-            if ( player.isJumping ) {
-              player.vel[ 1 ] = -PlayerJumpSpeed;
+            // const floor = getFloorUnder( map, entity.pos[ 0 ], entity.pos[ 1 ], entity.radius + 1 );    // need +1 because we're so far off?
+
+            // // The "check next" method above has us stop slightly above the floor
+            // // "Check next" seems to work better for bouncing off walls, so fix the difference by snapping us to the floor
+            // if ( undefined !== floor ) {
+            //   entity.pos[ 1 ] = floor - entity.radius;
+            // }
+
+            if ( entity.isJumping ) {
+              // entity.vel[ 0 ] = PlayerMoveSpeed * ( entity.isMovingLeft ? -1 : entity.isMovingRight ? 1 : 0 );
+              entity.vel[ 1 ] = -PlayerJumpSpeed;
+            }
+
+            if ( entity.isMovingLeft || entity.isMovingRight ) {
+              const testX = entity.pos[ 0 ] + ( entity.isMovingLeft ? -1 : 1 );
+              const testY = entity.pos[ 1 ];
+              const floor = getFloorUnder( map, testX, testY, entity.radius + 2 /* so we go down hills? */ );
+
+              // TODO: Need to make sure we aren't walking through a wall here
+
+              if ( undefined === floor ) {
+                entity.pos[ 0 ] = testX;
+              }
+              else if ( floor > testY + entity.radius - 2 ) {
+                entity.pos[ 0 ] = testX;
+                entity.pos[ 1 ] = floor - entity.radius;
+              }
             }
           }
         }

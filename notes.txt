@@ -4,6 +4,14 @@
   - Checking edge of circle for collisions gives different answers than checking for floor
     - So sometimes we stop from a fall but it isn't detected as being on the floor to walk/jump
   - Still need to utilize partial-move-then-check-collision for walking (so we don't walk partway into walls)
+  - Changed falling to step through and check against map instead of just finding the floor
+    - Now how do we walk?
+  - There's an annoying off-by-one with the floor when we use 'check next' to move
+    - But we stick to the ceiling when we don't
+      - Need to reconicle this
+        - Also hit stick-to-ceiling in some uneven ceiling cases with 'check next', so we need to resolve this another way
+        - Don't keep resetting vel[1] to 0?
+          - Only do it if vel is less than 0?
 8/26:
   - After we verify the next walking step is an ok slope, test the half circle for wall collision
     - Half circle to left or right depending on walk
