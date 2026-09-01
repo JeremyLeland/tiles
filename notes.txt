@@ -12,6 +12,18 @@
         - Also hit stick-to-ceiling in some uneven ceiling cases with 'check next', so we need to resolve this another way
         - Don't keep resetting vel[1] to 0?
           - Only do it if vel is less than 0?
+
+  - The two methods I'm trying seem to be:
+    1) Never allow us to collide
+      - Check if next step would make us collide before allowing move there, halt if it does
+      - This feels more correct, but leaves extra space
+      - I think the problem is we are checking too far ahead
+        - Should we check at radius - 0.5?
+    2) Stop once we're colliding
+      - This matches better with what floor walking gives us, but gets us stuck more
+  - Detour: if we're going to be all pixelly about this, rasterize player at 320x240 and see how that compares for collisions
+    - Maybe this will make more obvious which method is giving us better answers?
+
 8/26:
   - After we verify the next walking step is an ok slope, test the half circle for wall collision
     - Half circle to left or right depending on walk

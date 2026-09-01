@@ -93,6 +93,9 @@ maskCtx.putImageData( maskImageData, 0, 0 );
 const foregroundImage = new OffscreenCanvas( cols, rows );
 const foregroundCtx = foregroundImage.getContext( '2d' );
 
+const entitiesImage = new OffscreenCanvas( cols, rows );
+const entitiesCtx = entitiesImage.getContext( '2d' );
+
 const gameCanvas = new GameCanvas();
 gameCanvas.setBounds( 0, 0, cols, rows );
 
@@ -114,16 +117,6 @@ gameCanvas.update = ( dt ) => {
 
     entity.vel[ 1 ] += Gravity * dt;
 
-
-    // Handle separately below?
-    // if ( player.isMovingLeft ) {
-    //   player.pos[ 0 ] -= PlayerMoveSpeed * dt;
-    // }
-
-    // if ( player.isMovingRight ) {
-    //   player.pos[ 0 ] += PlayerMoveSpeed * dt;
-    // }
-
     const moveDist = vec2.length( moveVec );
     const moveAngle = Math.atan2( moveVec[ 1 ], moveVec[ 0 ] );
 
@@ -132,33 +125,29 @@ gameCanvas.update = ( dt ) => {
     // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
     for ( let testDist = 0; testDist <= moveDist; testDist ++ ) {
     // for ( let testDist = 0; testDist < moveDist; testDist += Math.min( 1, moveDist - testDist ) ) {
-      // const nextX = entity.pos[ 0 ] + moveStep[ 0 ];
-      // const nextY = entity.pos[ 1 ] + moveStep[ 1 ];
-      // const hitAngle = testMapHit( map, nextX, nextY, entity.radius, moveAngle );
+      const nextX = entity.pos[ 0 ] + moveStep[ 0 ];
+      const nextY = entity.pos[ 1 ] + moveStep[ 1 ];
+      const hitAngle = testMapHit( map, nextX, nextY, entity.radius, moveAngle );
 
-      const hitAngle = testMapHit( map, entity.pos[ 0 ], entity.pos[ 1 ], entity.radius, moveAngle );
+      // const hitAngle = testMapHit( map, entity.pos[ 0 ], entity.pos[ 1 ], entity.radius, moveAngle );
 
       if ( undefined === hitAngle ) {
-        // entity.pos[ 0 ] = nextX;
-        // entity.pos[ 1 ] = nextY;
+        entity.pos[ 0 ] = nextX;
+        entity.pos[ 1 ] = nextY;
 
-        vec2.add( entity.pos, entity.pos, moveStep );
+        // vec2.add( entity.pos, entity.pos, moveStep );
       }
       else {
         if ( entity.type === 'player' ) {
+
+          // console.log( 'player hit at angle ' + hitAngle );
+
           entity.vel[ 0 ] = 0;
           entity.vel[ 1 ] = 0;
 
+
           // If we're on the floor
           if ( 0 < hitAngle && hitAngle < Math.PI ) {
-
-            // const floor = getFloorUnder( map, entity.pos[ 0 ], entity.pos[ 1 ], entity.radius + 1 );    // need +1 because we're so far off?
-
-            // // The "check next" method above has us stop slightly above the floor
-            // // "Check next" seems to work better for bouncing off walls, so fix the difference by snapping us to the floor
-            // if ( undefined !== floor ) {
-            //   entity.pos[ 1 ] = floor - entity.radius;
-            // }
 
             if ( entity.isJumping ) {
               // entity.vel[ 0 ] = PlayerMoveSpeed * ( entity.isMovingLeft ? -1 : entity.isMovingRight ? 1 : 0 );
@@ -181,6 +170,8 @@ gameCanvas.update = ( dt ) => {
               }
             }
           }
+
+          // console.log( entity.pos );
         }
 
         if ( entity.type === 'bullet' ) {
@@ -193,49 +184,7 @@ gameCanvas.update = ( dt ) => {
         break;
       }
     }
-
   } );
-
-
-  // NOTE: This currently only checks directly under us (at center x)
-  //       So if another part of us is resting on a pixel, it won't count
-  // TODO: Come up with another way of doing this
-
-  // Find closest floor
-  // const fallFloor = getFloorUnder( map, player.pos[ 0 ], player.pos[ 1 ], player.radius /* TODO: Should we include move distance in here? */ );
-
-  // if ( fallFloor !== undefined ) {
-  //   player.pos[ 1 ] = fallFloor - player.radius;
-  //   player.vel[ 1 ] = player.isJumping ? -PlayerJumpSpeed : 0;
-  // }
-
-  // if ( player.isMovingLeft ) {
-  //   const testX = player.pos[ 0 ] - 1;
-  //   const testY = player.pos[ 1 ];
-  //   const floor = getFloorUnder( map, testX, testY, player.radius + 2 /* so we go down hills? */ );
-
-  //   if ( floor === undefined ) {
-  //     player.pos[ 0 ] = testX;
-  //   }
-  //   else if ( floor > testY + player.radius - 2 ) {
-  //     player.pos[ 0 ] = testX;
-  //     player.pos[ 1 ] = floor - player.radius;
-  //   }
-  // }
-
-  // else if ( player.isMovingRight ) {
-  //   const testX = player.pos[ 0 ] + 1;
-  //   const testY = player.pos[ 1 ];
-  //   const floor = getFloorUnder( map, testX, testY, player.radius + 2 /* so we go down hills? */ );
-
-  //   if ( floor === undefined ) {
-  //     player.pos[ 0 ] = testX;
-  //   }
-  //   else if ( floor > testY + player.radius - 2 ) {
-  //     player.pos[ 0 ] = testX;
-  //     player.pos[ 1 ] = floor - player.radius;
-  //   }
-  // }
 
   entities = entities.filter( b => b.health > 0 );
 }
@@ -266,8 +215,8 @@ function testMapHit( map, x, y, radius, moveAngle ) {
   for ( let j = 0; j <= numChecks; j ++ ) {
     for ( const dir of [ -1, 1 ] ) {
       const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
-      const testX = x + Math.cos( testAngle ) * radius;
-      const testY = y + Math.sin( testAngle ) * radius;
+      const testX = x + Math.cos( testAngle ) * ( radius - 0.5 );
+      const testY = y + Math.sin( testAngle ) * ( radius - 0.5 );
 
       const index = Math.floor( testX ) + Math.floor( testY ) * cols;
 
@@ -293,23 +242,47 @@ gameCanvas.draw = ( ctx ) => {
 
   ctx.drawImage( foregroundImage, 0, 0 );
 
-  //
-  // Cursor
-  //
+  entitiesCtx.clearRect( 0, 0, cols, rows );
 
-  // ctx.lineWidth = 0.02;
   entities.forEach( entity => {
     if ( entity.type === 'player' ) {
-      ctx.fillStyle = 'green';
-      Util.drawPoint( ctx, player.pos, player.radius );
-      ctx.strokeStyle = 'red';
-      Util.drawLine( ctx, player.pos, mousePos );
+      entitiesCtx.fillStyle = 'green';
+      Util.drawPoint( entitiesCtx, entity.pos, entity.radius );
+      entitiesCtx.strokeStyle = 'red';
+      Util.drawLine( entitiesCtx, entity.pos, mousePos );
+
+      // // Check points around player for hit
+
+      // const moveAngle = Math.atan2( entity.vel[ 1 ], entity.vel[ 0 ] );
+      // const numChecks = entity.radius * 2;      // radius * 2 is all of the points; fewer checks will space these out
+
+      // for ( let j = 0; j <= numChecks; j ++ ) {
+      //   for ( const dir of [ -1, 1 ] ) {
+      //     const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
+      //     const x = entity.pos[ 0 ] + Math.cos( testAngle ) * entity.radius;
+      //     const y = entity.pos[ 1 ] + Math.sin( testAngle ) * entity.radius;
+
+      //     const index = Math.floor( x ) + Math.floor( y ) * cols;
+
+      //     if ( map[ index ] === Terrain.Dirt ) {
+      //       entitiesCtx.fillStyle = 'red';
+      //     }
+      //     else {
+      //       entitiesCtx.fillStyle = 'lime';
+      //     }
+
+      //     Util.drawPoint( entitiesCtx, [ x, y ], 0.5 );
+      //   }
+      // }
+
     }
     else if ( entity.type === 'bullet' ) {
-      ctx.fillStyle = 'white';
-      Util.drawPoint( ctx, entity.pos, entity.radius );
+      entitiesCtx.fillStyle = 'white';
+      Util.drawPoint( entitiesCtx, entity.pos, entity.radius );
     }
   } );
+
+  ctx.drawImage( entitiesImage, 0, 0 );
 }
 
 document.addEventListener( 'keydown', e => {
