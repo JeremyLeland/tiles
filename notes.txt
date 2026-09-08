@@ -19,10 +19,15 @@
       - This feels more correct, but leaves extra space
       - I think the problem is we are checking too far ahead
         - Should we check at radius - 0.5?
+          - Actually, this seems to help a lot
     2) Stop once we're colliding
       - This matches better with what floor walking gives us, but gets us stuck more
   - Detour: if we're going to be all pixelly about this, rasterize player at 320x240 and see how that compares for collisions
     - Maybe this will make more obvious which method is giving us better answers?
+
+  - Made my collision/walk code play nicer together
+    - No longer get stuck on flat ceilings
+    - Still can get stuck on curved walls. Need to figure this out better.
 
 8/26:
   - After we verify the next walking step is an ok slope, test the half circle for wall collision
