@@ -22,6 +22,8 @@ let player = {
   health: 100,
 };
 
+let DEBUG_moveAngle = 0;
+
 const Gravity = 0.0005;
 const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
@@ -120,6 +122,8 @@ gameCanvas.update = ( dt ) => {
     const moveDist = vec2.length( moveVec );
     const moveAngle = Math.atan2( moveVec[ 1 ], moveVec[ 0 ] );
 
+    DEBUG_moveAngle = moveAngle;
+
     const moveStep = vec2.normalize( [], moveVec );
 
     // TODO: Will this have weird not-quite-long-enough issues with non-integer line lengths?
@@ -161,10 +165,12 @@ gameCanvas.update = ( dt ) => {
 
               // TODO: Need to make sure we aren't walking through a wall here
 
+              console.log( 'floor: ', floor, ', testY + entity.radius - 2: ', testY + entity.radius - 2 );
+
               if ( undefined === floor ) {
                 entity.pos[ 0 ] = testX;
               }
-              else if ( floor > testY + entity.radius - 2 ) {
+              else if ( floor >= testY + entity.radius - 2 ) {
                 entity.pos[ 0 ] = testX;
                 entity.pos[ 1 ] = floor - entity.radius;
               }
@@ -251,29 +257,30 @@ gameCanvas.draw = ( ctx ) => {
       entitiesCtx.strokeStyle = 'red';
       Util.drawLine( entitiesCtx, entity.pos, mousePos );
 
-      // // Check points around player for hit
+      // Check points around player for hit
 
-      // const moveAngle = Math.atan2( entity.vel[ 1 ], entity.vel[ 0 ] );
-      // const numChecks = entity.radius * 2;      // radius * 2 is all of the points; fewer checks will space these out
 
-      // for ( let j = 0; j <= numChecks; j ++ ) {
-      //   for ( const dir of [ -1, 1 ] ) {
-      //     const testAngle = moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
-      //     const x = entity.pos[ 0 ] + Math.cos( testAngle ) * entity.radius;
-      //     const y = entity.pos[ 1 ] + Math.sin( testAngle ) * entity.radius;
+      const numChecks = entity.radius * 2;      // radius * 2 is all of the points; fewer checks will space these out
 
-      //     const index = Math.floor( x ) + Math.floor( y ) * cols;
+      for ( let j = 0; j <= numChecks; j ++ ) {
+        for ( const dir of [ -1, 1 ] ) {
+          const testAngle = DEBUG_moveAngle + dir * ( j / numChecks ) * Math.PI / 2;
+          const x = entity.pos[ 0 ] + Math.cos( testAngle ) * entity.radius;
+          const y = entity.pos[ 1 ] + Math.sin( testAngle ) * entity.radius;
 
-      //     if ( map[ index ] === Terrain.Dirt ) {
-      //       entitiesCtx.fillStyle = 'red';
-      //     }
-      //     else {
-      //       entitiesCtx.fillStyle = 'lime';
-      //     }
+          const index = Math.floor( x ) + Math.floor( y ) * cols;
 
-      //     Util.drawPoint( entitiesCtx, [ x, y ], 0.5 );
-      //   }
-      // }
+          if ( map[ index ] === Terrain.Dirt ) {
+            entitiesCtx.fillStyle = 'red';
+          }
+          else {
+            entitiesCtx.fillStyle = 'lime';
+          }
+
+          // Util.drawPoint( entitiesCtx, [ x, y ], 0.5 );
+          entitiesCtx.fillRect( x, y, 1, 1 );
+        }
+      }
 
     }
     else if ( entity.type === 'bullet' ) {

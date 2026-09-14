@@ -1,3 +1,12 @@
+9/14:
+  - Two clear problems to start with:
+    1) Get stuck walking across flat ground with a small hole in it
+      - Increasing tollerance for floor height (was effectively 1 pixel before, now it allows 2 pixels)
+    2) Stick to inside of curved wall
+      - Looks like we're moving into collision with a pixel and then getting stuck there
+        + Is this happening as part of first move stage or second?
+  - Related problem?
+    - Is it because we're setting velocity to zero? Or because we're not sensing ground?
 8/31:
   - Before dealing with walking stuff, deal with jumping into ceilings
     - Should bounce off, not get moved up like it's a floor
