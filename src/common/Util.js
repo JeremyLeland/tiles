@@ -1,8 +1,33 @@
-export function drawLine( ctx, start, end ) {
+export function drawLine( ctx, start, end, showNormal = false ) {
   ctx.beginPath();
   ctx.moveTo( ...start );
   ctx.lineTo( ...end );
   ctx.stroke();
+
+  // Normal
+  if ( showNormal ) {
+    const dx = end[ 0 ] - start[ 0 ];
+    const dy = end[ 1 ] - start[ 1 ];
+    const len = Math.hypot( dx, dy );
+    const nx = dy / len;
+    const ny = -dx / len;
+
+    const normX = ( start[ 0 ] + end[ 0 ] ) / 2;
+    const normY = ( start[ 1 ] + end[ 1 ] ) / 2;
+
+    // ctx.save();
+
+    ctx.lineWidth *= 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo( normX, normY );
+    ctx.lineTo( normX + nx * 0.5 * len, normY + ny * 0.5 * len );
+    ctx.stroke();
+
+    ctx.lineWidth *= 2;
+
+    // ctx.restore();
+  }
 }
 
 export function drawPoint( ctx, p, radius = 0.02 ) {

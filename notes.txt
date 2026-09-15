@@ -1,12 +1,58 @@
+9/15:
+  - I need a system that will keep us from jumping through ceiling or falling through floor
+    - but won't prevent us from falling if I'm rubbing up against a wall
+  - Slowing velocity based on hitAngle is tempting
+    - but I'm worried if I don't properly zero velocity out, player will drift into walls
+  - How do I know if I'm hitting ceiling or side wall?
+    - Look at hitAngle? Use quadrants?
+  - Maybe this does need to be three steps
+    - We could conceivably move through the air
+    - then hit a wall and continue falling straight down
+    - then hit the floor and continue walking
+
+  - Would this be easier if we could do this in terms of time?
+    - See how long until we hit something travelling at our current velocity
+    - Then we can update until that point, adjust velocity if needed, then update further
+    - This also treats grids as edges of box instead of one solid square
+      - Should tell us whether we are hitting ceiling/floor or wall
+
 9/14:
   - Two clear problems to start with:
-    1) Get stuck walking across flat ground with a small hole in it
+    1) DONE: Get stuck walking across flat ground with a small hole in it
       - Increasing tollerance for floor height (was effectively 1 pixel before, now it allows 2 pixels)
     2) Stick to inside of curved wall
       - Looks like we're moving into collision with a pixel and then getting stuck there
         + Is this happening as part of first move stage or second?
-  - Related problem?
-    - Is it because we're setting velocity to zero? Or because we're not sensing ground?
+          - First move stage, second isn't happening because there's no floor
+        - Happens most easily on a pronounced corner
+      - Might be two sub-cases here:
+        1) Larger wall collision, detected as floor since angle is below
+          - Ends up with us walking through wall (since we don't collision detect the walks)
+        2) Tippy top collision, not detected as floor since angle is above
+          - Still gets us stuck as long as we hold down arrow keys
+
+  - Taking out walking for the moment to focus on falling along a wall
+    - I use arrow keys to choose desired move vector
+      - If this hits a wall, everything stops
+      - Need to stop sideways movement but continue the update?
+    - Using normal to adjust velocity is part of the solution, but position is still wrong because we stop
+    - Are there three phases here?
+      1) Free fall
+      2) Fall after collision
+      3) Walk
+    - Is "fall after collision" that different from "walk"?
+      - Ultimately, I want all steps to have an intended move vector that they step through until hit
+      - I can't "fall after collision" and then "walk"
+        - These should be mutually exclusive
+        - So maybe I move until collsion, then see what the angle was
+          - Or see if there's a floor for me here
+          - If I collided and I have a floor, I can walk (like now)
+          - If not, try to finish off the move dist with modified move step vector? 
+            - (based on estimated normal)
+            - Actually, with our design, this should always be a vertical fall (y-axis only)
+              - x-axis is handled by walking, y-axis by falling
+
+
 8/31:
   - Before dealing with walking stuff, deal with jumping into ceilings
     - Should bounce off, not get moved up like it's a floor
