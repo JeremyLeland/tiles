@@ -1,19 +1,26 @@
-export function drawLine( ctx, start, end, showNormal = false ) {
+export function drawLine( ctx, start, end ) {
   ctx.beginPath();
   ctx.moveTo( ...start );
   ctx.lineTo( ...end );
   ctx.stroke();
+}
+
+export function drawLine2( ctx, line, showNormal = false ) {
+  ctx.beginPath();
+  ctx.moveTo( line[ 0 ], line[ 1 ] );
+  ctx.lineTo( line[ 2 ], line[ 3 ] );
+  ctx.stroke();
 
   // Normal
   if ( showNormal ) {
-    const dx = end[ 0 ] - start[ 0 ];
-    const dy = end[ 1 ] - start[ 1 ];
+    const dx = line[ 2 ] - line[ 0 ];
+    const dy = line[ 3 ] - line[ 1 ];
     const len = Math.hypot( dx, dy );
     const nx = dy / len;
     const ny = -dx / len;
 
-    const normX = ( start[ 0 ] + end[ 0 ] ) / 2;
-    const normY = ( start[ 1 ] + end[ 1 ] ) / 2;
+    const normX = ( line[ 0 ] + line[ 2 ] ) / 2;
+    const normY = ( line[ 1 ] + line[ 3 ] ) / 2;
 
     // ctx.save();
 

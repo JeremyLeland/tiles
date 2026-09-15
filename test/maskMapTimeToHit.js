@@ -120,11 +120,14 @@ gameCanvas.draw = ( ctx ) => {
   Util.drawLine( ctx, player.pos, mousePos );
 
 
-  ctx.fillStyle = 'yellow';
+  ctx.fillStyle = 'white';
   Util.drawPoint( ctx, mousePos, player.radius );
 
   player.vel[ 0 ] = mousePos[ 0 ] - player.pos[ 0 ];
   player.vel[ 1 ] = mousePos[ 1 ] - player.pos[ 1 ];
+
+  let bestHitTime = Infinity;
+  let bestHitLine;
 
   // Show which grids we need to check
   const testLeft   = Math.floor( Math.min( player.pos[ 0 ], mousePos[ 0 ] ) - player.radius );
@@ -165,27 +168,35 @@ gameCanvas.draw = ( ctx ) => {
         ];
 
         lines.forEach( line => {
-          const time = timeToCircleHitLine( x, y, dx, dy, r, ...line );
+          const hitTime = timeToCircleHitLine( x, y, dx, dy, r, ...line );
 
-          if ( 0 <= time && time < Infinity ) {
-            const val = ( 1 - time ) * 255;
+          if ( 0 <= hitTime && hitTime < bestHitTime ) {
+            bestHitTime = hitTime;
+            bestHitLine = line;
+          }
+
+          if ( 0 <= hitTime && hitTime < Infinity ) {
+            const val = ( 1 - hitTime ) * 255;
 
             ctx.strokeStyle = `rgb( 128, ${ val }, 255 )`;
-            ctx.lineWidth = 0.2;
-            Util.drawLine( ctx, [ line[ 0 ], line[ 1 ] ], [ line[ 2 ], line[ 3 ] ], true );
+            ctx.lineWidth = 0.1;
+            Util.drawLine2( ctx, line, true );
           }
         } );
       }
-
-
-      // Draw lines that it hits
-      // Color based on time until hit?
-
     }
   }
 
+  const hitPos = vec2.scaleAndAdd( [], player.pos, player.vel, bestHitTime );
 
-  // ctx.drawImage( entitiesImage, 0, 0 );
+  if ( bestHitTime < Infinity ) {
+    ctx.fillStyle = 'orange';
+    Util.drawPoint( ctx, hitPos, player.radius );
+
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 0.2;
+    Util.drawLine2( ctx, bestHitLine, true );
+  }
 }
 
 function pointerInput( m ) {
