@@ -176,6 +176,8 @@ gameCanvas.draw = ( ctx ) => {
 }
 
 function getHit( map, entity, dt, debugCtx ) {
+  console.log( 'getHit' );
+
   let bestHit = {
     time: Infinity,
     line: null,
@@ -269,6 +271,8 @@ gameCanvas.pointerMove = pointerInput;
 // gameCanvas.start();
 
 
+const EPSILON = 1e-6;
+
 function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
   const px = x2 - x1;
   const py = y2 - y1;
@@ -293,11 +297,13 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
 
   const closestOnLine = ( ( hitX - x1 ) * px + ( hitY - y1 ) * py ) / D;
 
+  // NOTE: using slightly smaller radius lets us move along top of walls without "hitting" their sides
+  //       This feels hacky, though...is there a better way to accomodate this?
   if ( closestOnLine <= 0 ) {
-    return timeToCircleHitPoint( x, y, dx, dy, radius, x1, y1 );
+    return timeToCircleHitPoint( x, y, dx, dy, radius - EPSILON, x1, y1 );
   }
   else if ( 1 <= closestOnLine ) {
-    return timeToCircleHitPoint( x, y, dx, dy, radius, x2, y2 );
+    return timeToCircleHitPoint( x, y, dx, dy, radius - EPSILON, x2, y2 );
   }
   else {
     return hitTime;
@@ -316,9 +322,6 @@ function timeToCircleHitPoint( x, y, dx, dy, radius, cx, cy ) {
 
   return solveQuadratic( a, b, c );
 }
-
-
-const EPSILON = 1e-6;
 
 function solveQuadratic( A, B, C ) {
   if ( Math.abs( A ) < EPSILON ) {

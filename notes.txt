@@ -4,6 +4,7 @@
     - Got second step going, but it is 'hitting' edges of lines that it shouldn't
       - Hits ceiling and redirects sideways, but immediately detects hit on sidewalls above
       - Commit for now, but need to make this less sensitive...
+        - Fixed for now by using slightly smaller radius when checking against endpoints of line
 
 9/15:
   - I need a system that will keep us from jumping through ceiling or falling through floor
