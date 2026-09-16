@@ -28,6 +28,7 @@ const Gravity = 0.0005;
 const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
 
+const startPos = [ 8, 12 ];
 const mousePos = [ 20, 20 ];
 
 let entities = [ player ];
@@ -82,6 +83,7 @@ function setTerrainRect( x, y, width, height, value ) {
 setTerrainRect( 5, 8, 20, 5, Terrain.Empty );
 setTerrainRect( 2, 10, 25, 6, Terrain.Empty );
 setTerrainRect( 5, 7, 4, 6, Terrain.Empty );
+setTerrainRect( 20, 4, 8, 15, Terrain.Empty );
 
 maskCtx.putImageData( maskImageData, 0, 0 );
 
@@ -113,6 +115,8 @@ gameCanvas.draw = ( ctx ) => {
 
   // entitiesCtx.clearRect( 0, 0, cols, rows );
 
+  vec2.copy( player.pos, startPos );
+
   ctx.fillStyle = 'green';
   Util.drawPoint( ctx, player.pos, player.radius );
   ctx.strokeStyle = '#00f8';
@@ -126,14 +130,64 @@ gameCanvas.draw = ( ctx ) => {
   player.vel[ 0 ] = mousePos[ 0 ] - player.pos[ 0 ];
   player.vel[ 1 ] = mousePos[ 1 ] - player.pos[ 1 ];
 
-  let bestHitTime = Infinity;
-  let bestHitLine;
+  const bestHit = getHit( map, player, 1, ctx );
+
+  if ( bestHit.time < Infinity ) {
+    vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
+
+    ctx.fillStyle = 'orange';
+    Util.drawPoint( ctx, player.pos, player.radius );
+
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 0.2;
+    Util.drawLine2( ctx, bestHit.line, true );
+
+    // TODO: Rest of update...
+
+    // Left/Right wall
+    if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
+      player.vel[ 0 ] = 0;
+    }
+
+    // Ceiling/Floor
+    else {
+      player.vel[ 1 ] = 0;
+    }
+
+    const timeLeft = 1 - bestHit.time;
+
+    ctx.fillStyle = 'gray';
+    const nextGoalPos = vec2.scaleAndAdd( [], player.pos, player.vel, timeLeft );
+    Util.drawPoint( ctx, nextGoalPos, player.radius );
+
+    const nextHit = getHit( map, player, timeLeft, ctx );
+
+    if ( nextHit.time < Infinity ) {
+      vec2.scaleAndAdd( player.pos, player.pos, player.vel, nextHit.time );
+
+      ctx.fillStyle = 'yellow';
+      Util.drawPoint( ctx, player.pos, player.radius );
+
+      ctx.strokeStyle = 'lime';
+      ctx.lineWidth = 0.2;
+      Util.drawLine2( ctx, nextHit.line, true );
+    }
+  }
+}
+
+function getHit( map, entity, dt, debugCtx ) {
+  let bestHit = {
+    time: Infinity,
+    line: null,
+  };
+
+  const goalPos = vec2.scaleAndAdd( [], entity.pos, entity.vel, dt );
 
   // Show which grids we need to check
-  const testLeft   = Math.floor( Math.min( player.pos[ 0 ], mousePos[ 0 ] ) - player.radius );
-  const testTop    = Math.floor( Math.min( player.pos[ 1 ], mousePos[ 1 ] ) - player.radius );
-  const testRight  = Math.floor( Math.max( player.pos[ 0 ], mousePos[ 0 ] ) + player.radius );
-  const testBottom = Math.floor( Math.max( player.pos[ 1 ], mousePos[ 1 ] ) + player.radius );
+  const testLeft   = Math.floor( Math.min( entity.pos[ 0 ], goalPos[ 0 ] ) - entity.radius );
+  const testTop    = Math.floor( Math.min( entity.pos[ 1 ], goalPos[ 1 ] ) - entity.radius );
+  const testRight  = Math.floor( Math.max( entity.pos[ 0 ], goalPos[ 0 ] ) + entity.radius );
+  const testBottom = Math.floor( Math.max( entity.pos[ 1 ], goalPos[ 1 ] ) + entity.radius );
 
   // TODO: Would it ever make sense to throw out values that are outside of blue move line?
   //       Most moves are probably small enough that it wouldn't matter much
@@ -148,17 +202,21 @@ gameCanvas.draw = ( ctx ) => {
     for ( let testCol = testLeft; testCol <= testRight; testCol ++ ) {
 
       if ( map[ testCol + testRow * cols ] === Terrain.Empty ) {
-        ctx.fillStyle = '#0f08';
-        ctx.fillRect( testCol, testRow, 1, 1 );
+        if ( debugCtx ) {
+          debugCtx.fillStyle = '#0f04';
+          debugCtx.fillRect( testCol, testRow, 1, 1 );
+        }
       }
       else {
-        ctx.fillStyle = '#f008';
-        ctx.fillRect( testCol, testRow, 1, 1 );
+        if ( debugCtx ) {
+          debugCtx.fillStyle = '#f004';
+          debugCtx.fillRect( testCol, testRow, 1, 1 );
+        }
 
         // Test walls
-        const [ x, y ] = player.pos;
-        const [ dx, dy ] = player.vel;
-        const r = player.radius;
+        const [ x, y ] = entity.pos;
+        const [ dx, dy ] = entity.vel;
+        const r = entity.radius;
 
         const lines = [
           [ testCol, testRow + 1, testCol, testRow ],         // left
@@ -170,49 +228,35 @@ gameCanvas.draw = ( ctx ) => {
         lines.forEach( line => {
           const hitTime = timeToCircleHitLine( x, y, dx, dy, r, ...line );
 
-          if ( 0 <= hitTime && hitTime < bestHitTime ) {
-            bestHitTime = hitTime;
-            bestHitLine = line;
+          if ( 0 <= hitTime && hitTime < bestHit.time ) {
+            bestHit.time = hitTime;
+            bestHit.line = line;
           }
 
-          if ( 0 <= hitTime && hitTime < Infinity ) {
-            const val = ( 1 - hitTime ) * 255;
+          if ( debugCtx ) {
+            if ( 0 <= hitTime && hitTime < Infinity ) {
+              const val = ( 1 - hitTime ) * 255;
 
-            ctx.strokeStyle = `rgb( 128, ${ val }, 255 )`;
-            ctx.lineWidth = 0.1;
-            Util.drawLine2( ctx, line, true );
+              debugCtx.strokeStyle = `rgb( 128, ${ val }, 255 )`;
+              debugCtx.lineWidth = 0.1;
+              Util.drawLine2( debugCtx, line, true );
+            }
           }
         } );
       }
     }
   }
 
-  const hitPos = vec2.scaleAndAdd( [], player.pos, player.vel, bestHitTime );
-
-  if ( bestHitTime < Infinity ) {
-    ctx.fillStyle = 'orange';
-    Util.drawPoint( ctx, hitPos, player.radius );
-
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 0.2;
-    Util.drawLine2( ctx, bestHitLine, true );
-  }
+  return bestHit;
 }
 
 function pointerInput( m ) {
-  mousePos[ 0 ] = m.x;  //Math.floor( m.x );
-  mousePos[ 1 ] = m.y;  //Math.floor( m.y );
+  vec2.set( mousePos, m.x, m.y );
 
   if ( m.buttons === 1 ) {
-    const lineAngle = Math.atan2( mousePos[ 1 ] - player.pos[ 1 ], mousePos[ 0 ] - player.pos[ 0 ] );
-    const bulletSpeed = 0.5;
-
-    const lineVec = [ Math.cos( lineAngle ), Math.sin( lineAngle ) ];
-
   }
   else if ( m.buttons === 2 ) {
-    player.pos[ 0 ] = mousePos[ 0 ];
-    player.pos[ 1 ] = mousePos[ 1 ];
+    vec2.copy( startPos, mousePos );
   }
 
   gameCanvas.redraw();

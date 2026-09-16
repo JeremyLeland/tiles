@@ -1,3 +1,10 @@
+9/16:
+  - Finish move after being stopped by wall
+    - Show where ball would be
+    - Got second step going, but it is 'hitting' edges of lines that it shouldn't
+      - Hits ceiling and redirects sideways, but immediately detects hit on sidewalls above
+      - Commit for now, but need to make this less sensitive...
+
 9/15:
   - I need a system that will keep us from jumping through ceiling or falling through floor
     - but won't prevent us from falling if I'm rubbing up against a wall
@@ -15,6 +22,14 @@
     - Then we can update until that point, adjust velocity if needed, then update further
     - This also treats grids as edges of box instead of one solid square
       - Should tell us whether we are hitting ceiling/floor or wall
+    - This feels a lot better
+      - made a nice util to help validate, too
+      - Should test on low res maps like this before trying higher res ones
+
+    - NEXT: Continue the update after adjusting direction for wall
+      - Treat each update as dt of 1 for now
+      - If hit ceiling/floor, stop y and continue x
+      - If hit sides, stop x and continue y
 
 9/14:
   - Two clear problems to start with:
