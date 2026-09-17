@@ -46,7 +46,7 @@ for ( let index = 0; index < cols * rows; index ++ ) {
   maskData[ maskIndex + 3 ] = map[ index ] === Terrain.Empty ? 0 : 255;
 }
 
-maskCtx.putImageData( maskImageData, 0, 0 );
+// maskCtx.putImageData( maskImageData, 0, 0 );
 
 function setTerrain( col, row, value ) {
   if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
@@ -85,7 +85,7 @@ setTerrainRect( 2, 10, 25, 6, Terrain.Empty );
 setTerrainRect( 5, 7, 4, 6, Terrain.Empty );
 setTerrainRect( 20, 4, 8, 15, Terrain.Empty );
 
-maskCtx.putImageData( maskImageData, 0, 0 );
+// maskCtx.putImageData( maskImageData, 0, 0 );
 
 
 const foregroundImage = new OffscreenCanvas( cols, rows );
@@ -99,6 +99,8 @@ gameCanvas.setBounds( 0, 0, cols, rows );
 
 
 gameCanvas.draw = ( ctx ) => {
+  maskCtx.putImageData( maskImageData, 0, 0 );
+
   foregroundCtx.clearRect( 0, 0, cols, rows );
   foregroundCtx.globalCompositeOperation = 'source-over';
   foregroundCtx.drawImage( maskImage, 0, 0 );
@@ -124,53 +126,42 @@ gameCanvas.draw = ( ctx ) => {
   Util.drawLine( ctx, player.pos, mousePos );
 
 
-  ctx.fillStyle = 'white';
-  Util.drawPoint( ctx, mousePos, player.radius );
-
   player.vel[ 0 ] = mousePos[ 0 ] - player.pos[ 0 ];
   player.vel[ 1 ] = mousePos[ 1 ] - player.pos[ 1 ];
 
-  const bestHit = getHit( map, player, 1, ctx );
+  let timeLeft = 1;
 
-  if ( bestHit.time < Infinity ) {
-    vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
-
-    ctx.fillStyle = 'orange';
-    Util.drawPoint( ctx, player.pos, player.radius );
-
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 0.2;
-    Util.drawLine2( ctx, bestHit.line, true );
-
-    // TODO: Rest of update...
-
-    // Left/Right wall
-    if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
-      player.vel[ 0 ] = 0;
-    }
-
-    // Ceiling/Floor
-    else {
-      player.vel[ 1 ] = 0;
-    }
-
-    const timeLeft = 1 - bestHit.time;
-
+  for ( let step = 0; step < 2; step ++ ) {
     ctx.fillStyle = 'gray';
-    const nextGoalPos = vec2.scaleAndAdd( [], player.pos, player.vel, timeLeft );
-    Util.drawPoint( ctx, nextGoalPos, player.radius );
+    const goalPos = vec2.scaleAndAdd( [], player.pos, player.vel, timeLeft );
+    Util.drawPoint( ctx, goalPos, player.radius );
 
-    const nextHit = getHit( map, player, timeLeft, ctx );
+    const bestHit = getHit( map, player, timeLeft, ctx );
 
-    if ( nextHit.time < Infinity ) {
-      vec2.scaleAndAdd( player.pos, player.pos, player.vel, nextHit.time );
+    if ( bestHit.time < Infinity ) {
+      vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
 
-      ctx.fillStyle = 'yellow';
+      ctx.fillStyle = 'orange';
       Util.drawPoint( ctx, player.pos, player.radius );
 
-      ctx.strokeStyle = 'lime';
+      ctx.strokeStyle = 'yellow';
       ctx.lineWidth = 0.2;
-      Util.drawLine2( ctx, nextHit.line, true );
+      Util.drawLine2( ctx, bestHit.line, true );
+
+      // Left/Right wall
+      if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
+        player.vel[ 0 ] = 0;
+      }
+
+      // Ceiling/Floor
+      else {
+        player.vel[ 1 ] = 0;
+      }
+
+      timeLeft -= bestHit.time;
+    }
+    else {
+      break;
     }
   }
 }
