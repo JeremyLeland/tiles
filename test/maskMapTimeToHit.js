@@ -28,8 +28,8 @@ const Gravity = 0.0005;
 const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
 
-const startPos = [ 8, 12 ];
-const mousePos = [ 20, 20 ];
+const startPos = [ 8, 14 ];
+const mousePos = [ 15, 16 ];
 
 let entities = [ player ];
 
@@ -138,10 +138,17 @@ gameCanvas.draw = ( ctx ) => {
 
     const bestHit = getHit( map, player, timeLeft, ctx );
 
-    if ( bestHit.time < Infinity ) {
+    console.log( bestHit );
+
+    if ( 0 <= bestHit.time && bestHit.time < Infinity ) {
+
+      console.log( 'before pos', player.pos );
+
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
 
-      ctx.fillStyle = 'orange';
+      console.log( 'after pos', player.pos );
+
+      ctx.fillStyle = '#f808';
       Util.drawPoint( ctx, player.pos, player.radius );
 
       ctx.strokeStyle = 'yellow';
@@ -161,6 +168,11 @@ gameCanvas.draw = ( ctx ) => {
       timeLeft -= bestHit.time;
     }
     else {
+      vec2.scaleAndAdd( player.pos, player.pos, player.vel, timeLeft );
+
+      ctx.fillStyle = '#f808';
+      Util.drawPoint( ctx, player.pos, player.radius );
+
       break;
     }
   }
@@ -221,6 +233,8 @@ function getHit( map, entity, dt, debugCtx ) {
         lines.forEach( line => {
           const hitTime = timeToCircleHitLine( x, y, dx, dy, r, ...line );
 
+          console.log( 'hitTime = ',  hitTime, ' for line ', line );
+
           if ( 0 <= hitTime && hitTime < bestHit.time ) {
             bestHit.time = hitTime;
             bestHit.line = line;
@@ -269,13 +283,18 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
   const py = y2 - y1;
   const D = ( px * px ) + ( py * py );
 
+  if ( D === 0 ) {
+    console.log( 'D == 0!' );
+    return Infinity;
+  }
+
   const len = Math.sqrt( D );
   const normX = py / len;
   const normY = -px / len;
 
-  // Don't consider it a hit if we are moving away
+  // Don't consider it a hit if we are moving away or parallel
   const vDotN = dx * normX + dy * normY;
-  if ( vDotN > 0 ) {
+  if ( vDotN >= 0 ) {
     return Infinity;
   }
 
@@ -288,13 +307,18 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
 
   const closestOnLine = ( ( hitX - x1 ) * px + ( hitY - y1 ) * py ) / D;
 
-  // NOTE: using slightly smaller radius lets us move along top of walls without "hitting" their sides
-  //       This feels hacky, though...is there a better way to accomodate this?
+  console.log( 'closestOnLine = ', closestOnLine );
+
+  // Hacky way to skip barely touching case?
+  if ( closestOnLine <= 0 - radius || 1 + radius <= closestOnLine ) {
+    return Infinity;
+  }
+
   if ( closestOnLine <= 0 ) {
-    return timeToCircleHitPoint( x, y, dx, dy, radius - EPSILON, x1, y1 );
+    return timeToCircleHitPoint( x, y, dx, dy, radius, x1, y1 );
   }
   else if ( 1 <= closestOnLine ) {
-    return timeToCircleHitPoint( x, y, dx, dy, radius - EPSILON, x2, y2 );
+    return timeToCircleHitPoint( x, y, dx, dy, radius, x2, y2 );
   }
   else {
     return hitTime;
