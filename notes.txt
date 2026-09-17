@@ -6,6 +6,38 @@
       - Commit for now, but need to make this less sensitive...
         - Fixed for now by using slightly smaller radius when checking against endpoints of line
 
+  - NEXT: Make a new version of the mask map collision with timeToHit
+    - Just right-click spawn and move through air for now, to make sure that part is fine
+      - Maybe let jump from air just to test ceiling/side collisions
+    - Once that is working, take another stab at walking with timeToHit
+      - Try it with big blocks first 
+        - Simple case: stairs
+
+  - Detour: pull the maskMap code out into a class
+    - Ugh, wasted a bunch of time
+    - Biggest takeaway was that the mask imageData stuff can all just go in draw every frame
+      - Doesn't seem to be a perf hit so far, and avoids keeping track of it in many places
+      - Could probably just make some helper functions to draw rather than a whole class
+      - Deferring for now
+
+  - Trying to use timeToHit code for movement, but it seems I'm catching the endpoints of side walls again
+    - Maybe I should revert the "radius - EPSILON" hack from my demo and try to actually fix the problem
+    - Moving along ceiling seems fine, for some reason
+    - Is this a floating point precision issue? Would floor/ceiling my position after a hit help?
+
+  - Slow movement gets fucked up with the time tests
+  - Fast movement gets fucked up with the overlap tests
+  - Ugh
+
+  - Should I try out an overlap test instead of a sweep test?
+    - Or do it after?
+      - Do the sweep test for our planned move
+      - If all the hits are in the past, do overlap checks and back us out of anything
+
+  - Do we need to make the demo be directional and over a longer dt?
+    - Or just test smaller moves...
+      - see some weirdness where orange is past the gray with a slight move down and over?
+
 9/15:
   - I need a system that will keep us from jumping through ceiling or falling through floor
     - but won't prevent us from falling if I'm rubbing up against a wall
