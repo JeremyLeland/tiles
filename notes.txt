@@ -1,3 +1,19 @@
+9/17:
+  - Add stairs to timeToHit test, should be able to model there
+  - If wall is hit, instead of assuming it's a flat wall, check if the spot above is solid
+    - If it isn't, send us up the stairs
+      - Should we go up and around pixel? Diagonally?
+      - Should we immediately jump up one and then continue sideways movement?
+
+  - Before I could get to the stair stuff, my test hit another case of getting "caught" on the vertical walls below
+    - closestOnLine is 0
+      - What does that mean here? Center should be radius away, not 0...
+      - Because the player has the same x as the line and is moving at a diagonal upward, it "hit" it -2 ago
+        - When it hit it, it was indeed at 0
+          - This triggers the timeToHitCirclePoint
+          - Can I cheat my way out of this with < 0 instead of <= 0?
+          - Or should I bail early if this was a hit in the past?
+   
 9/16:
   - Finish move after being stopped by wall
     - Show where ball would be
@@ -37,6 +53,9 @@
   - Do we need to make the demo be directional and over a longer dt?
     - Or just test smaller moves...
       - see some weirdness where orange is past the gray with a slight move down and over?
+
+    - Is the problem when the quadratic has exactly one solution?
+      - If circle is precisely touching on only one point, we want to skip it
 
 9/15:
   - I need a system that will keep us from jumping through ceiling or falling through floor

@@ -28,8 +28,8 @@ const Gravity = 0.0005;
 const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
 
-const startPos = [ 8, 14 ];
-const mousePos = [ 15, 16 ];
+const startPos = [ 23, 17 ]; //[ 8, 14 ];
+const mousePos = [ 21, 16 ]; //[ 15, 16 ];
 
 let entities = [ player ];
 
@@ -138,15 +138,15 @@ gameCanvas.draw = ( ctx ) => {
 
     const bestHit = getHit( map, player, timeLeft, ctx );
 
-    console.log( bestHit );
+    // console.log( bestHit );
 
     if ( 0 <= bestHit.time && bestHit.time < Infinity ) {
 
-      console.log( 'before pos', player.pos );
+      // console.log( 'before pos', player.pos );
 
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
 
-      console.log( 'after pos', player.pos );
+      // console.log( 'after pos', player.pos );
 
       ctx.fillStyle = '#f808';
       Util.drawPoint( ctx, player.pos, player.radius );
@@ -236,6 +236,7 @@ function getHit( map, entity, dt, debugCtx ) {
           console.log( 'hitTime = ',  hitTime, ' for line ', line );
 
           if ( 0 <= hitTime && hitTime < bestHit.time ) {
+            console.log( 'better than ', bestHit.time, ', saving ', line );
             bestHit.time = hitTime;
             bestHit.line = line;
           }
@@ -301,6 +302,12 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
   const distFromLine = ( x1 - x ) * normX + ( y1 - y ) * normY;
 
   const hitTime = ( distFromLine + radius ) / vDotN;
+
+  // If we would've hit in the past, don't bother with the circleHitPoint stuff below
+  // It won't give us any better answer, and may get us stuck on walls behind/below us
+  if ( hitTime < 0 ) {
+    return hitTime;
+  }
 
   const hitX = x + dx * hitTime;
   const hitY = y + dy * hitTime;
