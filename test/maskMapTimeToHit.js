@@ -29,7 +29,7 @@ const PlayerMoveSpeed = 0.05;
 const PlayerJumpSpeed = 0.15;
 
 const startPos = [ 23, 17 ]; //[ 8, 14 ];
-const mousePos = [ 21, 16 ]; //[ 15, 16 ];
+const mousePos = [ 19, 17 ]; //[ 15, 16 ];
 
 let entities = [ player ];
 
@@ -84,6 +84,9 @@ setTerrainRect( 5, 8, 20, 5, Terrain.Empty );
 setTerrainRect( 2, 10, 25, 6, Terrain.Empty );
 setTerrainRect( 5, 7, 4, 6, Terrain.Empty );
 setTerrainRect( 20, 4, 8, 15, Terrain.Empty );
+
+setTerrainRect( 10, 16, 10, 1, Terrain.Empty );
+setTerrainRect( 15, 17, 5, 1, Terrain.Empty );
 
 // maskCtx.putImageData( maskImageData, 0, 0 );
 
@@ -157,7 +160,19 @@ gameCanvas.draw = ( ctx ) => {
 
       // Left/Right wall
       if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
-        player.vel[ 0 ] = 0;
+
+        // Check if we can climb this
+        const movingLeft = player.vel[ 0 ] < 0;
+
+        const testCol = bestHit.line[ 0 ] + ( movingLeft ? -1 : 0 );
+        const testRow = bestHit.line[ movingLeft ? 1 : 3 ] - 1;
+
+        if ( map[ testCol + testRow * cols ] === Terrain.Empty ) {
+          player.pos[ 1 ] -= 1;
+        }
+        else {
+          player.vel[ 0 ] = 0;
+        }
       }
 
       // Ceiling/Floor
