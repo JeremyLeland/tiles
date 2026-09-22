@@ -1,3 +1,43 @@
+9/22:
+  - Not to get thrown off course, but it might make more sense at some point to do bounding box (line vs line) collisions
+    - Instead of the circles
+    - Might fit the shape of a worm better? Might be easier than the circle edge stuff?
+      - Not sure circle edges really apply to this style of platform navigation anyway
+
+  - Debugging 21.3578 for the fall
+    - timeToCircleHitLine keeps giving us ~0, then suddenly gives us 1468
+      - Giving us the back end of the circle instead of the front end?
+        - Why is it discarding front end? Does this need some epsilon love?
+          - Before fall through, closestOnLine is 2.357800000000001
+          - After fall through, closestOnLine is still 2.357800000000001
+            - timeToCircleHitPoint is giving us the differing values
+              - was taking the A ~= 0 path, switches to the full quadratic path at that point
+              - I'm using 0 <= t#, should this be -EPSILON?
+                - Yes! Much better!
+
+  - Still fall through the step sometimes...
+    - x 21.0228?
+      - will this do a fall? Or only when walking? Seems to only be when walking
+
+
+
+9/21:
+  - Seems to be a floating point accuracy error
+  - We correctly find floor, but end up slightly below it so 'hit' is in the past on next update
+  - Tried changing 0 <= hitTime to -EPSILON <= hitTime, but then we have another problem on the next update
+  - Setting x to 20.5 hit these issues
+    - Solved with -EPSILON <= hitTime in multiple places
+      - Sidebar: put this in one place? Have < -EPISLON return Infinity, then just deal with values not Infinity
+  - Setting x to 21.3578 hits more issues?
+    - Only when animated, not frame-by-frame?
+    - hitTime for 19,16,20,16 goes from ~0 to 2175
+      - how? why? more debuggin?
+      - Did we slide down outside of epsilon?
+
+9/19:
+  - Dropping directly down over a corner falls through it
+    - My "walking down stairs" might work if I can fix this
+
 9/17:
   - Add stairs to timeToHit test, should be able to model there
   - If wall is hit, instead of assuming it's a flat wall, check if the spot above is solid

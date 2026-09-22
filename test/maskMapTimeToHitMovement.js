@@ -15,7 +15,7 @@ const map = Array( cols * rows ).fill( Terrain.Dirt );
 
 let player = {
   type: 'player',
-  pos: [ 8, 12 ],
+  pos: [ 21.3578, 13 ],
   vel: [ 0, 0 ],
   radius: 2,
   isMovingLeft: false,
@@ -30,7 +30,7 @@ const Gravity = 0.00005;  //0.0005;
 const PlayerMoveSpeed = 0.005;
 const PlayerJumpSpeed = 0.015;
 
-const mousePos = [ 20, 20 ];
+const mousePos = [ 20.4, 20 ];
 
 let entities = [ player ];
 
@@ -111,7 +111,7 @@ gameCanvas.update = ( dt ) => {
   for ( let step = 0; step < 2; step ++ ) {
     const bestHit = getHit( map, player, timeLeft );
 
-    if ( 0 <= bestHit.time && bestHit.time < Infinity ) {
+    if ( -EPSILON <= bestHit.time && bestHit.time < Infinity ) {
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
 
       // console.log( 'before pos', player.pos );
@@ -129,15 +129,20 @@ gameCanvas.update = ( dt ) => {
         player.vel[ 1 ] = 0;
       }
 
-      // console.log( 'after pos', player.pos );
+      // console.log( ' after partial update pos', player.pos );
 
       timeLeft -= bestHit.time;
     }
     else {
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, timeLeft );
+
+      // console.log( ' after rest of update pos', player.pos );
+
       break;
     }
   }
+
+  // console.log( 'after entire update, pos: ', player.pos );
 }
 
 gameCanvas.draw = ( ctx ) => {
@@ -185,6 +190,8 @@ gameCanvas.draw = ( ctx ) => {
 }
 
 function getHit( map, entity, dt, debugCtx ) {
+  // console.log( ' getHit' );
+
   let bestHit = {
     time: Infinity,
     line: null,
@@ -237,13 +244,15 @@ function getHit( map, entity, dt, debugCtx ) {
         lines.forEach( line => {
           const hitTime = timeToCircleHitLine( x, y, dx, dy, r, ...line );
 
-          if ( /*-EPSILON*/ 0 <= hitTime && hitTime < bestHit.time ) {
+          // console.log( '  hitTime for ', line, ' is ', hitTime );
+
+          if ( -EPSILON <= hitTime && hitTime < bestHit.time ) {
             bestHit.time = hitTime;
             bestHit.line = line;
           }
 
           if ( debugCtx ) {
-            if ( 0 <= hitTime && hitTime < Infinity ) {
+            if ( -EPSILON <= hitTime && hitTime < Infinity ) {
               const val = ( 1 - hitTime ) * 255;
 
               debugCtx.strokeStyle = `rgb( 128, ${ val }, 255 )`;
@@ -255,6 +264,8 @@ function getHit( map, entity, dt, debugCtx ) {
       }
     }
   }
+
+  // console.log( ' bestHit = ', bestHit );
 
   return bestHit;
 }
@@ -268,6 +279,9 @@ document.addEventListener( 'keydown', e => {
   }
   else if ( e.key === ' ' ) {
     player.isJumping = true;
+
+    // gameCanvas.update( 10 );
+    // gameCanvas.redraw();
   }
   else if ( e.key === 'p' ) {
     gameCanvas.toggle();
@@ -293,6 +307,8 @@ function pointerInput( m ) {
   }
   else if ( m.buttons === 2 ) {
     vec2.copy( player.pos, mousePos );
+
+    console.log( 'moved to ', player.pos );
   }
 
   // gameCanvas.redraw();
@@ -304,7 +320,8 @@ gameCanvas.pointerMove = pointerInput;
 
 gameCanvas.start();
 
-
+// NOTE: The epsilons are important, really! 
+// You're always tempted to just use zero, but the use of EPISILON is the result of a lot of blood, sweat, and debugging
 const EPSILON = 1e-6;
 
 function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
@@ -338,7 +355,7 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
   const closestOnLine = ( ( hitX - x1 ) * px + ( hitY - y1 ) * py ) / D;
 
   // Hacky way to skip barely touching case?
-  if ( closestOnLine <= 0 - radius || 1 + radius <= closestOnLine ) {
+  if ( closestOnLine <= 0 - radius / len || 1 + radius / len <= closestOnLine ) {
     return Infinity;
   }
 
@@ -375,6 +392,7 @@ function solveQuadratic( A, B, C ) {
 
     let closest = Infinity;
 
+    // Should I make this Math.abs( disc ) < EPSILON like above? 
     if ( -EPSILON < disc && disc < 0 ) {
       disc = 0;
       // debugger;
@@ -384,8 +402,8 @@ function solveQuadratic( A, B, C ) {
       const t0 = ( -B - Math.sqrt( disc ) ) / ( 2 * A );
       const t1 = ( -B + Math.sqrt( disc ) ) / ( 2 * A );
 
-      if ( 0 <= t0 && t0 < closest )   closest = t0;
-      if ( 0 <= t1 && t1 < closest )   closest = t1;
+      if ( -EPSILON <= t0 && t0 < closest )   closest = t0;
+      if ( -EPSILON <= t1 && t1 < closest )   closest = t1;
     }
 
     return closest;
