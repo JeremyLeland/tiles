@@ -18,7 +18,36 @@
   - Still fall through the step sometimes...
     - x 21.0228?
       - will this do a fall? Or only when walking? Seems to only be when walking
+        - [ 18, 16, 19, 16 ] hitTime goes from 0 to -0
+        - then [ 18, 16, 19, 16 ] becomes infinity and [ 19, 16, 20, 16 ] is -0
+          - which one do we actually fall through?
+            - it's hard to tell what's happening without position output
+            - maybe I can hide the infinities, too, since those don't seem as relevant to debugging
+          - [ 19, 16, 20, 16 ] is the one we fall though
+            - we run into problems after x > 20
+            - we should fall some, but not as far as we do
+              - hitTime goes from ~0 to 15 to 36 to -57, at which point it ignore it and falls through
+                - are we taking a different path there?
+                  - guess I should put all that other debugging back in...*sigh*
+                - Looks like I have a negative discriminent in quadratic around that time
+                  -it falls through without returning any value
+                    - is this correct? what does negative discriminent mean here?
+                      - means no valid results
 
+      Here's what happens:
+      after entire update, pos:  Array [ 20.270000000000028, 14.01155635084751 ]
+        getHit
+          closestOnLine 19,16->20,16 1.181104993480723
+          hitting right of line
+          solveQuadratic( 0.000025422500000000003, 0.00011502325610204247, 0.026808145854886334 )
+          disc -0.0000027128900025390753
+
+      Seems like this is where we fall through. There should be a solution here, why is disc negative?
+        + Look at how we are getting A, B, and C
+
+      Step back and ask why this only happens when we are moving sideways, not when drop straight down
+        - Something about the extra update? Something about the dx?
+          - What happens in above calculation if dx is 0?
 
 
 9/21:

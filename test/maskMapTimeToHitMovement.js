@@ -15,7 +15,7 @@ const map = Array( cols * rows ).fill( Terrain.Dirt );
 
 let player = {
   type: 'player',
-  pos: [ 21.3578, 13 ],
+  pos: [ 18, 13 ],
   vel: [ 0, 0 ],
   radius: 2,
   isMovingLeft: false,
@@ -72,7 +72,8 @@ setTerrainRect( 2, 10, 25, 6, Terrain.Empty );
 setTerrainRect( 5, 7, 4, 6, Terrain.Empty );
 setTerrainRect( 20, 4, 8, 15, Terrain.Empty );
 
-
+setTerrainRect( 10, 16, 10, 1, Terrain.Empty );
+setTerrainRect( 15, 17, 5, 1, Terrain.Empty );
 
 const maskImage = new OffscreenCanvas( cols, rows );
 const maskCtx = maskImage.getContext( '2d' );
@@ -142,7 +143,7 @@ gameCanvas.update = ( dt ) => {
     }
   }
 
-  // console.log( 'after entire update, pos: ', player.pos );
+  // console.log( player.pos, ' AFTER ENTIRE UPDATE' );
 }
 
 gameCanvas.draw = ( ctx ) => {
@@ -244,9 +245,12 @@ function getHit( map, entity, dt, debugCtx ) {
         lines.forEach( line => {
           const hitTime = timeToCircleHitLine( x, y, dx, dy, r, ...line );
 
-          // console.log( '  hitTime for ', line, ' is ', hitTime );
+          // if ( hitTime < Infinity ) {
+          //   console.log( '  hitTime for ', line, ' is ', hitTime );
+          // }
 
-          if ( -EPSILON <= hitTime && hitTime < bestHit.time ) {
+          // Make sure hitTime is within our update window, helps avoid other weirdness
+          if ( -EPSILON <= hitTime && hitTime < bestHit.time && hitTime < dt ) {
             bestHit.time = hitTime;
             bestHit.line = line;
           }
@@ -265,7 +269,7 @@ function getHit( map, entity, dt, debugCtx ) {
     }
   }
 
-  // console.log( ' bestHit = ', bestHit );
+  // console.log( ' bestHit = ', bestHit.line );
 
   return bestHit;
 }
@@ -332,6 +336,7 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
   if ( D === 0 ) {
     console.warn( 'D === 0 !!!' );
     debugger;   // what does this case actualy mean? Can it happen?
+    // Does this mean the line is a point?
     //return Infinity;
   }
 
@@ -354,23 +359,33 @@ function timeToCircleHitLine( x, y, dx, dy, radius, x1, y1, x2, y2 ) {
 
   const closestOnLine = ( ( hitX - x1 ) * px + ( hitY - y1 ) * py ) / D;
 
+  // console.log( `  closestOnLine ${ x1 },${ y1 }->${ x2 },${ y2 }`, closestOnLine );
+
   // Hacky way to skip barely touching case?
   if ( closestOnLine <= 0 - radius / len || 1 + radius / len <= closestOnLine ) {
+
+    // console.log( '   barely touching case, returning Infinity' );
     return Infinity;
   }
 
   if ( closestOnLine <= 0 ) {
+    // console.log( '   hitting left of line' );
     return timeToCircleHitPoint( x, y, dx, dy, radius, x1, y1 );
   }
   else if ( 1 <= closestOnLine ) {
+    // console.log( '   hitting right of line' );
     return timeToCircleHitPoint( x, y, dx, dy, radius, x2, y2 );
   }
   else {
+    // console.log( '   hitting within line' );
     return hitTime;
   }
 }
 
 function timeToCircleHitPoint( x, y, dx, dy, radius, cx, cy ) {
+
+  // console.log( `  timeToCircleHitPoint( ${ x }, ${ y }, ${ dx }, ${ dy }, ${ radius }, ${ cx }, ${ cy } )` );
+
   const dX = dx;
   const dY = dy;
   const fX = x - cx;
@@ -384,11 +399,21 @@ function timeToCircleHitPoint( x, y, dx, dy, radius, cx, cy ) {
 }
 
 function solveQuadratic( A, B, C ) {
+  // console.log( `   solveQuadratic( ${ A }, ${ B }, ${ C } )` );
+
   if ( Math.abs( A ) < EPSILON ) {
+    // console.log( '    A ~= 0' );
+
     return -C / B;
   }
   else {
     let disc = B * B - 4 * A * C;
+
+    // console.log( '    disc', disc );
+
+    // if ( disc <= -EPSILON ) {
+      // debugger;
+    // }
 
     let closest = Infinity;
 
@@ -401,6 +426,9 @@ function solveQuadratic( A, B, C ) {
     if ( disc >= 0 ) {
       const t0 = ( -B - Math.sqrt( disc ) ) / ( 2 * A );
       const t1 = ( -B + Math.sqrt( disc ) ) / ( 2 * A );
+
+      // console.log( '    t0', t0 );
+      // console.log( '    t1', t1 );
 
       if ( -EPSILON <= t0 && t0 < closest )   closest = t0;
       if ( -EPSILON <= t1 && t1 < closest )   closest = t1;
