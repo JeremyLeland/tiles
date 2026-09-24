@@ -1,3 +1,15 @@
+9/24:
+  - Climb walls
+    - Got simple version working, limit it to 1 height?
+  - Try with smaller blocks and bigger player
+  - Pull mask code and line code out
+  - Keyboard input helper function for Canvas that takes list of keydown and keyup functions
+
+  Bugs:
+    - Fly into corner and letting go causes us to rocket upward
+      - But not while we're holding it down
+
+
 9/22:
   - Not to get thrown off course, but it might make more sense at some point to do bounding box (line vs line) collisions
     - Instead of the circles
