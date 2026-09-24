@@ -123,6 +123,9 @@ gameCanvas.update = ( dt ) => {
       // Left/Right wall
       if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
         player.vel[ 0 ] = 0;
+
+        // Try crawling up wall
+        player.vel[ 1 ] = -PlayerMoveSpeed;   // TOOD: slower as we get toward top so we don't "hop" so much?
       }
 
       // Ceiling/Floor

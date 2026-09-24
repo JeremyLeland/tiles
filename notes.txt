@@ -49,6 +49,13 @@
         - Something about the extra update? Something about the dx?
           - What happens in above calculation if dx is 0?
 
+    - Didn't really figure out why, but limiting hitTime to the current frame's dt seems to prevent it
+
+    NEXT: Use this to go up the stairs if we find height is 1
+      - Need to cancel out gravity if we are climbing? How do we know we are climbing?
+        - We'll collide immediately if we're climbing, right? 
+          - So instead of playing the rest of the fall down, we set velocity positive and play it up?
+
 
 9/21:
   - Seems to be a floating point accuracy error
