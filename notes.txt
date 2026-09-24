@@ -9,7 +9,17 @@
       - Don't have to worry about multiple draw steps that way
         - Just maintain a foreground and background image and apply the given mask before drawing
 
-  - Keyboard input helper function for Canvas that takes list of keydown and keyup functions
+  - DONE: Keyboard input helper function for Canvas that takes list of keydown and keyup functions
+    - Actually, holding off on this
+    - It's a cute idea, but it makes it harder to change keys later (if I want to make it user controlable)
+      - Anything that breaks the link between hardcoded key and function 
+        - requires me to enumerate the possibilities
+        - I need to specify the keys and the actions twice, and then enumerate through the list of keys
+        - At this point, it seems clearer and more straightforward to just have the big if/else block
+      - I'm trying to avoid annoying repetition
+        - Maybe do this on case by case basis, not hardcode prescribe it for everything
+    - Actually, went ahead and implemented a version of this in KeyInput
+      - Kept it separate from GameCanvas for now, since they aren't strictly related
 
   Bugs:
     - Fly into corner and letting go causes us to rocket upward

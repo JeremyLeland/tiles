@@ -3,6 +3,7 @@
 import * as MaskMap from '../src/MaskMap.js';
 
 import { GameCanvas } from '../src/common/GameCanvas.js';
+import { KeyInput } from '../src/common/KeyInput.js';
 import * as Collisions from '../src/common/Collisions.js';
 import * as Util from '../src/common/Util.js';
 import { vec2 } from '../lib/gl-matrix.js';
@@ -228,35 +229,22 @@ function getHit( map, entity, dt, debugCtx ) {
   return bestHit;
 }
 
-document.addEventListener( 'keydown', e => {
-  if ( e.key === 'a' ) {
-    player.isMovingLeft = true;
-  }
-  else if ( e.key === 'd' ) {
-    player.isMovingRight = true;
-  }
-  else if ( e.key === ' ' ) {
-    player.isJumping = true;
+const keyInput = new KeyInput();
 
-    // gameCanvas.update( 10 );
-    // gameCanvas.redraw();
-  }
-  else if ( e.key === 'p' ) {
-    gameCanvas.toggle();
-  }
-} );
+keyInput.Keys = {
+  PlayerLeft: 'a',
+  PlayerRight: 'd',
+  PlayerJump: ' ',
+  ToggleUpdates: 'p',
+};
 
-document.addEventListener( 'keyup', e => {
-  if ( e.key === 'a' ) {
-    player.isMovingLeft = false;
-  }
-  else if ( e.key === 'd' ) {
-    player.isMovingRight = false;
-  }
-  else if ( e.key === ' ' ) {
-    player.isJumping = false;
-  }
-} );
+keyInput.Actions = {
+  PlayerLeft:   x => player.isMovingLeft = x,
+  PlayerRight:  x => player.isMovingRight = x,
+  PlayerJump:   x => player.isJumping = x,
+
+  ToggleUpdates: x => { if ( x ) gameCanvas.toggle() },
+};
 
 function pointerInput( m ) {
   vec2.set( mousePos, m.x, m.y );
