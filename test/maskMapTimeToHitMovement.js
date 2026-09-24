@@ -88,6 +88,7 @@ gameCanvas.update = ( dt ) => {
     const bestHit = getHit( map, player, timeLeft );
 
     if ( bestHit.time < Infinity ) {
+      // console.log( '  partial: ', player.pos, player.vel, bestHit.time );
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, bestHit.time );
 
       // console.log( 'before pos', player.pos );
@@ -108,20 +109,17 @@ gameCanvas.update = ( dt ) => {
         player.vel[ 1 ] = 0;
       }
 
-      // console.log( ' after partial update pos', player.pos );
-
       timeLeft -= bestHit.time;
     }
     else {
+      // console.log( '  rest of: ', player.pos, player.vel, timeLeft );
       vec2.scaleAndAdd( player.pos, player.pos, player.vel, timeLeft );
-
-      // console.log( ' after rest of update pos', player.pos );
 
       break;
     }
   }
 
-  // console.log( player.pos, ' AFTER ENTIRE UPDATE' );
+  // console.log( 'after pos/vel', player.pos, player.vel );
 }
 
 gameCanvas.draw = ( ctx ) => {

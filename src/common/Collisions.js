@@ -79,13 +79,16 @@ function timeToCircleHitPoint( x, y, dx, dy, radius, cx, cy ) {
   return solveQuadratic( a, b, c );
 }
 
+// NOTE: This solver assumes we only want positive values (and returns Infinity if none available)
+
 function solveQuadratic( A, B, C ) {
   // console.log( `   solveQuadratic( ${ A }, ${ B }, ${ C } )` );
 
   if ( Math.abs( A ) < EPSILON ) {
     // console.log( '    A ~= 0' );
 
-    return -C / B;
+    const t = -C / B;
+    return -EPSILON <= t ? t : Infinity;
   }
   else {
     let disc = B * B - 4 * A * C;
