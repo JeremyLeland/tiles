@@ -3,6 +3,12 @@
     - Got simple version working, limit it to 1 height?
   - Try with smaller blocks and bigger player
   - Pull mask code and line code out
+    - DONE: line code
+    - DONE: mask code
+      - Also simplified mask code by just directly editing the alpha of the foreground image
+      - Don't have to worry about multiple draw steps that way
+        - Just maintain a foreground and background image and apply the given mask before drawing
+
   - Keyboard input helper function for Canvas that takes list of keydown and keyup functions
 
   Bugs:

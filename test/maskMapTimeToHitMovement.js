@@ -1,9 +1,11 @@
 // Trying mask map movement version with free fall, rest of fall after collision, and movement
 
+import * as MaskMap from '../src/MaskMap.js';
+
 import { GameCanvas } from '../src/common/GameCanvas.js';
-import { vec2 } from '../lib/gl-matrix.js';
 import * as Collisions from '../src/common/Collisions.js';
 import * as Util from '../src/common/Util.js';
+import { vec2 } from '../lib/gl-matrix.js';
 
 const Terrain = {
   Empty: 0,
@@ -11,8 +13,7 @@ const Terrain = {
   Rock: 2,
 };
 
-const cols = 32, rows = 24;
-const map = Array( cols * rows ).fill( Terrain.Dirt );
+const map = MaskMap.create( 32, 24, Terrain.Dirt );
 
 let player = {
   type: 'player',
@@ -36,55 +37,27 @@ const mousePos = [ 20.4, 20 ];
 let entities = [ player ];
 
 
-function setTerrain( col, row, value ) {
-  if ( 0 <= col && col < cols && 0 <= row && row < rows ) {
-    const mapIndex = col + row * cols;
-    map[ mapIndex ] = value;
-    // maskData[ 4 * mapIndex + 3 ] = value === Terrain.Empty ? 0 : 255;
-  }
-}
+MaskMap.setTerrainRect( map, 5, 8, 20, 5, Terrain.Empty );
+MaskMap.setTerrainRect( map, 2, 10, 25, 6, Terrain.Empty );
+MaskMap.setTerrainRect( map, 5, 7, 4, 6, Terrain.Empty );
+MaskMap.setTerrainRect( map, 20, 4, 8, 15, Terrain.Empty );
+MaskMap.setTerrainRect( map, 10, 16, 10, 1, Terrain.Empty );
+MaskMap.setTerrainRect( map, 15, 17, 5, 1, Terrain.Empty );
 
-function setTerrainCircle( x, y, radius, value ) {
-  x = Math.floor( x );
-  y = Math.floor( y );
 
-  for ( let row = y - radius; row < y + radius; row ++ ) {
-    for ( let col = x - radius; col < x + radius; col ++ ) {
-      if ( Math.hypot( col - x, row - y ) < radius ) {
-        setTerrain( col, row, value );
-      }
-    }
-  }
-}
+const backgroundImage = new OffscreenCanvas( map.cols, map.rows );
+const backgroundCtx = backgroundImage.getContext( '2d' );
+backgroundCtx.fillStyle = '#321';
+backgroundCtx.fillRect( 0, 0, map.cols, map.rows );
 
-function setTerrainRect( x, y, width, height, value ) {
-  x = Math.floor( x );
-  y = Math.floor( y );
-
-  for ( let row = y; row < y + height; row ++ ) {
-    for ( let col = x; col < x + width; col ++ ) {
-      setTerrain( col, row, value );
-    }
-  }
-}
-
-setTerrainRect( 5, 8, 20, 5, Terrain.Empty );
-setTerrainRect( 2, 10, 25, 6, Terrain.Empty );
-setTerrainRect( 5, 7, 4, 6, Terrain.Empty );
-setTerrainRect( 20, 4, 8, 15, Terrain.Empty );
-
-setTerrainRect( 10, 16, 10, 1, Terrain.Empty );
-setTerrainRect( 15, 17, 5, 1, Terrain.Empty );
-
-const maskImage = new OffscreenCanvas( cols, rows );
-const maskCtx = maskImage.getContext( '2d' );
-
-const foregroundImage = new OffscreenCanvas( cols, rows );
+const foregroundImage = new OffscreenCanvas( map.cols, map.rows );
 const foregroundCtx = foregroundImage.getContext( '2d' );
+foregroundCtx.fillStyle = 'rgb(200, 100, 20)';
+foregroundCtx.fillRect( 0, 0, map.cols, map.rows );
+
 
 const gameCanvas = new GameCanvas();
-gameCanvas.setBounds( 0, 0, cols, rows );
-
+gameCanvas.setBounds( 0, 0, map.cols, map.rows );
 
 gameCanvas.update = ( dt ) => {
 
@@ -151,34 +124,11 @@ gameCanvas.update = ( dt ) => {
 }
 
 gameCanvas.draw = ( ctx ) => {
-
-  const maskImageData = maskCtx.getImageData( 0, 0, cols, rows );
-  const maskData = maskImageData.data;
-
-  map.forEach( ( terrain, index ) => {
-    const maskIndex = 4 * index;
-    maskData[ maskIndex ] = 255;
-    maskData[ maskIndex + 1 ] = 255;
-    maskData[ maskIndex + 2 ] = 255;
-    maskData[ maskIndex + 3 ] = terrain === Terrain.Empty ? 0 : 255;
-  } );
-
-  maskCtx.putImageData( maskImageData, 0, 0 );
-
-  foregroundCtx.clearRect( 0, 0, cols, rows );
-  foregroundCtx.globalCompositeOperation = 'source-over';
-  foregroundCtx.drawImage( maskImage, 0, 0 );
-  foregroundCtx.globalCompositeOperation = 'source-in';
-  foregroundCtx.fillStyle = 'rgb(200, 100, 20)';
-  foregroundCtx.fillRect( 0, 0, cols, rows );
+  MaskMap.makeMaskTransparent( foregroundCtx, map, Terrain.Empty );
 
   ctx.imageSmoothingEnabled = false;
-
-  ctx.fillStyle = '#321';
-  ctx.fillRect( 0, 0, cols, rows );
-
+  ctx.drawImage( backgroundImage, 0, 0 );
   ctx.drawImage( foregroundImage, 0, 0 );
-
 
   ctx.fillStyle = 'green';
   Util.drawPoint( ctx, player.pos, player.radius );
@@ -222,7 +172,7 @@ function getHit( map, entity, dt, debugCtx ) {
   for ( let testRow = testTop; testRow <= testBottom; testRow ++ ) {
     for ( let testCol = testLeft; testCol <= testRight; testCol ++ ) {
 
-      if ( map[ testCol + testRow * cols ] === Terrain.Empty ) {
+      if ( map.data[ testCol + testRow * map.cols ] === Terrain.Empty ) {
         if ( debugCtx ) {
           debugCtx.fillStyle = '#0f04';
           debugCtx.fillRect( testCol, testRow, 1, 1 );
