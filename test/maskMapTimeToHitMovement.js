@@ -14,13 +14,14 @@ const Terrain = {
   Rock: 2,
 };
 
-const map = MaskMap.create( 32, 24, Terrain.Dirt );
+// const map = MaskMap.create( 32, 24, Terrain.Dirt );
+const map = MaskMap.create( 320, 240, Terrain.Dirt );
 
 let player = {
   type: 'player',
-  pos: [ 18, 13 ],
+  pos: [ 30, 30 ],
   vel: [ 0, 0 ],
-  radius: 2,
+  radius: 8,
   isMovingLeft: false,
   isMovingRight: false,
   isJumping: false,
@@ -29,9 +30,9 @@ let player = {
 
 const debugInfo = {};
 
-const Gravity = 0.00005;  //0.0005;
-const PlayerMoveSpeed = 0.005;
-const PlayerJumpSpeed = 0.015;
+const Gravity = 0.0005;
+const PlayerMoveSpeed = 0.03;
+const PlayerJumpSpeed = 0.1;
 
 const mousePos = [ 20.4, 20 ];
 
@@ -44,6 +45,11 @@ MaskMap.setTerrainRect( map, 5, 7, 4, 6, Terrain.Empty );
 MaskMap.setTerrainRect( map, 20, 4, 8, 15, Terrain.Empty );
 MaskMap.setTerrainRect( map, 10, 16, 10, 1, Terrain.Empty );
 MaskMap.setTerrainRect( map, 15, 17, 5, 1, Terrain.Empty );
+
+MaskMap.setTerrainCircle( map, 30, 30, 20, Terrain.Empty );
+MaskMap.setTerrainCircle( map, 50, 50, 30, Terrain.Empty );
+MaskMap.setTerrainRect( map, 50, 30, 200, 40, Terrain.Empty );
+MaskMap.setTerrainCircle( map, 200, 50, 40, Terrain.Empty );
 
 
 const backgroundImage = new OffscreenCanvas( map.cols, map.rows );

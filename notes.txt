@@ -1,7 +1,7 @@
 9/24:
   - Climb walls
     - Got simple version working, limit it to 1 height?
-  - Try with smaller blocks and bigger player
+  - DONE: Try with smaller blocks and bigger player
   - Pull mask code and line code out
     - DONE: line code
     - DONE: mask code
@@ -22,8 +22,9 @@
       - Kept it separate from GameCanvas for now, since they aren't strictly related
 
   Bugs:
-    - Fly into corner and letting go causes us to rocket upward
+    - DONE: Fly into corner and letting go causes us to rocket upward
       - But not while we're holding it down
+        - Needed another -EPSILON<t check in Collisions (since I stopped checking in caller)
 
 
 9/22:
