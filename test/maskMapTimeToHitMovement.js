@@ -81,9 +81,9 @@ gameCanvas.update = ( dt ) => {
     player.vel[ 0 ] = 0;
   }
 
-  if ( player.isJumping ) {
-    player.vel[ 1 ] = -PlayerJumpSpeed;
-  }
+  // if ( player.isJumping ) {
+  //   player.vel[ 1 ] = -PlayerJumpSpeed;
+  // }
 
   player.vel[ 1 ] += Gravity * dt;
 
@@ -111,8 +111,8 @@ gameCanvas.update = ( dt ) => {
         const testCol = Math.floor( bestHit.line[ 0 ] ) + ( player.vel[ 0 ] < 0 ? -1 : 0 );
         const testRow = Math.floor( bestHit.line[ player.vel[ 0 ] < 0 ? 1 : 3 ] ) - 1;
 
-        console.log( 'bestHit:', bestHit );
-        console.log( 'test above at ', testCol, testRow );
+        // console.log( 'bestHit:', bestHit );
+        // console.log( 'test above at ', testCol, testRow );
         
         if ( 0 <= testRow && map.data[ testCol + testRow * map.cols ] == Terrain.Empty ) {
           player.vel[ 1 ] = -PlayerMoveSpeed;   // TOOD: slower as we get toward top so we don't "hop" so much?
@@ -123,7 +123,15 @@ gameCanvas.update = ( dt ) => {
 
       // Ceiling/Floor
       else {
-        player.vel[ 1 ] = 0;
+        // Floor
+        if ( bestHit.line[ 0 ] < bestHit.line[ 2 ] ) {
+          player.vel[ 1 ] = player.isJumping ? -PlayerJumpSpeed : 0;
+        }
+
+        // Ceiling
+        else {
+          player.vel[ 1 ] = 0;
+        }
       }
 
       timeLeft -= bestHit.time;

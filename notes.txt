@@ -1,5 +1,5 @@
 9/28:
-  - Climb walls
+  - DONE: Climb walls
     - Limit to 1 height
       - This works pretty well
       - It doesn't feel quite right on downhills and steep slopes
@@ -8,6 +8,16 @@
         - However, I've already spent a lot of time on this, and I don't want to burn all my energy on it
           - This is pretty good for now
         
+  - DONE: Jump instead of fly
+    - Only trigger jump if on flat ground
+      - How to determine now? Can we do this in our "ceiling/floor" spot?
+        - We can
+        - This has the same problem as above, though. 
+          - If we don't have a clear concept of being "snapped to ground" we don't jump in all the situations it seems like we should
+        - Again, probably enough to unblock for now and play with other things
+        - But this makes a case for having "in air" vs "on ground" states and moving/jumping differently in them
+
+  - Put this in a new file and add back the bullets
 
 9/24:
   - Climb walls
