@@ -50,6 +50,7 @@ MaskMap.setTerrainCircle( map, 30, 30, 20, Terrain.Empty );
 MaskMap.setTerrainCircle( map, 50, 50, 30, Terrain.Empty );
 MaskMap.setTerrainRect( map, 50, 30, 200, 40, Terrain.Empty );
 MaskMap.setTerrainCircle( map, 200, 50, 40, Terrain.Empty );
+MaskMap.setTerrainCircle( map, 250, 50, 20, Terrain.Empty );
 
 
 const backgroundImage = new OffscreenCanvas( map.cols, map.rows );
@@ -104,10 +105,20 @@ gameCanvas.update = ( dt ) => {
 
       // Left/Right wall
       if ( bestHit.line[ 0 ] === bestHit.line[ 2 ] ) {
-        player.vel[ 0 ] = 0;
+        // Climb wall if it's only 1 tall
+        //  - if we're moving left, the line we hit is at testX + 1
+        //  - use the correct bestHit.line y based on orientation
+        const testCol = Math.floor( bestHit.line[ 0 ] ) + ( player.vel[ 0 ] < 0 ? -1 : 0 );
+        const testRow = Math.floor( bestHit.line[ player.vel[ 0 ] < 0 ? 1 : 3 ] ) - 1;
 
-        // Try crawling up wall
-        player.vel[ 1 ] = -PlayerMoveSpeed;   // TOOD: slower as we get toward top so we don't "hop" so much?
+        console.log( 'bestHit:', bestHit );
+        console.log( 'test above at ', testCol, testRow );
+        
+        if ( 0 <= testRow && map.data[ testCol + testRow * map.cols ] == Terrain.Empty ) {
+          player.vel[ 1 ] = -PlayerMoveSpeed;   // TOOD: slower as we get toward top so we don't "hop" so much?
+        }
+
+        player.vel[ 0 ] = 0;
       }
 
       // Ceiling/Floor

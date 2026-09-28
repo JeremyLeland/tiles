@@ -1,3 +1,14 @@
+9/28:
+  - Climb walls
+    - Limit to 1 height
+      - This works pretty well
+      - It doesn't feel quite right on downhills and steep slopes
+        - There's a clear difference between "walking down the slope" and "falling forward then landing on slope"
+        - Might look better if we "snap to" the ground when we walk down it
+        - However, I've already spent a lot of time on this, and I don't want to burn all my energy on it
+          - This is pretty good for now
+        
+
 9/24:
   - Climb walls
     - Got simple version working, limit it to 1 height?
